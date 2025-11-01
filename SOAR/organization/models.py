@@ -46,10 +46,12 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
 
+ROLE_ADVISER = "adviser"
 ROLE_MEMBER = "member"
 ROLE_OFFICER = "officer"
 ROLE_LEADER = "leader"
 ROLE_CHOICES = [
+    (ROLE_ADVISER, "Adviser"),
     (ROLE_MEMBER, "Member"),
     (ROLE_OFFICER, "Officer"),
     (ROLE_LEADER, "Leader"),

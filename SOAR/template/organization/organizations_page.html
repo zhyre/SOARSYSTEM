@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOAR - Dashboard</title>
+    <title>SOAR - Organization</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,6 +33,15 @@
             transform: translateY(-4px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
+        .org-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -53,8 +62,7 @@
                             <i class="fas fa-bars text-gray-600"></i>
                         </button>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}! 👋</h1>
-                            <p class="text-sm text-gray-500">Track your organizations and upcoming events</p>
+                            <h1 class="text-2xl font-bold text-gray-800">Track Organizations     </h1>
                         </div>
                     </div>
 
@@ -79,41 +87,13 @@
 
             <!-- Content Area -->
             <div class="flex-1 overflow-y-auto p-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">Organizations</p>
-                                <h3 class="text-3xl font-bold text-gray-800">{{ all_orgs.count }}</h3>
-                            </div>
-                            <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-users text-blue-600 text-2xl"></i>
-                            </div>
-                        </div>
+                <!-- Search + Join -->
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="orgSearch" type="text" placeholder="Search your organization" aria-label="Search organizations" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">Upcoming Events</p>
-                                <h3 class="text-3xl font-bold text-gray-800">5</h3>
-                            </div>
-                            <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-calendar-check text-green-600 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">Announcements</p>
-                                <h3 class="text-3xl font-bold text-gray-800">8</h3>
-                            </div>
-                            <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-bullhorn text-purple-600 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
+                    <button id="joinBtn" class="px-5 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition">Join organization</button>
                 </div>
 
                 <!-- My Organizations Section -->
@@ -153,14 +133,27 @@
                     </div>
                 </div>
 
-                <!-- Upcoming Events Section -->
-                <div>
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Upcoming Events</h2>
-                        <span class="text-gray-400 italic">Coming soon</span>
+                <!-- Join Organizations Modal -->
+                <div id="joinModal" class="fixed inset-0 z-50 hidden">
+                    <div id="joinModalOverlay" class="absolute inset-0 bg-black bg-opacity-50"></div>
+                    <div class="absolute inset-0 flex items-center justify-center p-4 md:p-10 overflow-y-auto">
+                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl relative">
+                            <div class="flex items-center justify-between p-6 border-b">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-900">Browse All Organizations</h3>
+                                    <p class="text-sm text-gray-500">Find and join student organizations</p>
+                                </div>
+                                <button id="joinModalClose" class="p-2 rounded hover:bg-gray-100" aria-label="Close">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="p-6 md:p-8">
+                                {% include 'organization/join_org_card.html' %}
+                            </div>
+                        </div>
                     </div>
-                    <!-- Next sprint: dynamically list upcoming events here -->
                 </div>
+
             </div>
         </main>
     </div>
@@ -180,6 +173,88 @@
             sidebar.classList.remove('mobile-open');
             overlay.classList.add('hidden');
         });
+
+        // Search filtering across visible cards
+        const searchInput = document.getElementById('orgSearch');
+        function normalize(str) { return (str || '').toString().toLowerCase(); }
+        function filterCards(query) {
+            const q = normalize(query);
+            document.querySelectorAll('.org-card').forEach(card => {
+                const titleEl = card.querySelector('.org-title');
+                const descEl = card.querySelector('.org-desc');
+                const name = normalize(titleEl ? titleEl.textContent : card.getAttribute('data-org-name'));
+                const desc = normalize(descEl ? descEl.textContent : card.getAttribute('data-org-desc'));
+                const match = !q || name.includes(q) || desc.includes(q);
+                card.style.display = match ? '' : 'none';
+            });
+        }
+        searchInput?.addEventListener('input', (e) => filterCards(e.target.value));
+        filterCards('');
+
+        // Modal open/close + a11y
+        const joinBtn = document.getElementById('joinBtn');
+        const joinModal = document.getElementById('joinModal');
+        const joinModalOverlay = document.getElementById('joinModalOverlay');
+        const joinModalClose = document.getElementById('joinModalClose');
+        const modalSearch = document.getElementById('modalOrgSearch');
+        let lastFocused = null;
+
+        function getFocusable(container){
+            const selectors = [
+                'a[href]', 'button:not([disabled])', 'input:not([disabled])', 'select:not([disabled])',
+                'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])'
+            ];
+            return Array.from(container.querySelectorAll(selectors.join(',')))
+                .filter(el => el.offsetParent !== null);
+        }
+
+        function onModalKeydown(e){
+            if (e.key === 'Escape') { e.preventDefault(); closeJoinModal(); return; }
+            if (e.key === 'Tab') {
+                const focusables = getFocusable(joinModal);
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        }
+
+        function openJoinModal(){
+            if (!joinModal) return;
+            lastFocused = document.activeElement;
+            joinModal.classList.remove('hidden');
+            document.addEventListener('keydown', onModalKeydown);
+            // Focus search input first, fallback to close button
+            setTimeout(() => { (modalSearch || joinModalClose)?.focus(); }, 0);
+        }
+        function closeJoinModal(){
+            if (!joinModal) return;
+            joinModal.classList.add('hidden');
+            document.removeEventListener('keydown', onModalKeydown);
+            // restore focus to opener
+            setTimeout(() => { lastFocused?.focus?.(); }, 0);
+        }
+
+        // Scoped filtering inside modal only
+        function filterModalCards(query){
+            const q = (query || '').toString().toLowerCase();
+            if (!joinModal) return;
+            joinModal.querySelectorAll('.org-card').forEach(card => {
+                const titleEl = card.querySelector('.org-title');
+                const descEl = card.querySelector('.org-desc');
+                const name = (titleEl ? titleEl.textContent : card.getAttribute('data-org-name') || '').toLowerCase();
+                const desc = (descEl ? descEl.textContent : card.getAttribute('data-org-desc') || '').toLowerCase();
+                const match = !q || name.includes(q) || desc.includes(q);
+                card.style.display = match ? '' : 'none';
+            });
+        }
+
+        modalSearch?.addEventListener('input', (e)=> filterModalCards(e.target.value));
+
+        joinBtn?.addEventListener('click', openJoinModal);
+        joinModalOverlay?.addEventListener('click', closeJoinModal);
+        joinModalClose?.addEventListener('click', closeJoinModal);
     </script>
 </body>
 </html>

@@ -12,8 +12,10 @@ urlpatterns = [
     path('profile/', views.organization_profile, name='organization_profile'),
     path('profile/edit/', views.organization_edit_profile, name='organization_editprofile'),
     #path('members/', views.membermanagement, name='membermanagement'),
-    path('members/manage/', views.membermanagement, name='membermanagement'),
+    #path('members/manage/', views.membermanagement, name='membermanagement'),
+    #path('organization/<uuid:org_id>/members/manage/', views.membermanagement, name='membermanagement'),
     path('members/<uuid:member_id>/demote/', views.demote_member, name='demote_member'),
     path('api/update-organization/', views.api_update_organization, name='api_update_organization'),
-    
+    path('organization/<uuid:org_id>/members/manage/', views.membermanagement, name='membermanagement')
+
 ] + router.urls

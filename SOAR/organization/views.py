@@ -258,13 +258,12 @@ def organization_edit_profile(request):
 
 
 @login_required
-def membermanagement(request):
-    """Render the member management page."""
-    organization = Organization.objects.first()
-    members = OrganizationMember.objects.select_related('student').filter(organization=organization)
+def membermanagement(request, org_id):
+    """Render the member management page for a specific organization."""
     
-    # determine user role (depends on how your roles are stored)
-    user_role = None
+    organization = get_object_or_404(Organization, id=org_id)
+    members = OrganizationMember.objects.select_related('student').filter(organization=organization)
+
     try:
         org_member = OrganizationMember.objects.get(student=request.user, organization=organization)
         user_role = org_member.role

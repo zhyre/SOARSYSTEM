@@ -189,7 +189,7 @@
                         <i class="fas fa-bullhorn text-lg"></i>
                         <span class="sidebar-text font-medium">Announcements</span>
                     </a>
-                    <a href="{% url 'membermanagement' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
+                    <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
                         <i class="fas fa-user-friends text-lg"></i>
                         <span class="sidebar-text font-medium">Members</span>
                     </a>
@@ -234,7 +234,7 @@
                 </div>
 
                     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center justify-between">
-                        {% if user_role in "admin,leader" %}
+                        {% if "adviser" in user_role or "leader" in user_role %}
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Add Member</h3>
                             <p class="text-sm text-gray-500">Search affiliated users and assign a role</p>

@@ -9,6 +9,7 @@ urlpatterns = [
 
     # Protected routes (require login)
     path('index/', views.index, name='index'),
+    path('organizations/', views.organizations_page, name='organizations_page'),
     path('org_overview/<uuid:org_id>/', views.org_overview, name='org_overview'),
     path('organization/', views.organization_page, name='organization'),
     path('profile/', views.profile, name='profile'),
