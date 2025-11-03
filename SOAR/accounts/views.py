@@ -20,6 +20,12 @@ def index(request):
             "org": org,
             "member_count": org.members.filter(is_approved=True).count()
         })
+    
+    context = {
+        "user_orgs": user_orgs,  # for counting
+        "org_data": org_data,    # for detailed display if needed
+    }
+    return render(request, "accounts/index.html", context)
 
     all_orgs = Organization.objects.all()
     return render(request, "accounts/index.html", {

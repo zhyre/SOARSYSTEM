@@ -1,102 +1,87 @@
+// static/js/organization/func_editorgprofile.js
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Manage Programs Chips
-  const openModalBtn = document.getElementById('openModalBtn');
-  const displayChips = document.getElementById('displayChips');
+  console.log('✅ func_editorgprofile.js loaded');
 
-  // Function to create a chip
-  function createChip(name, id = null) {
-    const chip = document.createElement('span');
-    chip.className = "inline-flex items-center bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full";
+  // --- Elements ---
+  const form = document.getElementById('organizationForm');
+  const submitBtn = document.querySelector('button[type="submit"]');
+  const fileInput = document.getElementById('id_profile_picture');
+  const fileInfo = document.getElementById('file-info');
+  const fileName = document.getElementById('file-name');
 
-    // Chip text
-    const text = document.createElement('span');
-    text.textContent = name;
-    chip.appendChild(text);
-
-    // Remove button
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.textContent = '×';
-    removeBtn.className = 'ml-2 text-blue-700 font-bold';
-    removeBtn.addEventListener('click', () => chip.remove());
-    chip.appendChild(removeBtn);
-
-    if (id) chip.dataset.id = id; // store program id if exists
-    return chip;
+  if (!form || !submitBtn) {
+    console.error('❌ Edit profile script: Form or Submit Button not found!');
+    return;
   }
 
-  // Add program via prompt
-  openModalBtn?.addEventListener('click', () => {
-    const programName = prompt("Enter program name:");
-    if (programName) {
-      const chip = createChip(programName);
-      displayChips.appendChild(chip);
-
-      // Remove placeholder text if exists
-      const placeholder = displayChips.querySelector('.text-gray-400');
-      if (placeholder) placeholder.remove();
-    }
-  });
-
-  // Submit form data
-  const form = document.getElementById('organizationForm');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    // Collect program IDs or names
-    const allowedPrograms = Array.from(displayChips.children)
-                                .filter(chip => !chip.classList.contains('text-gray-400'))
-                                .map(chip => chip.dataset.id || chip.textContent);
-
-    const formData = new FormData();
-    formData.append('org_name', document.getElementById('org-name').value);
-    formData.append('org_adviser', document.getElementById('org-adviser').value);
-    formData.append('org_about', document.getElementById('org-about').value);
-    formData.append('is_public', document.getElementById('is-public').value);
-
-    allowedPrograms.forEach(prog => formData.append('allowed_programs', prog));
-
-    try {
-      const response = await fetch(window.location.href, { // POST to current page
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: formData
-      });
-
-      if (response.redirected) {
-        window.location.href = response.url; // redirect after success
+  // --- File input change handler (optional preview info) ---
+  if (fileInput) {
+    fileInput.addEventListener('change', function () {
+      if (this.files.length > 0) {
+        fileName.textContent = this.files[0].name;
+        fileInfo.classList.remove('hidden');
+        console.log(`📁 Selected file: ${this.files[0].name}`);
       } else {
-        alert("Organization updated successfully!");
+        fileInfo.classList.add('hidden');
       }
-    } catch (err) {
-      console.error(err);
-      alert("Network error.");
-    }
-  });
-});
-
-// Programs Modal
-const programsModal = document.getElementById('programsModal');
-document.getElementById('openProgramsModal').addEventListener('click', () => programsModal.classList.remove('hidden'));
-document.getElementById('closeProgramsModal').addEventListener('click', () => programsModal.classList.add('hidden'));
-document.getElementById('cancelPrograms').addEventListener('click', () => programsModal.classList.add('hidden'));
-
-document.getElementById('savePrograms').addEventListener('click', () => {
-  const chips = document.getElementById('displayChips');
-  chips.innerHTML = ''; // Clear old chips
-  const selected = Array.from(document.querySelectorAll('.program-checkbox:checked'));
-  if(selected.length === 0){
-    chips.innerHTML = '<span class="text-gray-400 text-sm italic">No programs selected yet</span>';
-  } else {
-    selected.forEach(prog => {
-      const chip = document.createElement('span');
-      chip.className = "inline-flex items-center bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full";
-      chip.textContent = prog.nextElementSibling.textContent;
-      chip.dataset.id = prog.value;
-      chips.appendChild(chip);
     });
   }
-  programsModal.classList.add('hidden');
+
+  // --- Debug: Click listener ---
+  submitBtn.addEventListener('click', () => {
+    console.log('🖱️ Submit button clicked');
+  });
+
+  // --- Main form submission ---
+  form.addEventListener('submit', async (e) => {
+    console.log('🚀 Form submit event triggered');
+    e.preventDefault();
+
+    const formData = new FormData(form); // ✅ Includes all fields + files automatically
+
+    // ✅ Log what’s inside FormData (debug)
+    console.log('📦 Submitting form data:');
+    for (let [key, value] of formData.entries()) {
+      if (key === 'profile_picture' && value instanceof File) {
+        console.log(`${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
+    }
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData, // ✅ Do not set Content-Type manually!
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest', // lets Django know this is AJAX
+        },
+      });
+
+      const result = await response.json();
+      console.log('🧾 Response result:', result);
+
+      if (response.ok && result.success) {
+        // ✅ Show success message
+        const successDiv = document.createElement('div');
+        successDiv.className =
+          'success-message bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4';
+        successDiv.innerHTML =
+          '<i class="fas fa-check-circle"></i> <span>' +
+          (result.message || 'Organization updated successfully!') +
+          '</span>';
+        form.parentNode.insertBefore(successDiv, form);
+
+        setTimeout(() => successDiv.remove(), 3000);
+        console.log('✅ Update successful!');
+      } else {
+        console.error('❌ Error from server:', result.errors || result.error);
+        alert('Error: ' + JSON.stringify(result.errors || result.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('🌐 Network error:', err);
+      alert('Network error: ' + err.message);
+    }
+  });
 });

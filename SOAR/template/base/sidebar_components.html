@@ -14,7 +14,7 @@
         <nav class="space-y-2">
             <a href="{% url 'index' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'index' %}bg-[rgba(61,131,245,0.674)]{% else %}hover:bg-[rgba(61,131,245,0.674)]{% endif %} transition duration-200 ease-in-out">
                 <i class="fas fa-home text-lg mt-1.5"></i>
-                <span class="font-medium">Dashboard</span>
+                <span class="font-medium">Home</span>
             </a>
                <a href="{% url 'organizations_page' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organizations_page' %}bg-[rgba(61,131,245,0.674)]{% else %}hover:bg-[rgba(61,131,245,0.674)]{% endif %} transition duration-200 ease-in-out">
                 <i class="fas fa-user text-lg mt-1.5"></i>
@@ -93,13 +93,13 @@
                 <i class="fas fa-bullhorn text-lg"></i>
                 <span class="sidebar-text font-medium">Announcements</span>
             </a>
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition duration-200 ease-in-out">
+            <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition duration-200 ease-in-out">
                 <i class="fas fa-user-friends text-lg"></i>
                 <span class="sidebar-text font-medium">Members</span>
             </a>
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition duration-200 ease-in-out">
+            <a href="{% url 'organization_profile' organization.id  %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition duration-200 ease-in-out">
                 <i class="fas fa-images text-lg"></i>
-                <span class="sidebar-text font-medium">Gallery</span>
+                <span class="sidebar-text font-medium">Org Profile</span>
             </a>
             <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition duration-200 ease-in-out">
                 <i class="fas fa-cog text-lg"></i>

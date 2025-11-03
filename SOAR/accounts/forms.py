@@ -170,3 +170,4 @@ class UserProfileForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if not isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({'placeholder': ' '})
+
