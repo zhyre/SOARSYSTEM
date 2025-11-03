@@ -142,7 +142,7 @@
         }
     </style>
 </head>
-<body class="organization-page" data-user-role="{{ user_role }}" data-org-id="{{ organization.id }}" data-user-search-url="/api/organizations/{{ organization.id }}/users/search/" data-add-member-url="/api/organizations/{{ organization.id }}/members/">
+<body class="organization-page" data-user-role="{{ user_role }}" data-org-id="{{ organization.id }}" data-user-search-url="/organization/organizations/{{ organization.id }}/users/search/" data-add-member-url="/organization/members/">
     <!-- Overlay for mobile (matches org page) -->
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
     
@@ -189,13 +189,13 @@
                         <i class="fas fa-bullhorn text-lg"></i>
                         <span class="sidebar-text font-medium">Announcements</span>
                     </a>
-                    <a href="{% url 'membermanagement' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
+                    <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
                         <i class="fas fa-user-friends text-lg"></i>
                         <span class="sidebar-text font-medium">Members</span>
                     </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
+                    <a href="{% url 'organization_profile' organization.id  %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
                         <i class="fas fa-images text-lg"></i>
-                        <span class="sidebar-text font-medium">Gallery</span>
+                        <span class="sidebar-text font-medium">Org Profile</span>
                     </a>
                     <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
                         <i class="fas fa-cog text-lg"></i>
@@ -234,7 +234,7 @@
                 </div>
 
                     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center justify-between">
-                        {% if user_role in "admin,leader" %}
+                        {% if "adviser" in user_role or "leader" in user_role %}
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Add Member</h3>
                             <p class="text-sm text-gray-500">Search affiliated users and assign a role</p>
@@ -288,7 +288,7 @@
                                         </td>
                                         <td class="actions">
                                             {% if member.is_approved %}
-                                                {% if user_role in "admin,leader" %}
+                                                {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
                                                     <button class="btn-icon" title="Promote/Demote" onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
                                                         <i class="fas fa-arrow-up"></i>
                                                     </button>
@@ -297,7 +297,7 @@
                                                     </button>
                                                 {% endif %}
                                             {% else %}
-                                                {% if user_role in "admin,leader" %}
+                                                {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
                                                     <button class="btn-icon" title="Approve" onclick="approveMember('{{ member.id }}', '{{ member.student.username }}')">
                                                         <i class="fas fa-check"></i>
                                                     </button>
@@ -314,6 +314,10 @@
                             <div id="no-members" class="no-results" style="display: none;">
                                 <i class="fas fa-users-slash"></i>
                                 <p>No members found matching your search</p>
+                            </div>
+                            <div id="no-members-initial" class="no-results" style="display: none;">
+                                <i class="fas fa-users"></i>
+                                <p>No members yet</p>
                             </div>
                         </div>
                         
@@ -356,6 +360,10 @@
                         <label style="display: inline-flex; align-items: center; gap: 8px;">
                             <input type="radio" name="role" value="Leader">
                             <span>Leader</span>
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="role" value="Officer">
+                            <span>Officer</span>
                         </label>
                         <label style="display: inline-flex; align-items: center; gap: 8px;">
                             <input type="radio" name="role" value="Member">
@@ -638,6 +646,21 @@
             color: #334155;
             font-weight: 600;
         }
+        /* No results message styling */
+        .no-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .no-results i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
     </style>
 
     <script>
@@ -707,6 +730,7 @@
             const addMemberForm = document.getElementById('add-member-form');
             const searchInput = document.getElementById('member-search');
             const noMembersMessage = document.getElementById('no-members');
+            const noMembersInitial = document.getElementById('no-members-initial');
             const userSearchInput = document.getElementById('user-search-input');
             const userSearchResults = document.getElementById('user-search-results');
             const selectedUserInput = document.getElementById('selected-user-id');
@@ -811,7 +835,7 @@
             function renderUserResults(users, meta = {}) {
                 if (!userSearchResults) return;
                 if (!users || users.length === 0) {
-                    const msg = (lastQuery && lastQuery.length >= 2) ? 'No users found' : 'Type at least 2 characters to search';
+                    const msg = (lastQuery && lastQuery.length >= 2) ? 'No affiliated users found matching your search' : 'Type at least 2 characters to search for affiliated users';
                     userSearchResults.innerHTML = `<div class="px-3 py-2 text-sm text-slate-500">${msg}</div>`;
                     userSearchResults.style.display = 'block';
                     return;
@@ -955,22 +979,47 @@
             // Search functionality
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
+                    const searchTerm = this.value.toLowerCase().trim();
                     const memberRows = document.querySelectorAll('#members-tbody .member-row');
-                    
+                    let visibleCount = 0;
+
                     memberRows.forEach(row => {
                         const name = row.getAttribute('data-name').toLowerCase();
                         const email = row.getAttribute('data-email').toLowerCase();
                         const role = row.getAttribute('data-role').toLowerCase();
-                        
-                        if (name.includes(searchTerm) ||
+
+                        const isVisible = searchTerm === '' ||
+                            name.includes(searchTerm) ||
                             email.includes(searchTerm) ||
-                            role.includes(searchTerm)) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
+                            role.includes(searchTerm);
+
+                        row.style.display = isVisible ? '' : 'none';
+                        if (isVisible) visibleCount++;
                     });
+
+                    // Update member count and no-members message
+                    const memberCountElement = document.querySelector('.member-count');
+                    const noMembersMessage = document.getElementById('no-members');
+                    const noMembersInitial = document.getElementById('no-members-initial');
+
+                    if (memberCountElement) {
+                        memberCountElement.textContent = `${visibleCount} member${visibleCount === 1 ? '' : 's'}`;
+                    }
+
+                    // Show appropriate message
+                    if (searchTerm !== '' && visibleCount === 0) {
+                        // Search term entered but no results
+                        if (noMembersMessage) noMembersMessage.style.display = 'flex';
+                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                    } else if (searchTerm === '' && visibleCount === 0) {
+                        // No search term and no members
+                        if (noMembersMessage) noMembersMessage.style.display = 'none';
+                        if (noMembersInitial) noMembersInitial.style.display = 'flex';
+                    } else {
+                        // Have results or search term with results
+                        if (noMembersMessage) noMembersMessage.style.display = 'none';
+                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                    }
                 });
             }
 
@@ -999,8 +1048,13 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
-                    // role mapping: Leader->leader, Regular/Member->member
-                    const apiRole = (role && role.toLowerCase() === 'leader') ? 'leader' : 'member';
+                    // role mapping: Leader->leader, Officer->officer, Regular/Member->member
+                    let apiRole = 'member';
+                    if (role && role.toLowerCase() === 'leader') {
+                        apiRole = 'leader';
+                    } else if (role && role.toLowerCase() === 'officer') {
+                        apiRole = 'officer';
+                    }
 
                     // CSRF helper (Django)
                     function getCookie(name) {
@@ -1018,7 +1072,7 @@
                             'Accept': 'application/json',
                             'X-CSRFToken': csrftoken || ''
                         },
-                        body: JSON.stringify({ user_id: userId, role: apiRole })
+                        body: JSON.stringify({ user_id: userId, role: apiRole, organization_id: '{{ organization.id }}' })
                     }).then(async (res) => {
                         if (!res.ok) {
                             const errText = await res.text().catch(() => '');
@@ -1094,8 +1148,8 @@
         function toggleMemberRole(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
 
-            // ✅ Only allow leaders and admins to promote/demote
-            if (currentUserRole !== 'leader' && currentUserRole !== 'admin') {
+            // ✅ Only allow advisers, leaders and admins to promote/demote
+            if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
                 alert("You don't have permission to promote or demote members.");
                 return;
             }
@@ -1110,7 +1164,10 @@
             let newRole = currentRole;
 
             // Determine action
-            if (currentRole === 'member') {
+            if (currentRole === 'adviser') {
+                alert('Already an Adviser, no need to promote or demote further.');
+                return;
+            } else if (currentRole === 'member') {
                 newRole = 'officer';
                 action = 'promote';
             } else if (currentRole === 'officer') {
@@ -1155,14 +1212,22 @@
                         // Update member count
                         const memberCount = document.querySelector('.member-count');
                         const noMembersMessage = document.getElementById('no-members');
-                        
+                        const noMembersInitial = document.getElementById('no-members-initial');
+
                         if (memberCount) {
                             const count = document.querySelectorAll('.member-row').length;
                             memberCount.textContent = `${count} ${count === 1 ? 'member' : 'members'}`;
-                            
-                            // Show no members message if no members left
-                            if (count === 0 && noMembersMessage) {
-                                noMembersMessage.style.display = 'flex';
+
+                            // Show appropriate message if no members left
+                            if (count === 0) {
+                                const searchTerm = document.getElementById('member-search')?.value?.toLowerCase().trim() || '';
+                                if (searchTerm !== '') {
+                                    if (noMembersMessage) noMembersMessage.style.display = 'flex';
+                                    if (noMembersInitial) noMembersInitial.style.display = 'none';
+                                } else {
+                                    if (noMembersMessage) noMembersMessage.style.display = 'none';
+                                    if (noMembersInitial) noMembersInitial.style.display = 'flex';
+                                }
                             }
                         }
                         

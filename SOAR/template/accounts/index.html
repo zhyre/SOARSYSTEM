@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/organization/organization_page.css' %}">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -52,27 +53,30 @@
                             <i class="fas fa-bars text-gray-600"></i>
                         </button>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}! 👋</h1>
+                            <br>
+                            <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }} {{ user.last_name|title }},{% endif %}! 👋</h1>
                             <p class="text-sm text-gray-500">Track your organizations and upcoming events</p>
                         </div>
                     </div>
 
                     <!-- User Profile -->
-                    <div class="flex items-center space-x-3">
-                        <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
-                            <i class="far fa-bell text-gray-600 text-xl"></i>
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
-                        <div class="hidden md:block text-right">
-                            <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
-                            <p class="text-xs text-gray-500">Student</p>
+                    <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
+                            <div class="hidden md:block text-right">
+                                <p class="text-base font-semibold text-gray-800">
+                                    {{ user.first_name|title }} {{ user.last_name|title }}
+                                </p>
+                            </div>
+
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" 
+                                    alt="{{ user.first_name }}" 
+                                    class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" 
+                                    alt="{{ user.first_name }}" 
+                                    class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                            {% endif %}
                         </div>
-                        {% if user.profile_picture %}
-                            <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
-                        {% else %}
-                            <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
-                        {% endif %}
-                    </div>
                 </div>
             </header>
 
@@ -84,7 +88,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">Organizations</p>
-                                <h3 class="text-3xl font-bold text-gray-800">{{ all_orgs.count }}</h3>
+                                <h3 class="text-3xl font-bold text-gray-800">{{ user_orgs.count }}</h3>
                             </div>
                             <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-users text-blue-600 text-2xl"></i>
@@ -95,7 +99,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">Upcoming Events</p>
-                                <h3 class="text-3xl font-bold text-gray-800">5</h3>
+                                <h3 class="text-3xl font-bold text-gray-800">Soon</h3>
                             </div>
                             <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-calendar-check text-green-600 text-2xl"></i>
@@ -106,7 +110,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">Announcements</p>
-                                <h3 class="text-3xl font-bold text-gray-800">8</h3>
+                                <h3 class="text-3xl font-bold text-gray-800">Soon</h3>
                             </div>
                             <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-bullhorn text-purple-600 text-2xl"></i>
@@ -136,8 +140,8 @@
                                     </div>
                                     <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{{ item.org.name }}</span>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ item.org.name }}</h3>
-                                <p class="text-gray-600 text-sm mb-4">{{ item.org.description }}</p>
+                                <h3 class="org-title text-xl font-bold text-gray-800 mb-2">{{ item.org.name }}</h3>
+                                <p class="org-desc text-gray-600 text-sm mb-4">{{ item.org.description }}</p>
                                 <div class="flex items-center justify-between text-sm text-gray-500">
                                     <span class="flex items-center space-x-1">
                                         <i class="fas fa-users"></i>
@@ -148,52 +152,6 @@
                         </a>
                         {% empty %}
                         <p class="text-gray-500">You are not a member of any organizations yet.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- All Organizations Section -->
-                <div class="mb-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Browse All Organizations</h2>
-                            <p class="text-gray-500">Find and join student organizations</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {% for org in all_orgs %}
-                        <div class="org-card block bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer">
-                            <div class="h-28 bg-gradient-to-r from-blue-500 to-blue-600 relative">
-                                <div class="absolute inset-0 bg-black bg-opacity-10"></div>
-                            </div>
-                            <div class="p-6">
-                                <div class="flex items-start justify-between mb-4">
-                                    <div class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center -mt-6 border-4 border-white">
-                                        <i class="fas fa-users text-blue-600 text-xl"></i>
-                                    </div>
-                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{{ org.name }}</span>
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ org.name }}</h3>
-                                <p class="text-gray-600 text-sm mb-4">{{ org.description }}</p>
-                                <div class="flex items-center justify-between text-sm text-gray-500">
-                                    <span class="flex items-center space-x-1">
-                                        <i class="fas fa-users"></i>
-                                        <span>{{ org.members.count }} members</span>
-                                    </span>
-                                </div>
-                                <a href="{% url 'org_overview' org.id %}" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition block text-center">View Details</a>
-                                {% if org not in user_orgs %}
-                                <form method="POST" action="{% url 'join_org' org.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full">Join</button>
-                                </form>
-                                {% else %}
-                                <span class="mt-2 px-4 py-2 bg-gray-200 text-gray-600 rounded-lg block text-center">Already a member</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% empty %}
-                        <p class="text-gray-500">No organizations available.</p>
                         {% endfor %}
                     </div>
                 </div>

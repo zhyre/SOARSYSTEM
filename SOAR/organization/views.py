@@ -9,9 +9,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
 from .models import Organization, OrganizationMember, Program
+from accounts.models import User
+from .forms import OrganizationEditForm
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, ProgramSerializer
 from .permissions import IsOrgOfficerOrAdviser
 from django.core.mail import send_mail
+from decouple import config
+from supabase import create_client
+
+# Initialize Supabase client
+SUPABASE_URL = config("SUPABASE_URL")
+SUPABASE_KEY = config("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def organization_detail(request, org_id):
@@ -45,6 +54,50 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         serializer = OrganizationMemberSerializer(members, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'], url_path='users/search')
+    def users_search(self, request, pk=None):
+        org = self.get_object()
+        query = request.query_params.get('q', '').strip()
+
+        # Base queryset: all users
+        users = User.objects.all()
+
+        # If organization is private, filter by allowed programs
+        if not org.is_public:
+            allowed_programs = org.allowed_programs.all()
+            program_names = [p.name for p in allowed_programs]
+            program_abbrevs = [p.abbreviation for p in allowed_programs]
+            users = users.filter(
+                Q(course__in=program_names) | Q(course__in=program_abbrevs)
+            )
+
+        # Exclude users who are already members of this organization
+        existing_member_ids = org.members.values_list('student_id', flat=True)
+        users = users.exclude(id__in=existing_member_ids)
+
+        # Apply search query
+        if query:
+            users = users.filter(
+                Q(username__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query)
+            )
+
+        # Serialize with basic user info
+        user_data = users.values('id', 'username', 'first_name', 'last_name', 'email', 'course')[:50]  # Limit to 50 results
+        results = []
+        for user in user_data:
+            full_name = f"{user['first_name']} {user['last_name']}".strip()
+            results.append({
+                'id': str(user['id']),
+                'name': full_name or user['username'],
+                'username': user['username'],
+                'email': user['email'],
+                'program': user['course'] or '',
+            })
+
+        return Response(results)
+
 
 # ==============================
 # PROGRAM VIEWSET
@@ -63,6 +116,41 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
     serializer_class = OrganizationMemberSerializer
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        """Create a new organization member."""
+        user_id = request.data.get('user_id')
+        role = request.data.get('role', 'member')
+        org_id = request.data.get('organization_id')  # Get org_id from request data
+
+        if not user_id:
+            return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not org_id:
+            return Response({'error': 'organization_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=user_id)
+            organization = Organization.objects.get(id=org_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Organization.DoesNotExist:
+            return Response({'error': 'Organization not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if user is already a member of this organization
+        if OrganizationMember.objects.filter(student=user, organization=organization).exists():
+            return Response({'error': 'User is already a member of this organization'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the member
+        member = OrganizationMember.objects.create(
+            organization=organization,
+            student=user,
+            role=role,
+            is_approved=True  # Auto-approve for now
+        )
+
+        serializer = self.get_serializer(member)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     # ✅ Promote Member
     @action(detail=True, methods=['post'])
     def promote(self, request, pk=None):
@@ -72,14 +160,14 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
         member = self.get_object()
         promoter = request.user
 
-        # Restrict to only admins and leaders
+        # Restrict to only admins, advisers and leaders
         if not (promoter.is_superuser or promoter.is_staff):
             promoter_record = OrganizationMember.objects.filter(
                 organization=member.organization,
                 student=promoter
             ).first()
-            if not promoter_record or promoter_record.role != "Leader":
-                return Response({'error': 'Only leaders or admins can promote members.'}, status=status.HTTP_403_FORBIDDEN)
+            if not promoter_record or promoter_record.role not in ["adviser", "leader"]:
+                return Response({'error': 'Only advisers, leaders or admins can promote members.'}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             member.promote(promoter=promoter)
@@ -105,14 +193,14 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
         member = self.get_object()
         demoter = request.user
 
-        # Restrict to only admins and leaders
+        # Restrict to only admins, advisers and leaders
         if not (demoter.is_superuser or demoter.is_staff):
             demoter_record = OrganizationMember.objects.filter(
                 organization=member.organization,
                 student=demoter
             ).first()
-            if not demoter_record or demoter_record.role != "Leader":
-                return Response({'error': 'Only leaders or admins can demote members.'}, status=status.HTTP_403_FORBIDDEN)
+            if not demoter_record or demoter_record.role not in ["adviser", "leader"]:
+                return Response({'error': 'Only advisers, leaders or admins can demote members.'}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             member.demote(demoter=demoter)
@@ -194,15 +282,16 @@ def orgpage(request, org_id):
 
 
 @login_required
-def organization_profile(request):
-    organization = Organization.objects.first() if Organization.objects.exists() else None
+def organization_profile(request, org_id):
+    # Fetch the specific organization using org_id
+    organization = get_object_or_404(Organization, id=org_id)
     programs = Program.objects.all()
 
-    if request.method == 'POST' and organization:
+    if request.method == 'POST':
         name = (request.POST.get('org_name') or organization.name).strip()
         about = (request.POST.get('org_about') or organization.description or '').strip()
         is_public_val = request.POST.get('is_public')
-        is_public = True if str(is_public_val).lower() in ('true', '1', 'on', 'yes') else False
+        is_public = str(is_public_val).lower() in ('true', '1', 'on', 'yes')
 
         organization.name = name
         organization.description = about
@@ -217,7 +306,8 @@ def organization_profile(request):
             organization.allowed_programs.clear()
 
         messages.success(request, "Organization profile updated successfully!")
-        return redirect('organization_profile')
+        # Redirect to the same org's profile
+        return redirect('organization_profile', org_id=organization.id)
 
     return render(request, 'organization/organization_profile.html', {
         'organization': organization,
@@ -225,46 +315,74 @@ def organization_profile(request):
     })
 
 
+
 @login_required
-def organization_edit_profile(request):
-    organization = Organization.objects.first()
-    programs = Program.objects.all()
+def organization_editprofile(request, org_id):
+    organization = get_object_or_404(Organization, id=org_id)
+    programs = list(Program.objects.values('id', 'name', 'abbreviation'))
 
-    if request.method == 'POST' and organization:
-        name = (request.POST.get('org_name') or organization.name).strip()
-        about = (request.POST.get('org_about') or organization.description or '').strip()
-        is_public_val = request.POST.get('is_public')
-        is_public = str(is_public_val).lower() in ('true', '1', 'on', 'yes')
+    if request.method == 'POST':
+        print("=== ORGANIZATION EDIT PROFILE POST REQUEST ===")
+        print(f"FILES in request: {list(request.FILES.keys())}")
+        print(f"POST data keys: {list(request.POST.keys())}")
 
-        organization.name = name
-        organization.description = about
-        organization.is_public = is_public
-        organization.save()
+        form = OrganizationEditForm(request.POST, request.FILES, instance=organization)
 
-        if not is_public:
-            allowed_ids = request.POST.getlist('allowed_programs')
-            allowed_programs = Program.objects.filter(id__in=allowed_ids)
-            organization.allowed_programs.set(allowed_programs)
+        # ✅ Skip image validation if no new file
+        if not request.FILES.get('profile_picture'):
+            print("No profile_picture in FILES, popping from form")
+            form.fields.pop('profile_picture', None)
         else:
-            organization.allowed_programs.clear()
+            print(f"Profile picture found: {request.FILES['profile_picture']}")
 
-        messages.success(request, "Organization profile updated successfully.")
-        return redirect('organization_profile')
+        if form.is_valid():
+            print("Form is valid")
+            org = form.save(commit=False)
 
+            # ✅ Handle profile_picture upload to Supabase
+            if 'profile_picture' in request.FILES:
+                print(f"Assigning profile_picture: {request.FILES['profile_picture']}")
+                org.profile_picture = request.FILES['profile_picture']
+
+            # ✅ Handle allowed_programs manually (comma-separated IDs)
+            allowed_programs_ids = form.cleaned_data.get('allowed_programs', [])
+            print(f"Allowed programs IDs: {allowed_programs_ids}")
+
+            if allowed_programs_ids:
+                print("Saving org and setting allowed programs")
+                org.save()  # save first before M2M update
+                org.allowed_programs.set(allowed_programs_ids)
+            else:
+                print("Saving org and clearing allowed programs")
+                org.save()
+                org.allowed_programs.clear()
+
+            print(f"Final org.profile_picture: {org.profile_picture}")
+            print("=== ORGANIZATION UPDATE SUCCESSFUL ===")
+            return JsonResponse({'success': True, 'message': 'Organization updated successfully'})
+        else:
+            print("Form errors:", form.errors)
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    users = User.objects.all()
     return render(request, 'organization/organization_editprofile.html', {
         'organization': organization,
         'programs': programs,
+        'users': users,
+        'SUPABASE_URL': SUPABASE_URL,
+        'SUPABASE_KEY': SUPABASE_KEY,
+        'current_allowed_programs': [str(p.id) for p in organization.allowed_programs.all()],
     })
 
 
+
 @login_required
-def membermanagement(request):
-    """Render the member management page."""
-    organization = Organization.objects.first()
-    members = OrganizationMember.objects.select_related('student').filter(organization=organization)
+def membermanagement(request, org_id):
+    """Render the member management page for a specific organization."""
     
-    # determine user role (depends on how your roles are stored)
-    user_role = None
+    organization = get_object_or_404(Organization, id=org_id)
+    members = OrganizationMember.objects.select_related('student').filter(organization=organization)
+
     try:
         org_member = OrganizationMember.objects.get(student=request.user, organization=organization)
         user_role = org_member.role
@@ -313,14 +431,14 @@ def demote_member(request, member_id):
         member = OrganizationMember.objects.get(id=member_id)
         demoter = request.user  # the one performing the action
 
-        # Check permissions: only admins and leaders
+        # Check permissions: only admins, advisers and leaders
         if not (demoter.is_superuser or demoter.is_staff):
             demoter_record = OrganizationMember.objects.filter(
                 organization=member.organization,
                 student=demoter
             ).first()
-            if not demoter_record or demoter_record.role != "Leader":
-                return JsonResponse({"error": "Only leaders or admins can demote members."}, status=403)
+            if not demoter_record or demoter_record.role not in ["adviser", "leader"]:
+                return JsonResponse({"error": "Only advisers, leaders or admins can demote members."}, status=403)
 
         # Demotion logic
         if member.role == "Leader":
@@ -341,3 +459,46 @@ def demote_member(request, member_id):
         return JsonResponse({"error": "Member not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Program
+from .forms import ProgramForm
+
+def program_list(request):
+    programs = Program.objects.all()
+    return render(request, 'organization/program_list.html', {'programs': programs})
+
+def add_program(request):
+    if request.method == 'POST':
+        form = ProgramForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('program_list')
+    else:
+        form = ProgramForm()
+    return render(request, 'organization/program_modal.html', {'form': form})
+
+def edit_program(request, pk):
+    program = get_object_or_404(Program, pk=pk)
+    if request.method == 'POST':
+        form = ProgramForm(request.POST, instance=program)
+        if form.is_valid():
+            form.save()
+            return redirect('program_list')
+    else:
+        form = ProgramForm(instance=program)
+    return render(request, 'organization/program_modal.html', {'form': form, 'program': program})
+
+def delete_program(request, pk):
+    program = get_object_or_404(Program, pk=pk)
+    if request.method == 'POST':
+        program.delete()
+        return redirect('program_list')
+    return render(request, 'organization/delete_program.html', {'program': program})
+
+from django.http import JsonResponse
+from .models import Program
+
+def get_programs(request):
+    programs = Program.objects.values('id', 'abbreviation', 'name')
+    return JsonResponse(list(programs), safe=False)

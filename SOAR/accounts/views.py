@@ -20,9 +20,33 @@ def index(request):
             "org": org,
             "member_count": org.members.filter(is_approved=True).count()
         })
+    
+    context = {
+        "user_orgs": user_orgs,  # for counting
+        "org_data": org_data,    # for detailed display if needed
+    }
+    return render(request, "accounts/index.html", context)
 
     all_orgs = Organization.objects.all()
     return render(request, "accounts/index.html", {
+        "org_data": org_data,
+        "all_orgs": all_orgs,
+        "user_orgs": user_orgs,
+    })
+
+@login_required
+def organizations_page(request):
+    """Organizations page: show user's joined orgs and allow browsing/joining others."""
+    user_orgs = Organization.objects.filter(members__student=request.user, members__is_approved=True)
+    org_data = []
+    for org in user_orgs:
+        org_data.append({
+            "org": org,
+            "member_count": org.members.filter(is_approved=True).count()
+        })
+
+    all_orgs = Organization.objects.all()
+    return render(request, "organization/organizations_page.html", {
         "org_data": org_data,
         "all_orgs": all_orgs,
         "user_orgs": user_orgs,
