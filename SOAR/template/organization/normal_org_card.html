@@ -1,0 +1,52 @@
+<div class="mb-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for item in org_data %}
+        <a href="{% url 'orgpage' item.org.id %}" 
+           class="org-card block bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+            
+            <!-- Banner background -->
+            <div class="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 relative">
+                <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+
+                <!-- Org Profile Picture overlapping banner -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 bottom-0 translate-y-1/2">
+                    {% if item.org.profile_picture %}
+                        <img src="{{ item.org.profile_picture.url }}" 
+                             alt="{{ item.org.name }}" 
+                             class="w-20 h-20 rounded-xl shadow-md border-4 border-white object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% else %}
+                        <div class="w-20 h-20 bg-white rounded-xl shadow-md flex items-center justify-center border-4 border-white">
+                            <i class="fas fa-users text-blue-600 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Blue oval badge (floating on banner) -->
+                <span class="absolute right-3 bottom-2 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
+                    {{ item.org.name|truncatechars:18 }}
+                </span>
+            </div>
+
+            <!-- Card content -->
+            <div class="pt-12 px-6 pb-6 text-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    {{ item.org.name }}
+                </h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                    {{ item.org.description|default:"No description available." }}
+                </p>
+
+                <div class="flex items-center justify-center text-sm text-gray-500">
+                    <i class="fas fa-users mr-1"></i>
+                    <span>{{ item.member_count }} members</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p class="text-gray-500 col-span-full text-center py-10">
+            You are not a member of any organizations yet.
+        </p>
+        {% endfor %}
+    </div>
+</div>
