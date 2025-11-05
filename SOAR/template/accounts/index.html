@@ -126,34 +126,13 @@
                             <h2 class="text-2xl font-bold text-gray-800">My Organizations</h2>
                             <p class="text-gray-500">Click on an organization to view its dashboard</p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {% for item in org_data %}
-                        <a href="{% url 'orgpage' item.org.id %}" class="org-card block bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer">
-                            <div class="h-28 bg-gradient-to-r from-blue-500 to-blue-600 relative">
-                                <div class="absolute inset-0 bg-black bg-opacity-10"></div>
-                            </div>
-                            <div class="p-6">
-                                <div class="flex items-start justify-between mb-4">
-                                    <div class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center -mt-6 border-4 border-white">
-                                        <i class="fas fa-users text-blue-600 text-xl"></i>
-                                    </div>
-                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{{ item.org.name }}</span>
-                                </div>
-                                <h3 class="org-title text-xl font-bold text-gray-800 mb-2">{{ item.org.name }}</h3>
-                                <p class="org-desc text-gray-600 text-sm mb-4">{{ item.org.description }}</p>
-                                <div class="flex items-center justify-between text-sm text-gray-500">
-                                    <span class="flex items-center space-x-1">
-                                        <i class="fas fa-users"></i>
-                                        <span>{{ item.member_count }} members</span>
-                                    </span>
-                                </div>
-                            </div>
+                        {% if show_see_more %}
+                        <a href="{% url 'organizations_page' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            See More
                         </a>
-                        {% empty %}
-                        <p class="text-gray-500">You are not a member of any organizations yet.</p>
-                        {% endfor %}
+                        {% endif %}
                     </div>
+                    {% include 'organization/normal_org_card.html' %}
                 </div>
 
                 <!-- Upcoming Events Section -->

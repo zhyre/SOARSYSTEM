@@ -15,24 +15,23 @@ from django.shortcuts import get_object_or_404
 def index(request):
     user_orgs = Organization.objects.filter(members__student=request.user, members__is_approved=True)
     org_data = []
-    for org in user_orgs:
+    for org in user_orgs[:3]:  # Limit to 3 organizations
         org_data.append({
             "org": org,
             "member_count": org.members.filter(is_approved=True).count()
         })
-    
+
+    # Get total count for "See More" logic
+    total_user_orgs = user_orgs.count()
+    show_see_more = total_user_orgs > 3
+
     context = {
         "user_orgs": user_orgs,  # for counting
-        "org_data": org_data,    # for detailed display if needed
+        "org_data": org_data,    # for detailed display (limited to 3)
+        "show_see_more": show_see_more,
+        "total_orgs_count": total_user_orgs,
     }
     return render(request, "accounts/index.html", context)
-
-    all_orgs = Organization.objects.all()
-    return render(request, "accounts/index.html", {
-        "org_data": org_data,
-        "all_orgs": all_orgs,
-        "user_orgs": user_orgs,
-    })
 
 @login_required
 def organizations_page(request):
