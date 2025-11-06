@@ -22,7 +22,7 @@
     <!-- Organization Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for org in all_orgs %}
-        <div class="group org-card bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+    <div class="group org-card bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1" data-org-name="{{ org.name|default:''|escape }}" data-org-desc="{{ org.description|default:''|escape }}">
             
             <!-- Banner background -->
             <div class="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 relative">

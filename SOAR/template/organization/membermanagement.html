@@ -292,6 +292,10 @@
                                                     <button class="btn-icon" title="Promote/Demote" onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
                                                         <i class="fas fa-arrow-up"></i>
                                                     </button>
+                                                    <!-- Explicit demote button -->
+                                                    <button class="btn-icon" title="Demote" onclick="demoteMember('{{ member.id }}', '{{ member.role }}')">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </button>
                                                     <button class="btn-icon danger" title="Remove Member" onclick="confirmRemoveMember('{{ member.id }}', '{{ member.student.username }}')">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -1144,22 +1148,22 @@
             }
         });
 
-        // Toggle member role (promote/demote)
+        // Toggle member role (promote/demote) — now server-backed via AJAX
         function toggleMemberRole(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
 
-            // ✅ Only allow advisers, leaders and admins to promote/demote
+            // Only allow advisers, leaders and admins to promote/demote
             if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
                 alert("You don't have permission to promote or demote members.");
                 return;
             }
 
             const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
+            if (!memberRow) return alert('Member row not found');
             const roleElement = memberRow.querySelector('.role-tag');
             const toggleBtn = memberRow.querySelector('.btn-icon:not(.danger)');
-            const icon = toggleBtn.querySelector('i');
+            const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
 
-            const roleOrder = ['member', 'officer', 'leader'];
             let action = '';
             let newRole = currentRole;
 
@@ -1184,57 +1188,169 @@
                 action = 'demote';
             }
 
-            if (confirm(`Are you sure you want to ${action} this ${currentRole} to ${newRole}?`)) {
-                memberRow.setAttribute('data-role', newRole);
-                roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
-                roleElement.className = 'role-tag ' + newRole;
-                toggleBtn.title = newRole === 'leader' ? 'Demote to Officer' : 'Promote/Demote';
-                icon.className = 'fas fa-' + (action === 'promote' ? 'arrow-up' : 'arrow-down');
-                showSuccessMessage(`Member ${action}d to ${newRole.charAt(0).toUpperCase() + newRole.slice(1)}`);
+            if (!action) return;
+
+            if (!confirm(`Are you sure you want to ${action} this ${currentRole} to ${newRole}?`)) return;
+
+            // Prepare for server call
+            const csrftoken = getCookie('csrftoken') || '';
+            const orgId = document.body.getAttribute('data-org-id');
+            let url = '';
+            if (action === 'promote') {
+                // use the function-based promote endpoint we added
+                url = `/organization/organization/${orgId}/members/${memberId}/promote/`;
+            } else {
+                // demote endpoint (function view)
+                url = `/organization/members/${memberId}/demote/`;
             }
+
+            // UI: show loading state
+            if (toggleBtn) toggleBtn.disabled = true;
+            const prevIconClass = icon ? icon.className : null;
+            if (icon) icon.className = 'fas fa-spinner fa-spin';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            }).then(async (res) => {
+                const data = await res.json().catch(() => null);
+                if (!res.ok) {
+                    const err = (data && (data.error || data.detail)) || res.statusText || 'Request failed';
+                    throw new Error(err);
+                }
+                return data;
+            }).then((data) => {
+                // Update DOM only after server success
+                memberRow.setAttribute('data-role', newRole);
+                if (roleElement) {
+                    roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+                    roleElement.className = 'role-tag ' + newRole;
+                }
+                if (toggleBtn) toggleBtn.title = newRole === 'leader' ? 'Demote to Officer' : 'Promote/Demote';
+                if (icon) icon.className = 'fas fa-' + (action === 'promote' ? 'arrow-up' : 'arrow-down');
+
+                // Use server message if provided
+                showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member ${action}d to ${newRole}`);
+            }).catch((err) => {
+                alert('Unable to ' + action + ' member: ' + (err.message || err));
+                console.error(err);
+            }).finally(() => {
+                if (toggleBtn) toggleBtn.disabled = false;
+                if (icon && prevIconClass) icon.className = prevIconClass;
+            });
         }
 
 
 
-        // Confirm member removal
+        // Confirm member removal (server-backed)
         function confirmRemoveMember(memberId, memberName) {
-            if (confirm(`Are you sure you want to remove ${memberName} from the organization?`)) {
-                const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
-                if (memberRow) {
-                    // Add fade out animation
-                    memberRow.style.transition = 'opacity 0.3s ease';
-                    memberRow.style.opacity = '0';
-                    
-                    // Remove after animation completes
-                    setTimeout(() => {
-                        memberRow.remove();
-                        
-                        // Update member count
-                        const memberCount = document.querySelector('.member-count');
-                        const noMembersMessage = document.getElementById('no-members');
-                        const noMembersInitial = document.getElementById('no-members-initial');
+            if (!confirm(`Are you sure you want to remove ${memberName} from the organization?`)) return;
 
-                        if (memberCount) {
-                            const count = document.querySelectorAll('.member-row').length;
-                            memberCount.textContent = `${count} ${count === 1 ? 'member' : 'members'}`;
+            const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
+            if (!memberRow) return alert('Member row not found');
 
-                            // Show appropriate message if no members left
-                            if (count === 0) {
-                                const searchTerm = document.getElementById('member-search')?.value?.toLowerCase().trim() || '';
-                                if (searchTerm !== '') {
-                                    if (noMembersMessage) noMembersMessage.style.display = 'flex';
-                                    if (noMembersInitial) noMembersInitial.style.display = 'none';
-                                } else {
-                                    if (noMembersMessage) noMembersMessage.style.display = 'none';
-                                    if (noMembersInitial) noMembersInitial.style.display = 'flex';
-                                }
+            // UI: optimistic disable
+            const removeBtn = memberRow.querySelector('button[title="Remove Member"]');
+            const icon = removeBtn ? removeBtn.querySelector('i') : null;
+            const prevIconClass = icon ? icon.className : null;
+            if (icon) icon.className = 'fas fa-spinner fa-spin';
+            if (removeBtn) removeBtn.disabled = true;
+
+            const csrftoken = getCookie('csrftoken') || '';
+
+            // Call the DRF viewset destroy endpoint
+            fetch(`/organization/members/${memberId}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': csrftoken },
+                credentials: 'same-origin'
+            }).then(async (res) => {
+                let data = null;
+                try { data = await res.json(); } catch(e) { /* ignore non-json */ }
+                if (!res.ok) {
+                    const err = (data && (data.error || data.detail)) || res.statusText || 'Request failed';
+                    throw new Error(err);
+                }
+                // success -> remove row with animation
+                memberRow.style.transition = 'opacity 0.3s ease';
+                memberRow.style.opacity = '0';
+                setTimeout(() => {
+                    memberRow.remove();
+                    const memberCount = document.querySelector('.member-count');
+                    const noMembersMessage = document.getElementById('no-members');
+                    const noMembersInitial = document.getElementById('no-members-initial');
+                    if (memberCount) {
+                        const count = document.querySelectorAll('.member-row').length;
+                        memberCount.textContent = `${count} ${count === 1 ? 'member' : 'members'}`;
+                        if (count === 0) {
+                            const searchTerm = document.getElementById('member-search')?.value?.toLowerCase().trim() || '';
+                            if (searchTerm !== '') {
+                                if (noMembersMessage) noMembersMessage.style.display = 'flex';
+                                if (noMembersInitial) noMembersInitial.style.display = 'none';
+                            } else {
+                                if (noMembersMessage) noMembersMessage.style.display = 'none';
+                                if (noMembersInitial) noMembersInitial.style.display = 'flex';
                             }
                         }
-                        
-                        showSuccessMessage('Member removed successfully');
-                    }, 300);
-                }
+                    }
+                    showSuccessMessage('Member removed successfully');
+                }, 300);
+            }).catch((err) => {
+                alert('Unable to remove member: ' + (err.message || err));
+                console.error(err);
+            }).finally(() => {
+                if (removeBtn) removeBtn.disabled = false;
+                if (icon && prevIconClass) icon.className = prevIconClass;
+            });
+        }
+
+        // Demote member (explicit button) - server-backed
+        function demoteMember(memberId, currentRole) {
+            const currentUserRole = document.body.getAttribute('data-user-role');
+            if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
+                alert("You don't have permission to demote members.");
+                return;
             }
+
+            if (!confirm('Are you sure you want to demote this member?')) return;
+
+            const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
+            if (!memberRow) return alert('Member row not found');
+            const roleElement = memberRow.querySelector('.role-tag');
+            const demoteBtn = memberRow.querySelector(`button[title="Demote"]`);
+            const icon = demoteBtn ? demoteBtn.querySelector('i') : null;
+            const prevIconClass = icon ? icon.className : null;
+            if (icon) icon.className = 'fas fa-spinner fa-spin';
+            if (demoteBtn) demoteBtn.disabled = true;
+
+            const csrftoken = getCookie('csrftoken') || '';
+
+            fetch(`/organization/members/${memberId}/demote/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                credentials: 'same-origin'
+            }).then(async res => {
+                const data = await res.json().catch(() => null);
+                if (!res.ok) throw new Error((data && (data.error || data.detail)) || res.statusText || 'Request failed');
+                return data;
+            }).then((data) => {
+                const newRole = (data && data.new_role) || 'member';
+                memberRow.setAttribute('data-role', newRole);
+                if (roleElement) {
+                    roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+                    roleElement.className = 'role-tag ' + newRole;
+                }
+                showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member demoted to ${newRole}`);
+            }).catch(err => {
+                alert('Unable to demote member: ' + (err.message || err));
+                console.error(err);
+            }).finally(() => {
+                if (demoteBtn) demoteBtn.disabled = false;
+                if (icon && prevIconClass) icon.className = prevIconClass;
+            });
         }
 
         // Show success message with animation

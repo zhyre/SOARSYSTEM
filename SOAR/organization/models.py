@@ -85,16 +85,16 @@ class OrganizationMember(models.Model):
                 organization=self.organization,
                 student=promoter
             ).first()
-            allowed = promoter_record and promoter_record.role == "Leader"
+            allowed = promoter_record and promoter_record.role == ROLE_LEADER
 
         if not allowed:
             raise PermissionError("Only leaders or admins can promote members.")
 
-        # Promotion logic
-        if self.role == "Member":
-            self.role = "Officer"
-        elif self.role == "Officer":
-            self.role = "Leader"
+        # Promotion logic (use ROLE_* constants stored in DB)
+        if self.role == ROLE_MEMBER:
+            self.role = ROLE_OFFICER
+        elif self.role == ROLE_OFFICER:
+            self.role = ROLE_LEADER
         else:
             raise ValueError("Cannot promote further; already a Leader.")
 
@@ -112,16 +112,16 @@ class OrganizationMember(models.Model):
                 organization=self.organization,
                 student=demoter
             ).first()
-            allowed = demoter_record and demoter_record.role == "Leader"
+            allowed = demoter_record and demoter_record.role == ROLE_LEADER
 
         if not allowed:
             raise PermissionError("Only leaders or admins can demote members.")
 
-        # Demotion logic
-        if self.role == "Leader":
-            self.role = "Officer"
-        elif self.role == "Officer":
-            self.role = "Member"
+        # Demotion logic (use ROLE_* constants stored in DB)
+        if self.role == ROLE_LEADER:
+            self.role = ROLE_OFFICER
+        elif self.role == ROLE_OFFICER:
+            self.role = ROLE_MEMBER
         else:
             raise ValueError("Cannot demote further; already a Member.")
 
