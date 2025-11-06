@@ -87,21 +87,31 @@
 
             <!-- Content Area -->
             <div class="flex-1 overflow-y-auto p-6">
+                <!-- Debug panel shown when a search query is present -->
+                {% if q %}
+                <div id="debugPanel" class="mb-4 p-4 rounded bg-yellow-50 border-l-4 border-yellow-400 text-sm text-gray-700">
+                    <strong>Debug</strong>: query = "{{ q }}" — server matched {{ all_orgs|length }} organization(s).
+                    <div class="mt-2 text-xs text-gray-600">Matched names: {% for o in all_orgs %}{% if not forloop.first %}, {% endif %}{{ o.name }}{% empty %}— none —{% endfor %}</div>
+                </div>
+                {% endif %}
                 <!-- Search + Join -->
                 <div class="flex items-center gap-4 mb-8">
                     <div class="relative flex-1">
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input id="orgSearch" type="text" placeholder="Search your organization" aria-label="Search organizations" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <!-- Top search: client-side filter for "Your Organizations" -->
+                        <input id="orgSearch" type="text" placeholder="Search your organizations" aria-label="Search your organizations" value="" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
                     <button id="joinBtn" class="px-5 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition">Join organization</button>
                 </div>
 
     <!-- My Organizations Section -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Organizations</h2>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Organizations</h2>
 
-        {% include 'organization/normal_org_card.html' %}
-    </div>
+                    <div id="myOrgsSection">
+                        {% include 'organization/normal_org_card.html' %}
+                    </div>
+                </div>
 
 
 
@@ -110,6 +120,10 @@
                     <div id="joinModalOverlay" class="absolute inset-0 bg-black bg-opacity-50"></div>
                     <div class="absolute inset-0 flex items-center justify-center p-4 md:p-10 overflow-y-auto">
                         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl relative">
+                            <!-- Always-visible close button (viewport-fixed so it's always reachable) -->
+                            <button id="joinModalCloseTop" style="position:fixed;top:1rem;right:1rem;z-index:9999;" class="p-3 bg-white rounded-full shadow hover:bg-gray-100" aria-label="Close join modal">
+                                <i class="fas fa-times text-gray-700"></i>
+                            </button>
                             <div class="flex items-center justify-between p-6 border-b">
                                 <div>
                                     <h3 class="text-xl font-semibold text-gray-900">Browse All Organizations</h3>
@@ -146,21 +160,43 @@
             overlay.classList.add('hidden');
         });
 
-        // Search filtering across visible cards
-        const searchInput = document.getElementById('orgSearch');
+    // Search filtering across visible cards
+    const searchInput = document.getElementById('orgSearch');
+    const myOrgsSection = document.getElementById('myOrgsSection');
         function normalize(str) { return (str || '').toString().toLowerCase(); }
+
+        // Helper to extract sensible title/description from a card using multiple fallbacks
+        function cardText(card){
+            const titleEl = card.querySelector('.org-title') || card.querySelector('h3');
+            const descEl = card.querySelector('.org-desc') || card.querySelector('p');
+            const name = titleEl ? titleEl.textContent : (card.getAttribute('data-org-name') || '');
+            const desc = descEl ? descEl.textContent : (card.getAttribute('data-org-desc') || '');
+            return { name: normalize(name), desc: normalize(desc) };
+        }
+
         function filterCards(query) {
             const q = normalize(query);
             document.querySelectorAll('.org-card').forEach(card => {
-                const titleEl = card.querySelector('.org-title');
-                const descEl = card.querySelector('.org-desc');
-                const name = normalize(titleEl ? titleEl.textContent : card.getAttribute('data-org-name'));
-                const desc = normalize(descEl ? descEl.textContent : card.getAttribute('data-org-desc'));
-                const match = !q || name.includes(q) || desc.includes(q);
+                const { name } = cardText(card);
+                const match = !q || name.includes(q);
                 card.style.display = match ? '' : 'none';
             });
         }
-        searchInput?.addEventListener('input', (e) => filterCards(e.target.value));
+        // typing filters only the user's org cards; pressing Enter won't submit
+        searchInput?.addEventListener('input', (e) => filterUserOrgs(e.target.value));
+        searchInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); filterUserOrgs(searchInput.value); }
+        });
+
+        function filterUserOrgs(query){
+            const q = normalize(query);
+            if (!myOrgsSection) return;
+            myOrgsSection.querySelectorAll('.org-card').forEach(card => {
+                const { name } = cardText(card);
+                const match = !q || name.includes(q);
+                card.style.display = match ? '' : 'none';
+            });
+        }
         filterCards('');
 
         // Modal open/close + a11y
@@ -197,8 +233,8 @@
             lastFocused = document.activeElement;
             joinModal.classList.remove('hidden');
             document.addEventListener('keydown', onModalKeydown);
-            // Focus search input first, fallback to close button
-            setTimeout(() => { (modalSearch || joinModalClose)?.focus(); }, 0);
+            // Focus search input first, fallback to visible close button
+            setTimeout(() => { (modalSearch || document.getElementById('joinModalCloseTop') || joinModalClose)?.focus(); }, 0);
         }
         function closeJoinModal(){
             if (!joinModal) return;
@@ -213,11 +249,8 @@
             const q = (query || '').toString().toLowerCase();
             if (!joinModal) return;
             joinModal.querySelectorAll('.org-card').forEach(card => {
-                const titleEl = card.querySelector('.org-title');
-                const descEl = card.querySelector('.org-desc');
-                const name = (titleEl ? titleEl.textContent : card.getAttribute('data-org-name') || '').toLowerCase();
-                const desc = (descEl ? descEl.textContent : card.getAttribute('data-org-desc') || '').toLowerCase();
-                const match = !q || name.includes(q) || desc.includes(q);
+                const { name } = cardText(card);
+                const match = !q || name.includes(q);
                 card.style.display = match ? '' : 'none';
             });
         }
@@ -226,7 +259,28 @@
 
         joinBtn?.addEventListener('click', openJoinModal);
         joinModalOverlay?.addEventListener('click', closeJoinModal);
-        joinModalClose?.addEventListener('click', closeJoinModal);
+    joinModalClose?.addEventListener('click', closeJoinModal);
+    const joinModalCloseTop = document.getElementById('joinModalCloseTop');
+    joinModalCloseTop?.addEventListener('click', closeJoinModal);
+
+        // If the page was loaded with a query, open modal and apply it to modal search
+        const initialQuery = "{{ q|default:''|escapejs }}";
+        console.log('initialQuery:', initialQuery);
+        if (initialQuery && initialQuery !== "") {
+            // prefill inputs
+            if (searchInput) searchInput.value = initialQuery;
+            if (modalSearch) modalSearch.value = initialQuery;
+            // open modal and apply filter
+            openJoinModal();
+            setTimeout(() => {
+                // log counts for debugging
+                const modalCards = joinModal ? joinModal.querySelectorAll('.org-card') : [];
+                console.log('modalCards count before filter:', modalCards.length);
+                filterModalCards(initialQuery);
+                const modalCardsAfter = joinModal ? Array.from(joinModal.querySelectorAll('.org-card')).filter(c=>c.style.display!=='none') : [];
+                console.log('modalCards visible after filter:', modalCardsAfter.length);
+            }, 50);
+        }
     </script>
 </body>
 </html>

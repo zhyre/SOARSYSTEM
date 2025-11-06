@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
-from .models import Organization, OrganizationMember, Program
+from .models import Organization, OrganizationMember, Program, ROLE_MEMBER, ROLE_OFFICER, ROLE_LEADER, ROLE_ADVISER
 from accounts.models import User
 from .forms import OrganizationEditForm
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, ProgramSerializer
@@ -440,11 +440,11 @@ def demote_member(request, member_id):
             if not demoter_record or demoter_record.role not in ["adviser", "leader"]:
                 return JsonResponse({"error": "Only advisers, leaders or admins can demote members."}, status=403)
 
-        # Demotion logic
-        if member.role == "Leader":
-            member.role = "Officer"
-        elif member.role == "Officer":
-            member.role = "Member"
+        # Demotion logic (use ROLE_* constants)
+        if member.role == ROLE_LEADER:
+            member.role = ROLE_OFFICER
+        elif member.role == ROLE_OFFICER:
+            member.role = ROLE_MEMBER
         else:
             return JsonResponse({"error": "Cannot demote further; already a Member."}, status=400)
 
@@ -452,6 +452,46 @@ def demote_member(request, member_id):
         return JsonResponse({
             "status": "success",
             "message": f"{member.student.username} has been demoted to {member.role}.",
+            "new_role": member.role
+        })
+
+    except OrganizationMember.DoesNotExist:
+        return JsonResponse({"error": "Member not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def promote_member(request, org_id, member_id):
+    """Promote a member (Member → Officer → Leader). Only Leaders or Admins can perform this."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    try:
+        member = OrganizationMember.objects.get(id=member_id, organization__id=org_id)
+        promoter = request.user
+
+        # Check permissions: only admins, advisers and leaders
+        if not (promoter.is_superuser or promoter.is_staff):
+            promoter_record = OrganizationMember.objects.filter(
+                organization=member.organization,
+                student=promoter
+            ).first()
+            if not promoter_record or promoter_record.role not in ["adviser", "leader"]:
+                return JsonResponse({"error": "Only advisers, leaders or admins can promote members."}, status=403)
+
+        # Promotion logic (use ROLE_* constants)
+        if member.role == ROLE_MEMBER:
+            member.role = ROLE_OFFICER
+        elif member.role == ROLE_OFFICER:
+            member.role = ROLE_LEADER
+        else:
+            return JsonResponse({"error": "Cannot promote further; already a Leader."}, status=400)
+
+        member.save()
+        return JsonResponse({
+            "status": "success",
+            "message": f"{member.student.username} has been promoted to {member.role}.",
             "new_role": member.role
         })
 

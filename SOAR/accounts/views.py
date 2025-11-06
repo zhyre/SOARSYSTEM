@@ -8,6 +8,7 @@ from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 from organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
+from django.db.models import Q
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404
 
@@ -44,11 +45,21 @@ def organizations_page(request):
             "member_count": org.members.filter(is_approved=True).count()
         })
 
-    all_orgs = Organization.objects.all()
+    # Support simple search via ?q=... (searches name and description)
+    q = request.GET.get('q', '').strip()
+    if q:
+        # Only search by organization name (avoid matching description)
+        all_orgs = Organization.objects.filter(
+            Q(name__icontains=q)
+        ).distinct()
+    else:
+        all_orgs = Organization.objects.all()
+
     return render(request, "organization/organizations_page.html", {
         "org_data": org_data,
         "all_orgs": all_orgs,
         "user_orgs": user_orgs,
+        "q": q,
     })
 
 @login_required

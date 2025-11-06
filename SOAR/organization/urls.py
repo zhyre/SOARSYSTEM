@@ -16,6 +16,7 @@ urlpatterns = [
     #path('members/manage/', views.membermanagement, name='membermanagement'),
     #path('organization/<uuid:org_id>/members/manage/', views.membermanagement, name='membermanagement'),
     path('members/<uuid:member_id>/demote/', views.demote_member, name='demote_member'),
+    path('organization/<uuid:org_id>/members/<uuid:member_id>/promote/', views.promote_member, name='promote_member'),
     path('api/update-organization/', views.api_update_organization, name='api_update_organization'),
     path('organization/<uuid:org_id>/members/manage/', views.membermanagement, name='membermanagement'),
     path('organization/<uuid:org_id>/profile/', views.organization_profile, name='organization_profile'),
