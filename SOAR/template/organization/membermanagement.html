@@ -670,54 +670,95 @@
     <script>
         // Approve member join request
         function approveMember(memberId, memberName) {
-            if (!confirm(`Approve ${memberName}'s join request?`)) return;
-            const csrftoken = getCookie('csrftoken');
-            fetch(`/organization/members/${memberId}/approve/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRFToken': csrftoken || ''
-                }
-            }).then(async (res) => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }).then((data) => {
-                showSuccessMessage('Member approved and notified.');
-                location.reload();
-            }).catch((err) => {
-                alert('Unable to approve member.');
-                console.error(err);
-            });
+            return confirmAction(`Approve ${memberName}'s join request?`, 'Approve member')
+                .then(confirmed => {
+                    if (!confirmed) return;
+                    const csrftoken = getCookie('csrftoken');
+                    return fetch(`/organization/members/${memberId}/approve/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRFToken': csrftoken || ''
+                        }
+                    }).then(async (res) => {
+                        if (!res.ok) throw new Error(await res.text());
+                        return res.json();
+                    }).then((data) => {
+                        showSuccessMessage('Member approved and notified.');
+                        location.reload();
+                    }).catch((err) => {
+                        showToastFallback('Unable to approve member.', 'error');
+                        console.error(err);
+                    });
+                });
         }
 
         // Reject member join request
         function rejectMember(memberId, memberName) {
-            if (!confirm(`Reject ${memberName}'s join request?`)) return;
-            const csrftoken = getCookie('csrftoken');
-            fetch(`/organization/members/${memberId}/reject/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRFToken': csrftoken || ''
-                }
-            }).then(async (res) => {
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            }).then((data) => {
-                showSuccessMessage('Member rejected and notified.');
-                location.reload();
-            }).catch((err) => {
-                alert('Unable to reject member.');
-                console.error(err);
-            });
+            return confirmAction(`Reject ${memberName}'s join request?`, 'Reject member')
+                .then(confirmed => {
+                    if (!confirmed) return;
+                    const csrftoken = getCookie('csrftoken');
+                    return fetch(`/organization/members/${memberId}/reject/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRFToken': csrftoken || ''
+                        }
+                    }).then(async (res) => {
+                        if (!res.ok) throw new Error(await res.text());
+                        return res.json();
+                    }).then((data) => {
+                        showSuccessMessage('Member rejected and notified.');
+                        location.reload();
+                    }).catch((err) => {
+                        showToastFallback('Unable to reject member.', 'error');
+                        console.error(err);
+                    });
+                });
         }
         // CSRF helper (Django)
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Wrapper that prefers the global modal confirm but falls back to native confirm
+        function confirmAction(message, title) {
+            try {
+                if (typeof window.showConfirmModal === 'function') {
+                    // showConfirmModal returns a Promise<boolean>
+                    return window.showConfirmModal(title || '', message);
+                }
+            } catch (e) {
+                console.error('showConfirmModal failed', e);
+            }
+            return Promise.resolve(window.confirm(message));
+        }
+
+        // Wrapper to show toast or fallback to alert / success message
+        function showToastFallback(message, level) {
+            try {
+                if (typeof window.showToast === 'function') {
+                    window.showToast(message, level || 'info');
+                    return;
+                }
+            } catch (e) {
+                console.error('showToast failed', e);
+            }
+            // Fallbacks
+            if (level === 'success' && typeof showSuccessMessage === 'function') {
+                showSuccessMessage(message);
+                return;
+            }
+            if (level === 'error') {
+                window.alert(message);
+                return;
+            }
+            window.alert(message);
         }
 
         // Initialize when DOM is fully loaded
@@ -1149,12 +1190,12 @@
         });
 
         // Toggle member role (promote/demote) — now server-backed via AJAX
-        function toggleMemberRole(memberId, currentRole) {
+    async function toggleMemberRole(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
 
             // Only allow advisers, leaders and admins to promote/demote
             if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
-                alert("You don't have permission to promote or demote members.");
+                showToastFallback("You don't have permission to promote or demote members.", 'error');
                 return;
             }
 
@@ -1175,7 +1216,7 @@
                 newRole = 'officer';
                 action = 'promote';
             } else if (currentRole === 'officer') {
-                const promoteFurther = confirm('Promote this Officer to Leader? Click Cancel to demote to Member.');
+                const promoteFurther = await confirmAction('Promote this Officer to Leader? Click Cancel to demote to Member.', 'Promote Officer');
                 if (promoteFurther) {
                     newRole = 'leader';
                     action = 'promote';
@@ -1190,7 +1231,8 @@
 
             if (!action) return;
 
-            if (!confirm(`Are you sure you want to ${action} this ${currentRole} to ${newRole}?`)) return;
+            const ok = await confirmAction(`Are you sure you want to ${action} this ${currentRole} to ${newRole}?`, 'Confirm role change');
+            if (!ok) return;
 
             // Prepare for server call
             const csrftoken = getCookie('csrftoken') || '';
@@ -1236,7 +1278,7 @@
                 // Use server message if provided
                 showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member ${action}d to ${newRole}`);
             }).catch((err) => {
-                alert('Unable to ' + action + ' member: ' + (err.message || err));
+                showToastFallback('Unable to ' + action + ' member: ' + (err.message || err), 'error');
                 console.error(err);
             }).finally(() => {
                 if (toggleBtn) toggleBtn.disabled = false;
@@ -1248,10 +1290,12 @@
 
         // Confirm member removal (server-backed)
         function confirmRemoveMember(memberId, memberName) {
-            if (!confirm(`Are you sure you want to remove ${memberName} from the organization?`)) return;
+            return confirmAction(`Are you sure you want to remove ${memberName} from the organization?`, 'Remove member')
+                .then(confirmed => {
+                    if (!confirmed) return;
 
-            const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
-            if (!memberRow) return alert('Member row not found');
+                    const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
+                    if (!memberRow) return showToastFallback('Member row not found', 'error');
 
             // UI: optimistic disable
             const removeBtn = memberRow.querySelector('button[title="Remove Member"]');
@@ -1299,26 +1343,29 @@
                     showSuccessMessage('Member removed successfully');
                 }, 300);
             }).catch((err) => {
-                alert('Unable to remove member: ' + (err.message || err));
+                showToastFallback('Unable to remove member: ' + (err.message || err), 'error');
                 console.error(err);
             }).finally(() => {
                 if (removeBtn) removeBtn.disabled = false;
                 if (icon && prevIconClass) icon.className = prevIconClass;
             });
+        });
         }
 
         // Demote member (explicit button) - server-backed
         function demoteMember(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
             if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
-                alert("You don't have permission to demote members.");
+                showToastFallback("You don't have permission to demote members.", 'error');
                 return;
             }
 
-            if (!confirm('Are you sure you want to demote this member?')) return;
+            return confirmAction('Are you sure you want to demote this member?', 'Demote member')
+                .then(confirmed => {
+                    if (!confirmed) return;
 
-            const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
-            if (!memberRow) return alert('Member row not found');
+                    const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
+                    if (!memberRow) return showToastFallback('Member row not found', 'error');
             const roleElement = memberRow.querySelector('.role-tag');
             const demoteBtn = memberRow.querySelector(`button[title="Demote"]`);
             const icon = demoteBtn ? demoteBtn.querySelector('i') : null;
@@ -1345,12 +1392,13 @@
                 }
                 showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member demoted to ${newRole}`);
             }).catch(err => {
-                alert('Unable to demote member: ' + (err.message || err));
+                showToastFallback('Unable to demote member: ' + (err.message || err), 'error');
                 console.error(err);
             }).finally(() => {
                 if (demoteBtn) demoteBtn.disabled = false;
                 if (icon && prevIconClass) icon.className = prevIconClass;
             });
+        });
         }
 
         // Show success message with animation

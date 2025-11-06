@@ -179,6 +179,11 @@
                                 <i class="fas fa-calendar-alt mr-1.5"></i>
                                 <span>Created {{ organization.date_created|date:"F Y" }}</span>
                             </span>
+                            {% if user.is_authenticated and user_role %}
+                                <button id="leaveOrgBtn" class="ml-2 px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition" onclick="leaveOrganization('{{ organization.id }}')">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -281,6 +286,28 @@
                 }
             });
         });
+
+        // Leave organization (called by leave button) — uses global confirm modal & toast
+        function leaveOrganization(orgId) {
+            showConfirmModal('Leave organization', 'Are you sure you want to leave this organization?')
+                .then(confirmed => {
+                    if (!confirmed) return;
+                    const csrftoken = document.cookie.split('; ').find(c => c.startsWith('csrftoken='))?.split('=')[1] || '';
+                    fetch(`/organization/orgpage/${orgId}/leave/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+                        credentials: 'same-origin'
+                    }).then(async res => {
+                        const data = await res.json().catch(() => null);
+                        if (!res.ok) throw new Error((data && (data.error || data.detail)) || res.statusText || 'Request failed');
+                        showToast((data && data.message) || 'You have left the organization.', 'success');
+                        setTimeout(() => window.location.href = '/accounts/organizations/', 800);
+                    }).catch(err => {
+                        showToast('Unable to leave organization: ' + (err.message || err), 'error');
+                        console.error(err);
+                    });
+                });
+        }
     </script>
 </body>
 </html>

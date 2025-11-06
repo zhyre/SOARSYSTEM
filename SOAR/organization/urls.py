@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/update-organization/', views.api_update_organization, name='api_update_organization'),
     path('organization/<uuid:org_id>/members/manage/', views.membermanagement, name='membermanagement'),
     path('organization/<uuid:org_id>/profile/', views.organization_profile, name='organization_profile'),
+    path('orgpage/<uuid:org_id>/leave/', views.leave_organization, name='leave_organization'),
 
 
     path('programs/', views.program_list, name='program_list'),
