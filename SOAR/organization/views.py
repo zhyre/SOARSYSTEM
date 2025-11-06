@@ -542,3 +542,35 @@ from .models import Program
 def get_programs(request):
     programs = Program.objects.values('id', 'abbreviation', 'name')
     return JsonResponse(list(programs), safe=False)
+
+
+@login_required
+def leave_organization(request, org_id):
+    """Allow the current user to leave the given organization.
+
+    - Prevent advisers from leaving via the UI.
+    - Prevent the last leader from leaving; require assigning another leader first.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        organization = get_object_or_404(Organization, id=org_id)
+        member = OrganizationMember.objects.filter(organization=organization, student=request.user).first()
+        if not member:
+            return JsonResponse({'error': 'You are not a member of this organization.'}, status=404)
+
+        if member.role == ROLE_ADVISER:
+            return JsonResponse({'error': 'Advisers cannot leave an organization via this action.'}, status=403)
+
+        if member.role == ROLE_LEADER:
+            leaders_count = OrganizationMember.objects.filter(organization=organization, role=ROLE_LEADER).count()
+            if leaders_count <= 1:
+                return JsonResponse({'error': 'Cannot leave as the only leader. Assign another leader first.'}, status=400)
+
+        # All checks passed — remove membership
+        member.delete()
+        return JsonResponse({'status': 'success', 'message': 'You have left the organization.'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
