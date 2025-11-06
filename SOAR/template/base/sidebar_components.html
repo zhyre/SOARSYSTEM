@@ -81,7 +81,7 @@
 
         <!-- Navigation -->
         <nav class="space-y-2">
-            <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'orgpage' %}bg-[rgba(61,131,245,0.674)]{% else %}hover:bg-[rgba(61,131,245,0.674)]{% endif %} transition duration-200 ease-in-out">
+            <a href="{% url 'orgpage' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'orgpage' %}bg-[rgba(61,131,245,0.674)]{% else %}hover:bg-[rgba(61,131,245,0.674)]{% endif %} transition duration-200 ease-in-out">
                 <i class="fas fa-home text-lg"></i>
                 <span class="sidebar-text font-medium">Feed</span>
             </a>
@@ -112,7 +112,8 @@
             <a href="{% url 'index' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[rgba(61,131,245,0.674)] transition">
                 <i class="fas fa-arrow-left text-lg"></i>
                 <span class="font-medium">Back to Dashboard</span>
-    </div>
+            </a>
+        </div>
 </aside>
 
 <!-- Default Sidebar (Legacy) -->
