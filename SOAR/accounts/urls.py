@@ -20,4 +20,7 @@ urlpatterns = [
     path('organization/', include('organization.urls')),
     # Join organization
     path('join_org/<uuid:org_id>/', views.join_org, name='join_org'),
+    
+    # Notifications
+    path('notifications/', views.notifications_view, name='notifications'),
 ]
