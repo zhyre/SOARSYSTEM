@@ -10,14 +10,30 @@
     <link rel="stylesheet" href="{% static 'css/accounts/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/accounts/members_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Additional inline styles */
-        .member-row[data-member-id] {
-            transition: opacity 0.3s ease;
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Simple Modal Styles */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #3838cc 100%);
+            background-attachment: fixed;
+        }
+        
+        /* Enhanced member row animations */
+        .member-row[data-member-id] {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .member-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Modern Modal Styles with Backdrop Blur */
         .simple-modal {
             display: none;
             position: fixed;
@@ -25,10 +41,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         .simple-modal.show {
@@ -37,102 +71,129 @@
         
         .simple-modal-content {
             background: white;
-            padding: 24px;
-            border-radius: 8px;
+            padding: 32px;
+            border-radius: 20px;
             width: 90%;
-            max-width: 500px;
+            max-width: 540px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .simple-modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
         }
         
         .simple-modal-header h3 {
             margin: 0;
-            font-size: 1.25rem;
-            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
         }
         
         .close-btn {
-            background: none;
+            background: #f1f5f9;
             border: none;
-            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 1.25rem;
             cursor: pointer;
-            color: #6b7280;
-            padding: 4px 8px;
-            line-height: 1;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
         
         .close-btn:hover {
-            color: #374151;
+            background: #e2e8f0;
+            color: #334155;
+            transform: rotate(90deg);
         }
         
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #374151;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9375rem;
         }
         
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
         
         .form-actions {
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #e5e7eb;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f5f9;
         }
         
         .error-message {
             color: #dc2626;
-            font-size: 0.75rem;
-            margin-top: 4px;
+            font-size: 0.8125rem;
+            margin-top: 6px;
             display: none;
+            font-weight: 500;
         }
-        /* Sidebar styles aligned with org page */
+        
+        /* Enhanced Sidebar */
         .sidebar {
             transition: transform 0.3s ease, width 0.3s ease;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
-            background-color: #0f172a; /* slate-900 */
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             color: #fff;
         }
+        
         .sidebar.collapsed {
             width: 80px;
         }
+        
         .sidebar.collapsed .sidebar-text {
             display: none;
         }
+        
         .sidebar.collapsed .logo-text {
             display: none;
         }
+        
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
                 position: fixed;
                 z-index: 50;
-                width: 16rem; /* w-64 */
+                width: 16rem;
                 height: 100vh;
                 overflow-y: auto;
             }
@@ -140,201 +201,555 @@
                 transform: translateX(0);
             }
         }
+        
+        /* Enhanced Main Content Cards */
+        main {
+            background: transparent;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .content-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        /* Enhanced Search Box */
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            padding-left: 16px;
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-size: 0.9375rem;
+            background: #f8fafc;
+        }
+        
+        .search-box input:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        /* Enhanced Buttons */
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        /* Enhanced Table */
+        .table-responsive {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .members-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .members-table thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .members-table thead th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #475569;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .members-table tbody td {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            background: white;
+        }
+        
+        .members-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .members-table tbody tr:hover {
+            background: #fafbfc;
+        }
+        
+        /* Enhanced Member Info */
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 220px;
+        }
+        
+        .member-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #2421cf 100%);
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .member-details .member-name {
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 4px;
+        }
+        
+        .member-details .member-email {
+            color: #64748b;
+            font-size: 0.8125rem;
+            max-width: 240px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Enhanced Role Tags */
+        .role-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .role-tag.admin {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+        
+        .role-tag.leader {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+        
+        .role-tag.officer {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .role-tag.member {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #334155;
+        }
+        
+        /* Enhanced Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .status-badge.active {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+        
+        .status-badge.active::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Enhanced Action Buttons */
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            color: #475569;
+            background: white;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .btn-icon:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-icon:active {
+            transform: translateY(0);
+        }
+        
+        .btn-icon.danger {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+        
+        .btn-icon.danger:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+        
+        /* Enhanced User Search Dropdown */
+        #user-search-results {
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 2px solid #e2e8f0;
+        }
+        
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .search-result-item:hover {
+            background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .search-result-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8125rem;
+            color: #334155;
+            font-weight: 700;
+        }
+        
+        /* Enhanced No Results */
+        .no-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+            font-size: 0.9375rem;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+            opacity: 0.5;
+        }
+        
+        /* Enhanced Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 0 0 16px 16px;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #261bc2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Enhanced Header */
+        .page-header {
+            margin-bottom: 8px;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        
+        .page-header p {
+            color: #64748b;
+            font-size: 0.9375rem;
+        }
+        
+        /* Mobile Menu Button Enhancement */
+        #mobileMenuToggle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        #mobileMenuToggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Radio Button Enhancement */
+        .form-group input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+        
+        .form-group label[style*="inline-flex"] {
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        
+        .form-group label[style*="inline-flex"]:hover {
+            background: white;
+            border-color: #cbd5e1;
+        }
+        
+        .form-group label[style*="inline-flex"]:has(input:checked) {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body class="organization-page" data-user-role="{{ user_role }}" data-org-id="{{ organization.id }}" data-user-search-url="/organization/organizations/{{ organization.id }}/users/search/" data-add-member-url="/organization/members/">
-    <!-- Overlay for mobile (matches org page) -->
+    <!-- Overlay for mobile -->
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
     
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (matches org page) -->
-        <aside id="sidebar" class="sidebar text-white w-64 flex-shrink-0 overflow-y-auto">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex items-center justify-center">
-                            <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-8 w-auto">
-                        </div>
-                        <span class="logo-text text-xl font-bold text-white"></span>
-                    </div>
-                    <button id="sidebarToggle" class="hidden md:block p-2 hover:bg-blue-500 rounded-lg transition">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+        <!-- Include Organization Sidebar -->
+        {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
 
-                <!-- Organization Info -->
-                <div class="mb-8 pb-6 border-b border-blue-500">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                            <i class="fas fa-users text-blue-600 text-lg"></i>
-                        </div>
-                        <div class="sidebar-text">
-                            <h3 class="font-semibold text-sm">{{ organization.name|default:"Computer Science Society" }}</h3>
-                            <p class="text-blue-200 text-xs">{{ organization.members.count }} member{{ organization.members.count|pluralize }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigation -->
-                <nav class="space-y-2">
-                    <a href="{% url 'orgpage' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
-                        <i class="fas fa-home text-lg"></i>
-                        <span class="sidebar-text font-medium">Feed</span>
-                    </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
-                        <i class="fas fa-calendar-alt text-lg"></i>
-                        <span class="sidebar-text font-medium">Events</span>
-                    </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
-                        <i class="fas fa-bullhorn text-lg"></i>
-                        <span class="sidebar-text font-medium">Announcements</span>
-                    </a>
-                    <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-500 bg-opacity-50 hover:bg-opacity-70 transition">
-                        <i class="fas fa-user-friends text-lg"></i>
-                        <span class="sidebar-text font-medium">Members</span>
-                    </a>
-                    <a href="{% url 'organization_profile' organization.id  %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
-                        <i class="fas fa-images text-lg"></i>
-                        <span class="sidebar-text font-medium">Org Profile</span>
-                    </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
-                        <i class="fas fa-cog text-lg"></i>
-                        <span class="sidebar-text font-medium">Settings</span>
-                    </a>
-                </nav>
-
-                <!-- Back to Dashboard -->
-                <div class="mt-8 pt-6 border-t border-blue-500">
-                    <a href="{% url 'index' %}" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-500 hover:bg-opacity-50 transition">
-                        <i class="fas fa-arrow-left text-lg"></i>
-                        <span class="sidebar-text font-medium">Back to Dashboard</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
         <div class="flex-1 flex flex-col overflow-hidden">
-            <main class="flex-1 overflow-y-auto p-4 md:p-8">
-                <!-- Mobile menu toggle button (no top bar) -->
-                <button id="mobileMenuToggle" class="md:hidden mb-4 p-2 hover:bg-gray-100 rounded-lg border border-gray-200">
-                    <i class="fas fa-bars text-gray-600"></i>
-                </button>
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <!-- Mobile menu toggle button (only visible on mobile) -->
+            <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-[#0f172a] rounded-lg text-white">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pt-16 md:pt-8">
+                <div class="content-card">
                     <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800 mb-2">Members Management</h1>
-                            <p class="text-sm text-gray-500">Manage your organization members and their roles</p>
+                        <div class="page-header">
+                            <h1>Members Management</h1>
+                            <p>Manage your organization members and their roles</p>
                         </div>
                         <div class="search-filter-bar">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" placeholder="Search members..." id="member-search" autocomplete="off" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <div class="search-box relative w-full">
+                                <input type="text" placeholder="Search members..." id="member-search" autocomplete="off" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center justify-between">
-                        {% if "adviser" in user_role or "leader" in user_role %}
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Add Member</h3>
-                            <p class="text-sm text-gray-500">Search affiliated users and assign a role</p>
-                        </div>
-                        <button id="add-member-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
-                            <i class="fas fa-user-plus"></i>
-                            <span>Add Member</span>
-                        </button>
-                        {% endif %}
+                {% if "adviser" in user_role or "leader" in user_role %}
+                <div class="content-card flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Add New Member</h3>
+                        <p class="text-sm text-gray-500">Search affiliated users and assign a role</p>
                     </div>
+                    <button id="add-member-btn" class="btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Add Member</span>
+                    </button>
+                </div>
+                {% endif %}
 
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800">Members</h2>
-                            <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="members-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Role</th>
-                                        <th>Date Added</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="members-tbody">
-                                    {% for member in members %}
-                                    <tr class="member-row" data-member-id="{{ member.id }}" data-name="{{ member.student.username }}" data-email="{{ member.student.email }}" data-role="{{ member.role }}">
-                                        <td>
-                                            <div class="member-info">
-                                                <div class="member-avatar">{{ member.student.username|slice:":2"|upper }}</div>
-                                                <div class="member-details">
-                                                    <div class="member-name">{{ member.student.username }}</div>
-                                                    <div class="member-email">{{ member.student.email }}</div>
-                                                </div>
+                <div class="content-card">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
+                        <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Date Added</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="members-tbody">
+                                {% for member in members %}
+                                <tr class="member-row" data-member-id="{{ member.id }}" data-name="{{ member.student.username }}" data-email="{{ member.student.email }}" data-role="{{ member.role }}">
+                                    <td>
+                                        <div class="member-info">
+                                            <div class="member-avatar">{{ member.student.username|slice:":2"|upper }}</div>
+                                            <div class="member-details">
+                                                <div class="member-name">{{ member.student.username }}</div>
+                                                <div class="member-email">{{ member.student.email }}</div>
                                             </div>
-                                        </td>
-                                        <td>
-                                            <span class="role-tag {{ member.role }}">{{ member.role|title }}</span>
-                                        </td>
-                                        <td>{{ member.date_joined|date:"Y-m-d" }}</td>
-                                        <td>
-                                            {% if member.is_approved %}
-                                                <span class="status-badge active">Active</span>
-                                            {% else %}
-                                                <span class="status-badge" style="background:#fee2e2;color:#991b1b;">Pending</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="role-tag {{ member.role }}">{{ member.role|title }}</span>
+                                    </td>
+                                    <td>{{ member.date_joined|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if member.is_approved %}
+                                            <span class="status-badge active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge" style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="actions">
+                                        {% if member.is_approved %}
+                                            {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
+                                                <button class="btn-icon" title="Promote/Demote" onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button class="btn-icon" title="Demote" onclick="demoteMember('{{ member.id }}', '{{ member.role }}')">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                                <button class="btn-icon danger" title="Remove Member" onclick="confirmRemoveMember('{{ member.id }}', '{{ member.student.username }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             {% endif %}
-                                        </td>
-                                        <td class="actions">
-                                            {% if member.is_approved %}
-                                                {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
-                                                    <button class="btn-icon" title="Promote/Demote" onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </button>
-                                                    <!-- Explicit demote button -->
-                                                    <button class="btn-icon" title="Demote" onclick="demoteMember('{{ member.id }}', '{{ member.role }}')">
-                                                        <i class="fas fa-arrow-down"></i>
-                                                    </button>
-                                                    <button class="btn-icon danger" title="Remove Member" onclick="confirmRemoveMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                {% endif %}
-                                            {% else %}
-                                                {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
-                                                    <button class="btn-icon" title="Approve" onclick="approveMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                    <button class="btn-icon danger" title="Reject" onclick="rejectMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                {% endif %}
+                                        {% else %}
+                                            {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
+                                                <button class="btn-icon" title="Approve" onclick="approveMember('{{ member.id }}', '{{ member.student.username }}')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn-icon danger" title="Reject" onclick="rejectMember('{{ member.id }}', '{{ member.student.username }}')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            <div id="no-members" class="no-results" style="display: none;">
-                                <i class="fas fa-users-slash"></i>
-                                <p>No members found matching your search</p>
-                            </div>
-                            <div id="no-members-initial" class="no-results" style="display: none;">
-                                <i class="fas fa-users"></i>
-                                <p>No members yet</p>
-                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="no-members" class="no-results" style="display: none;">
+                            <i class="fas fa-users-slash"></i>
+                            <p>No members found matching your search</p>
                         </div>
-                        
-                        <div class="pagination">
-                            <span>Showing 1 to 2 of 2 entries</span>
-                            <div class="table-actions">
-                                <!-- Add Member button removed -->
-                            </div>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn" disabled>
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
+                        <div id="no-members-initial" class="no-results" style="display: none;">
+                            <i class="fas fa-users"></i>
+                            <p>No members yet</p>
                         </div>
+                    </div>
+                    
+                    <div class="pagination">
+                        <span class="text-sm text-gray-600">Showing 1 to 2 of 2 entries</span>
+                        <div class="table-actions"></div>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </main>
@@ -345,7 +760,7 @@
     <div id="add-member-modal" class="simple-modal">
         <div class="simple-modal-content">
             <div class="simple-modal-header">
-                <h3>Add Member</h3>
+                <h3>Add New Member</h3>
                 <button id="close-add-member-modal" class="close-btn">&times;</button>
             </div>
             <form id="add-member-form">
@@ -359,8 +774,8 @@
                     <div id="name-error" class="error-message"></div>
                 </div>
                 <div class="form-group">
-                    <label>Role</label>
-                    <div style="display: flex; gap: 12px;">
+                    <label>Assign Role</label>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <label style="display: inline-flex; align-items: center; gap: 8px;">
                             <input type="radio" name="role" value="Leader">
                             <span>Leader</span>
@@ -384,291 +799,48 @@
         </div>
     </div>
 
-
-    <style>
-        /* Add Member Form Styles */
-        .add-member-form-container {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .add-member-form-container h3 {
-            color: #1e293b;
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .add-member-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 1rem;
-            align-items: flex-end;
-        }
-
-        .form-group {
-            margin-bottom: 0;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #475569;
-            font-size: 0.875rem;
-        }
-
-        .add-member-form input[type="text"],
-        .add-member-form select {
-            width: 100%;
-            padding: 0.625rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.9375rem;
-            transition: all 0.2s ease;
-        }
-
-        .add-member-form input[type="text"]:focus,
-        .add-member-form select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-actions {
-            margin-top: 1.25rem;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 0.625rem 1.25rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #1d4ed8;
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            color: #dc2626;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            min-height: 1rem;
-        }
-
-        .success-message {
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            background: #d1fae5;
-            color: #065f46;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .success-message i {
-            color: #10b981;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            .add-member-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                margin-top: 0.5rem;
-            }
-        }
-        /* Members table cleanup */
-        .members-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-        .members-table thead th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            color: #64748b; /* slate-500 */
-            background-color: #f8fafc; /* slate-50 */
-            border-bottom: 1px solid #e2e8f0; /* slate-200 */
-            text-transform: uppercase;
-        }
-        .members-table tbody td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9; /* slate-100 */
-            vertical-align: middle;
-        }
-        .members-table tbody tr:hover {
-            background-color: #f8fafc; /* slate-50 */
-        }
-        .member-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 220px;
-        }
-        .member-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 9999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #2563eb; /* blue-600 */
-            color: #fff;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-        .member-details .member-name {
-            color: #0f172a; /* slate-900 */
-            font-weight: 600;
-        }
-        .member-details .member-email {
-            color: #64748b; /* slate-500 */
-            font-size: 12px;
-            max-width: 240px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .role-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .role-tag.admin {
-            background: #dbeafe; /* blue-100 */
-            color: #1e40af;      /* blue-800 */
-        }
-        .role-tag.leader {
-            background: #dcfce7; /* green-100 */
-            color: #166534;      /* green-800 */
-        }
-        .role-tag.officer {
-            background: #fee2e2; /* red-100 */
-            color: #991b1b;      /* red-800 */
-        }
-        .role-tag.member {
-            background: #f1f5f9; /* slate-100 */
-            color: #334155;      /* slate-700 */
-        }
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .status-badge.active {
-            background: #dcfce7; /* green-100 */
-            color: #166534;      /* green-800 */
-        }
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            color: #334155; /* slate-700 */
-            background: #ffffff;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-        .btn-icon:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-        }
-        .btn-icon.danger {
-            color: #b91c1c; /* red-700 */
-            border-color: #fecaca; /* red-200 */
-            background: #fff7f7;
-        }
-        .btn-icon.danger:hover {
-            background: #fee2e2;
-            border-color: #fca5a5; /* red-300 */
-        }
-        /* User search dropdown */
-        #user-search-results {
-            border-radius: 0 0 8px 8px;
-        }
-        .search-result-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            cursor: pointer;
-        }
-        .search-result-item:hover {
-            background: #f8fafc;
-        }
-        .search-result-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 9999px;
-            background: #e2e8f0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: #334155;
-            font-weight: 600;
-        }
-        /* No results message styling */
-        .no-results {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-        .no-results i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #cbd5e1;
-        }
-    </style>
-
     <script>
-        // Approve member join request
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function toggleMobileMenu() {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('mobile-open');
+                document.body.classList.toggle('overflow-hidden');
+            }
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', toggleMobileMenu);
+            }
+
+            const navLinks = document.querySelectorAll('#sidebar a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        toggleMobileMenu();
+                    }
+                });
+            });
+
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('mobile-open');
+                    document.body.classList.remove('overflow-hidden');
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+        });
+
+        // Approve member
         function approveMember(memberId, memberName) {
             return confirmAction(`Approve ${memberName}'s join request?`, 'Approve member')
                 .then(confirmed => {
@@ -694,7 +866,7 @@
                 });
         }
 
-        // Reject member join request
+        // Reject member
         function rejectMember(memberId, memberName) {
             return confirmAction(`Reject ${memberName}'s join request?`, 'Reject member')
                 .then(confirmed => {
@@ -719,18 +891,16 @@
                     });
                 });
         }
-        // CSRF helper (Django)
+
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
-        // Wrapper that prefers the global modal confirm but falls back to native confirm
         function confirmAction(message, title) {
             try {
                 if (typeof window.showConfirmModal === 'function') {
-                    // showConfirmModal returns a Promise<boolean>
                     return window.showConfirmModal(title || '', message);
                 }
             } catch (e) {
@@ -739,7 +909,6 @@
             return Promise.resolve(window.confirm(message));
         }
 
-        // Wrapper to show toast or fallback to alert / success message
         function showToastFallback(message, level) {
             try {
                 if (typeof window.showToast === 'function') {
@@ -749,7 +918,6 @@
             } catch (e) {
                 console.error('showToast failed', e);
             }
-            // Fallbacks
             if (level === 'success' && typeof showSuccessMessage === 'function') {
                 showSuccessMessage(message);
                 return;
@@ -761,9 +929,7 @@
             window.alert(message);
         }
 
-        // Initialize when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
             const menuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -784,35 +950,26 @@
             const userSearchUrl = document.body.getAttribute('data-user-search-url');
             const addMemberUrl = document.body.getAttribute('data-add-member-url');
 
-            // Pagination state for user search
             let searchPage = 1;
             const pageSize = 5;
             let lastQuery = '';
             let lastHasNext = false;
             let lastHasPrev = false;
 
-            // Toggle sidebar
             function toggleSidebar() {
-                // Mobile behavior (matches org page)
                 sidebar.classList.toggle('mobile-open');
                 overlay.classList.toggle('hidden');
-                
-                // Toggle aria-expanded for accessibility
                 const isExpanded = menuToggle?.getAttribute('aria-expanded') === 'true' || false;
                 menuToggle?.setAttribute('aria-expanded', (!isExpanded).toString());
             }
 
-            // Show add member modal
             function showAddMemberModal() {
                 addMemberModal.classList.add('show');
                 document.body.classList.add('no-scroll');
-                
-                // Focus the first input when modal opens
                 const firstInput = userSearchInput;
                 if (firstInput) {
                     setTimeout(() => firstInput.focus(), 100);
                 }
-                // reset previous state
                 if (selectedUserInput) {
                     selectedUserInput.value = '';
                     selectedUserInput.removeAttribute('data-name');
@@ -826,12 +983,9 @@
                 lastQuery = '';
             }
 
-            // Hide add member modal
             function hideAddMemberModal() {
                 addMemberModal.classList.remove('show');
                 document.body.classList.remove('no-scroll');
-                
-                // Reset form when hiding modal
                 if (addMemberForm) {
                     addMemberForm.reset();
                     clearMemberErrors();
@@ -839,7 +993,6 @@
                 if (userSearchResults) userSearchResults.style.display = 'none';
             }
 
-            // Clear all member form errors
             function clearMemberErrors() {
                 const errorElements = document.querySelectorAll('.error-message');
                 errorElements.forEach(el => {
@@ -848,7 +1001,6 @@
                 });
             }
 
-            // Show error message for a specific field
             function showError(fieldId, message) {
                 const errorElement = document.getElementById(fieldId);
                 if (errorElement) {
@@ -857,12 +1009,10 @@
                 }
             }
 
-            // Get initials from name (e.g., "John Doe" -> "JD")
             function getInitials(name) {
                 return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
             }
 
-            // Debounce helper
             function debounce(fn, delay = 300) {
                 let t;
                 return (...args) => {
@@ -902,7 +1052,6 @@
                     `;
                 }).join('');
 
-                // Pagination footer
                 const hasNext = !!meta.next || meta.has_next === true || (meta.count && (searchPage * pageSize) < meta.count);
                 const hasPrev = searchPage > 1;
                 lastHasNext = hasNext;
@@ -916,7 +1065,6 @@
                 `;
                 userSearchResults.style.display = 'block';
 
-                // attach click handlers
                 userSearchResults.querySelectorAll('.search-result-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const id = item.getAttribute('data-id');
@@ -933,7 +1081,6 @@
                     });
                 });
 
-                // Pagination handlers
                 const prevBtn = document.getElementById('user-search-prev');
                 const nextBtn = document.getElementById('user-search-next');
                 prevBtn && prevBtn.addEventListener('click', (e) => {
@@ -980,7 +1127,6 @@
             const debouncedSearch = debounce(doSearch, 300);
             debouncedSearch.flush = function(){};
 
-            // Event Listeners
             if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
             if (overlay) overlay.addEventListener('click', () => {
                 sidebar.classList.remove('mobile-open');
@@ -990,7 +1136,6 @@
                 sidebar.classList.toggle('collapsed');
             });
 
-            // Mobile actions dropdown (matches org page)
             const mobileActionsBtn = document.getElementById('mobileActionsBtn');
             const mobileActionsMenu = document.getElementById('mobileActionsMenu');
             mobileActionsBtn?.addEventListener('click', (e) => {
@@ -1001,7 +1146,6 @@
                 mobileActionsMenu?.classList.add('hidden');
             });
 
-            // Modal event listeners
             if (addMemberBtn) addMemberBtn.addEventListener('click', showAddMemberModal);
             if (closeAddMemberModal) closeAddMemberModal.addEventListener('click', hideAddMemberModal);
             if (cancelAddMember) cancelAddMember.addEventListener('click', hideAddMemberModal);
@@ -1021,7 +1165,6 @@
                 }
             });
 
-            // Search functionality
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const searchTerm = this.value.toLowerCase().trim();
@@ -1042,7 +1185,6 @@
                         if (isVisible) visibleCount++;
                     });
 
-                    // Update member count and no-members message
                     const memberCountElement = document.querySelector('.member-count');
                     const noMembersMessage = document.getElementById('no-members');
                     const noMembersInitial = document.getElementById('no-members-initial');
@@ -1051,24 +1193,19 @@
                         memberCountElement.textContent = `${visibleCount} member${visibleCount === 1 ? '' : 's'}`;
                     }
 
-                    // Show appropriate message
                     if (searchTerm !== '' && visibleCount === 0) {
-                        // Search term entered but no results
                         if (noMembersMessage) noMembersMessage.style.display = 'flex';
                         if (noMembersInitial) noMembersInitial.style.display = 'none';
                     } else if (searchTerm === '' && visibleCount === 0) {
-                        // No search term and no members
                         if (noMembersMessage) noMembersMessage.style.display = 'none';
                         if (noMembersInitial) noMembersInitial.style.display = 'flex';
                     } else {
-                        // Have results or search term with results
                         if (noMembersMessage) noMembersMessage.style.display = 'none';
                         if (noMembersInitial) noMembersInitial.style.display = 'none';
                     }
                 });
             }
 
-            // Form submission (uses selected user + role)
             if (addMemberForm) {
                 addMemberForm.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -1093,7 +1230,6 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
-                    // role mapping: Leader->leader, Officer->officer, Regular/Member->member
                     let apiRole = 'member';
                     if (role && role.toLowerCase() === 'leader') {
                         apiRole = 'leader';
@@ -1101,15 +1237,8 @@
                         apiRole = 'officer';
                     }
 
-                    // CSRF helper (Django)
-                    function getCookie(name) {
-                        const value = `; ${document.cookie}`;
-                        const parts = value.split(`; ${name}=`);
-                        if (parts.length === 2) return parts.pop().split(';').shift();
-                    }
                     const csrftoken = getCookie('csrftoken');
 
-                    // Persist via API
                     fetch(addMemberUrl, {
                         method: 'POST',
                         headers: {
@@ -1189,11 +1318,9 @@
             }
         });
 
-        // Toggle member role (promote/demote) — now server-backed via AJAX
-    async function toggleMemberRole(memberId, currentRole) {
+        async function toggleMemberRole(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
 
-            // Only allow advisers, leaders and admins to promote/demote
             if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
                 showToastFallback("You don't have permission to promote or demote members.", 'error');
                 return;
@@ -1208,7 +1335,6 @@
             let action = '';
             let newRole = currentRole;
 
-            // Determine action
             if (currentRole === 'adviser') {
                 alert('Already an Adviser, no need to promote or demote further.');
                 return;
@@ -1234,19 +1360,15 @@
             const ok = await confirmAction(`Are you sure you want to ${action} this ${currentRole} to ${newRole}?`, 'Confirm role change');
             if (!ok) return;
 
-            // Prepare for server call
             const csrftoken = getCookie('csrftoken') || '';
             const orgId = document.body.getAttribute('data-org-id');
             let url = '';
             if (action === 'promote') {
-                // use the function-based promote endpoint we added
                 url = `/organization/organization/${orgId}/members/${memberId}/promote/`;
             } else {
-                // demote endpoint (function view)
                 url = `/organization/members/${memberId}/demote/`;
             }
 
-            // UI: show loading state
             if (toggleBtn) toggleBtn.disabled = true;
             const prevIconClass = icon ? icon.className : null;
             if (icon) icon.className = 'fas fa-spinner fa-spin';
@@ -1266,7 +1388,6 @@
                 }
                 return data;
             }).then((data) => {
-                // Update DOM only after server success
                 memberRow.setAttribute('data-role', newRole);
                 if (roleElement) {
                     roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
@@ -1275,7 +1396,6 @@
                 if (toggleBtn) toggleBtn.title = newRole === 'leader' ? 'Demote to Officer' : 'Promote/Demote';
                 if (icon) icon.className = 'fas fa-' + (action === 'promote' ? 'arrow-up' : 'arrow-down');
 
-                // Use server message if provided
                 showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member ${action}d to ${newRole}`);
             }).catch((err) => {
                 showToastFallback('Unable to ' + action + ' member: ' + (err.message || err), 'error');
@@ -1286,9 +1406,6 @@
             });
         }
 
-
-
-        // Confirm member removal (server-backed)
         function confirmRemoveMember(memberId, memberName) {
             return confirmAction(`Are you sure you want to remove ${memberName} from the organization?`, 'Remove member')
                 .then(confirmed => {
@@ -1297,62 +1414,58 @@
                     const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
                     if (!memberRow) return showToastFallback('Member row not found', 'error');
 
-            // UI: optimistic disable
-            const removeBtn = memberRow.querySelector('button[title="Remove Member"]');
-            const icon = removeBtn ? removeBtn.querySelector('i') : null;
-            const prevIconClass = icon ? icon.className : null;
-            if (icon) icon.className = 'fas fa-spinner fa-spin';
-            if (removeBtn) removeBtn.disabled = true;
+                    const removeBtn = memberRow.querySelector('button[title="Remove Member"]');
+                    const icon = removeBtn ? removeBtn.querySelector('i') : null;
+                    const prevIconClass = icon ? icon.className : null;
+                    if (icon) icon.className = 'fas fa-spinner fa-spin';
+                    if (removeBtn) removeBtn.disabled = true;
 
-            const csrftoken = getCookie('csrftoken') || '';
+                    const csrftoken = getCookie('csrftoken') || '';
 
-            // Call the DRF viewset destroy endpoint
-            fetch(`/organization/members/${memberId}/`, {
-                method: 'DELETE',
-                headers: { 'X-CSRFToken': csrftoken },
-                credentials: 'same-origin'
-            }).then(async (res) => {
-                let data = null;
-                try { data = await res.json(); } catch(e) { /* ignore non-json */ }
-                if (!res.ok) {
-                    const err = (data && (data.error || data.detail)) || res.statusText || 'Request failed';
-                    throw new Error(err);
-                }
-                // success -> remove row with animation
-                memberRow.style.transition = 'opacity 0.3s ease';
-                memberRow.style.opacity = '0';
-                setTimeout(() => {
-                    memberRow.remove();
-                    const memberCount = document.querySelector('.member-count');
-                    const noMembersMessage = document.getElementById('no-members');
-                    const noMembersInitial = document.getElementById('no-members-initial');
-                    if (memberCount) {
-                        const count = document.querySelectorAll('.member-row').length;
-                        memberCount.textContent = `${count} ${count === 1 ? 'member' : 'members'}`;
-                        if (count === 0) {
-                            const searchTerm = document.getElementById('member-search')?.value?.toLowerCase().trim() || '';
-                            if (searchTerm !== '') {
-                                if (noMembersMessage) noMembersMessage.style.display = 'flex';
-                                if (noMembersInitial) noMembersInitial.style.display = 'none';
-                            } else {
-                                if (noMembersMessage) noMembersMessage.style.display = 'none';
-                                if (noMembersInitial) noMembersInitial.style.display = 'flex';
-                            }
+                    fetch(`/organization/members/${memberId}/`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRFToken': csrftoken },
+                        credentials: 'same-origin'
+                    }).then(async (res) => {
+                        let data = null;
+                        try { data = await res.json(); } catch(e) { }
+                        if (!res.ok) {
+                            const err = (data && (data.error || data.detail)) || res.statusText || 'Request failed';
+                            throw new Error(err);
                         }
-                    }
-                    showSuccessMessage('Member removed successfully');
-                }, 300);
-            }).catch((err) => {
-                showToastFallback('Unable to remove member: ' + (err.message || err), 'error');
-                console.error(err);
-            }).finally(() => {
-                if (removeBtn) removeBtn.disabled = false;
-                if (icon && prevIconClass) icon.className = prevIconClass;
-            });
-        });
+                        memberRow.style.transition = 'opacity 0.3s ease';
+                        memberRow.style.opacity = '0';
+                        setTimeout(() => {
+                            memberRow.remove();
+                            const memberCount = document.querySelector('.member-count');
+                            const noMembersMessage = document.getElementById('no-members');
+                            const noMembersInitial = document.getElementById('no-members-initial');
+                            if (memberCount) {
+                                const count = document.querySelectorAll('.member-row').length;
+                                memberCount.textContent = `${count} ${count === 1 ? 'member' : 'members'}`;
+                                if (count === 0) {
+                                    const searchTerm = document.getElementById('member-search')?.value?.toLowerCase().trim() || '';
+                                    if (searchTerm !== '') {
+                                        if (noMembersMessage) noMembersMessage.style.display = 'flex';
+                                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                                    } else {
+                                        if (noMembersMessage) noMembersMessage.style.display = 'none';
+                                        if (noMembersInitial) noMembersInitial.style.display = 'flex';
+                                    }
+                                }
+                            }
+                            showSuccessMessage('Member removed successfully');
+                        }, 300);
+                    }).catch((err) => {
+                        showToastFallback('Unable to remove member: ' + (err.message || err), 'error');
+                        console.error(err);
+                    }).finally(() => {
+                        if (removeBtn) removeBtn.disabled = false;
+                        if (icon && prevIconClass) icon.className = prevIconClass;
+                    });
+                });
         }
 
-        // Demote member (explicit button) - server-backed
         function demoteMember(memberId, currentRole) {
             const currentUserRole = document.body.getAttribute('data-user-role');
             if (currentUserRole !== 'adviser' && currentUserRole !== 'leader' && !currentUserRole.includes('admin')) {
@@ -1366,42 +1479,41 @@
 
                     const memberRow = document.querySelector(`.member-row[data-member-id="${memberId}"]`);
                     if (!memberRow) return showToastFallback('Member row not found', 'error');
-            const roleElement = memberRow.querySelector('.role-tag');
-            const demoteBtn = memberRow.querySelector(`button[title="Demote"]`);
-            const icon = demoteBtn ? demoteBtn.querySelector('i') : null;
-            const prevIconClass = icon ? icon.className : null;
-            if (icon) icon.className = 'fas fa-spinner fa-spin';
-            if (demoteBtn) demoteBtn.disabled = true;
+                    const roleElement = memberRow.querySelector('.role-tag');
+                    const demoteBtn = memberRow.querySelector(`button[title="Demote"]`);
+                    const icon = demoteBtn ? demoteBtn.querySelector('i') : null;
+                    const prevIconClass = icon ? icon.className : null;
+                    if (icon) icon.className = 'fas fa-spinner fa-spin';
+                    if (demoteBtn) demoteBtn.disabled = true;
 
-            const csrftoken = getCookie('csrftoken') || '';
+                    const csrftoken = getCookie('csrftoken') || '';
 
-            fetch(`/organization/members/${memberId}/demote/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                credentials: 'same-origin'
-            }).then(async res => {
-                const data = await res.json().catch(() => null);
-                if (!res.ok) throw new Error((data && (data.error || data.detail)) || res.statusText || 'Request failed');
-                return data;
-            }).then((data) => {
-                const newRole = (data && data.new_role) || 'member';
-                memberRow.setAttribute('data-role', newRole);
-                if (roleElement) {
-                    roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
-                    roleElement.className = 'role-tag ' + newRole;
-                }
-                showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member demoted to ${newRole}`);
-            }).catch(err => {
-                showToastFallback('Unable to demote member: ' + (err.message || err), 'error');
-                console.error(err);
-            }).finally(() => {
-                if (demoteBtn) demoteBtn.disabled = false;
-                if (icon && prevIconClass) icon.className = prevIconClass;
-            });
-        });
+                    fetch(`/organization/members/${memberId}/demote/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                        credentials: 'same-origin'
+                    }).then(async res => {
+                        const data = await res.json().catch(() => null);
+                        if (!res.ok) throw new Error((data && (data.error || data.detail)) || res.statusText || 'Request failed');
+                        return data;
+                    }).then((data) => {
+                        const newRole = (data && data.new_role) || 'member';
+                        memberRow.setAttribute('data-role', newRole);
+                        if (roleElement) {
+                            roleElement.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+                            roleElement.className = 'role-tag ' + newRole;
+                        }
+                        showSuccessMessage((data && (data.message || data.status)) ? (data.message || data.status) : `Member demoted to ${newRole}`);
+                    }).catch(err => {
+                        showToastFallback('Unable to demote member: ' + (err.message || err), 'error');
+                        console.error(err);
+                    }).finally(() => {
+                        if (demoteBtn) demoteBtn.disabled = false;
+                        if (icon && prevIconClass) icon.className = prevIconClass;
+                    });
+                });
         }
 
-        // Show success message with animation
         function showSuccessMessage(message) {
             const successMessage = document.getElementById('success-message');
             if (successMessage) {
@@ -1410,13 +1522,11 @@
                     messageText.textContent = message;
                 }
                 
-                // Show message with fade in
                 successMessage.style.display = 'flex';
                 setTimeout(() => {
                     successMessage.style.opacity = '1';
                 }, 10);
                 
-                // Hide message after delay with fade out
                 setTimeout(() => {
                     successMessage.style.opacity = '0';
                     setTimeout(() => {

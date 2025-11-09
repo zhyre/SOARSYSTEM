@@ -10,8 +10,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gradient-to-br from-gray-50 to-blue-50">
     {% if request.user.is_superuser or request.user.is_staff or is_org_officer_or_leader %}
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
 
@@ -21,40 +28,41 @@
             {% if organization %}
             {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
             {% endif %}
-
-
-    {% endif %}
         </aside>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Bar -->
-            <header class="bg-white shadow-sm z-10">
+            <header class="bg-white shadow-sm z-10 border-b border-blue-100">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center space-x-4">
-                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
                             <i class="fas fa-bars text-gray-600"></i>
                         </button>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Organization Profile</h1>
-                            <p class="text-sm text-gray-500">Manage your organization details and settings</p>
+                            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-cog text-blue-600 mr-3"></i>
+                                Organization Profile
+                            </h1>
+                            <p class="text-sm text-gray-500 mt-1">Manage your organization details and settings</p>
                         </div>
                     </div>
 
                     <!-- Top Right Buttons -->
                     <div class="flex items-center space-x-3">
-                        <a href="{% url 'membermanagement' organization.id%}" class="hidden sm:flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        <a href="{% url 'membermanagement' organization.id%}" 
+                           class="hidden sm:flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
                             <i class="fas fa-users-cog"></i>
                             <span>Member Management</span>
                         </a>
                         
                         <!-- Mobile Dropdown -->
                         <div class="sm:hidden relative">
-                            <button id="mobileActionsBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <button id="mobileActionsBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <i class="fas fa-ellipsis-v text-gray-600"></i>
                             </button>
                             <div id="mobileActionsMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                                <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-100">
+                                <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-100 transition-colors">
                                     <i class="fas fa-users-cog text-green-600"></i>
                                     <span>Member Management</span>
                                 </a>
@@ -65,11 +73,10 @@
                         <div class="flex items-center space-x-3 pl-3 border-l border-gray-200">
                             <div class="hidden md:block text-right">
                                 <p class="text-sm font-medium text-gray-700">{{ user.last_name }}, {{ user.first_name }}{% if user.middle_name %} {{ user.middle_name }}{% endif %}</p>
-                           <!--     <p class="text-xs text-gray-500">Admin</p> -->
                             </div>
                             <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=2563eb&color=fff" 
                                  alt="{{ user.last_name }}, {{ user.first_name }}" 
-                                 class="w-10 h-10 rounded-full border-2 border-blue-500">
+                                 class="w-10 h-10 rounded-full border-2 border-blue-500 shadow-md">
                         </div>
                     </div>
                 </div>
@@ -77,178 +84,234 @@
 
             <!-- Content Area -->
             <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-5xl mx-auto">
+                    <!-- Messages -->
+                    {% if success %}
+                    <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-lg shadow-md animate-fade-in">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-2xl mr-3"></i>
+                            <div>
+                                <p class="font-semibold">Success!</p>
+                                <p class="text-sm">Changes saved successfully!</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
-                <!-- Organization Content -->
-                <div class="bg-white rounded-xl shadow-sm p-6" id="organization-details" style="display: block;">
-                    <div class="space-y-6">
-                        
-                        <!-- General Information -->
-<div class="mb-6">
-  <h2 class="text-lg font-semibold text-gray-800 mb-2">General Information</h2>
-  <p class="text-sm text-gray-500">Update your organization details below.</p>
-</div>
+                    {% if error %}
+                    <div class="mb-6 bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-lg shadow-md animate-fade-in">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle text-2xl mr-3"></i>
+                            <div>
+                                <p class="font-semibold">Error!</p>
+                                <p class="text-sm">Error saving changes. Please try again.</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
-<div class="bg-white p-6 rounded-xl shadow-sm">
-  <!-- Profile Header -->
-  <div class="flex flex-col items-center text-center mb-8">
-    <div class="relative">
-      {% if organization.profile_picture %}
-        <img src="{{ organization.profile_picture.url }}"
-             alt="Organization Logo"
-             class="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-md">
-      {% else %}
-        <img src="/static/images/default_org.png"
-             alt="Organization Logo"
-             class="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-md">
-      {% endif %}
-    </div>
-    <h3 class="mt-4 text-2xl font-bold text-gray-800">{{ organization.name }}</h3>
-    <p class="text-gray-600 text-sm mt-1">{{ organization.description|default:"Organization description goes here." }}</p>
-  </div>
+                    <!-- Organization Content -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-blue-100" id="organization-details">
+                        <div class="space-y-6">
+                            <!-- Header Section -->
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 rounded-t-2xl relative overflow-hidden">
+                                <div class="absolute inset-0 bg-black opacity-5"></div>
+                                <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                                <div class="relative">
+                                    <h2 class="text-xl font-bold text-white flex items-center">
+                                        <i class="fas fa-edit mr-3"></i>
+                                        Edit Organization Profile
+                                    </h2>
+                                    <p class="text-blue-100 text-sm mt-1">Update your organization details and settings</p>
+                                </div>
+                            </div>
 
-  <!-- Form Fields -->
+                            <div class="px-8 pb-8">
+                                <!-- Profile Header -->
+                                <div class="flex flex-col items-center text-center mb-8 -mt-12">
+                                    <div class="relative">
+                                        {% if organization.profile_picture %}
+                                        <img src="{{ organization.profile_picture.url }}"
+                                             alt="Organization Logo"
+                                             class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl ring-4 ring-blue-100">
+                                        {% else %}
+                                        <img src="/static/images/default_org.png"
+                                             alt="Organization Logo"
+                                             class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl ring-4 ring-blue-100">
+                                        {% endif %}
+                                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-camera text-white text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="mt-4 text-2xl font-bold text-gray-800">{{ organization.name }}</h3>
+                                    <p class="text-gray-600 text-sm mt-1 max-w-2xl">{{ organization.description|default:"Organization description goes here." }}</p>
+                                </div>
 
-<form class="space-y-6"
-      id="organizationForm"
-      method="POST"
-      enctype="multipart/form-data"
-      action="{% url 'organization_editprofile' organization.id %}">
-    {% csrf_token %}
+                                <!-- Form Fields -->
+                                <form class="space-y-8"
+                                      id="organizationForm"
+                                      method="POST"
+                                      enctype="multipart/form-data"
+                                      action="{% url 'organization_editprofile' organization.id %}">
+                                    {% csrf_token %}
 
-    <!-- Profile Picture Upload -->
-    <div class="mb-6">
-      <label for="id_profile_picture" class="block text-sm font-medium text-gray-700 mb-2">
-        Organization Logo
-      </label>
-      <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-      <div id="file-info" class="mt-2 text-sm text-gray-600 hidden">
-        <i class="fas fa-paperclip mr-1"></i>
-        <span id="file-name"></span>
-      </div>
-    </div>
+                                    <!-- Profile Picture Upload -->
+                                    <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border border-blue-100">
+                                        <label for="id_profile_picture" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                            <i class="fas fa-image text-blue-600 mr-2"></i>
+                                            Organization Logo
+                                        </label>
+                                        <div class="relative">
+                                            <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*" 
+                                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        </div>
+                                        <div id="file-info" class="mt-3 text-sm text-gray-600 hidden bg-blue-50 px-4 py-2 rounded-lg">
+                                            <i class="fas fa-paperclip mr-2 text-blue-600"></i>
+                                            <span id="file-name" class="font-medium"></span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-2 flex items-start">
+                                            <i class="fas fa-info-circle mr-2 mt-0.5 text-blue-500"></i>
+                                            <span>Recommended: Square image, at least 400x400px</span>
+                                        </p>
+                                    </div>
 
-    <input type="hidden" id="selectedProgramsInput" name="allowed_programs" value="{% for program in organization.allowed_programs.all %}{{ program.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                    <input type="hidden" id="selectedProgramsInput" name="allowed_programs" value="{% for program in organization.allowed_programs.all %}{{ program.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label for="id_name" class="block text-sm font-medium text-gray-700 mb-2">
-                Organization Name *
-            </label>
-            <input type="text" id="id_name" name="name" required
-                    value="{{ organization.name }}"
-                    placeholder="Enter organization name"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Organization Name -->
+                                        <div>
+                                            <label for="id_name" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-building text-blue-600 mr-2"></i>
+                                                Organization Name *
+                                            </label>
+                                            <input type="text" id="id_name" name="name" required
+                                                   value="{{ organization.name }}"
+                                                   placeholder="Enter organization name"
+                                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400">
+                                        </div>
+
+                                        <!-- Visibility -->
+                                        <div>
+                                            <label for="id_is_public" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                                <i class="fas fa-eye text-blue-600 mr-2"></i>
+                                                Visibility
+                                            </label>
+                                            <select id="id_is_public" name="is_public" 
+                                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400">
+                                                <option value="true" {% if organization.is_public %}selected{% endif %}>🌐 Public</option>
+                                                <option value="false" {% if not organization.is_public %}selected{% endif %}>🔒 Private</option>
+                                            </select>
+                                            <p class="text-xs text-gray-500 mt-2 flex items-start">
+                                                <i class="fas fa-info-circle mr-2 mt-0.5 text-blue-500"></i>
+                                                <span>Public organizations are open to all students. Private ones are limited to specific programs or invited members.</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Adviser -->
+                                    <div>
+                                        <label for="id_adviser" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                            <i class="fas fa-user-tie text-blue-600 mr-2"></i>
+                                            Adviser
+                                        </label>
+                                        <select id="id_adviser" name="adviser" 
+                                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400">
+                                            <option value="">Select Adviser</option>
+                                            {% for user in users %}
+                                            <option value="{{ user.id }}" {% if organization.adviser and organization.adviser.id == user.id %}selected{% endif %}>{{ user.last_name }}, {{ user.first_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-2 flex items-start">
+                                            <i class="fas fa-info-circle mr-1 mt-0.5 text-blue-500"></i>
+                                            <span>Select the organization adviser</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div>
+                                        <label for="id_description" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                            <i class="fas fa-align-left text-blue-600 mr-2"></i>
+                                            About Organization
+                                        </label>
+                                        <textarea id="id_description" name="description" rows="5"
+                                                  placeholder="Enter organization description"
+                                                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none hover:border-gray-400">{{ organization.description }}</textarea>
+                                        <p class="text-xs text-gray-500 mt-2 flex items-start">
+                                            <i class="fas fa-info-circle mr-1 mt-0.5 text-blue-500"></i>
+                                            <span>Provide a brief description of your organization</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Programs Affiliated -->
+                                    <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border border-blue-100">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <label class="block text-sm font-semibold text-gray-700 flex items-center">
+                                                <i class="fas fa-graduation-cap text-blue-600 mr-2"></i>
+                                                Programs Affiliated
+                                            </label>
+                                            <button id="openProgramsModal" type="button"
+                                                    class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                                                <i class="fas fa-plus-circle"></i>
+                                                Select Programs
+                                            </button>
+                                        </div>
+
+                                        <div id="displayChips"
+                                             class="flex flex-wrap gap-3 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white min-h-[80px] transition-all hover:border-blue-400">
+                                            {% if not organization.is_public %}
+                                                {% for program in organization.allowed_programs.all %}
+                                                    <span class="inline-flex items-center bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 px-3 py-2 rounded-full text-sm font-medium border border-blue-200 shadow-sm hover:shadow-md transition-shadow" data-id="{{ program.id }}">
+                                                        <i class="fas fa-book mr-2 text-blue-600"></i>
+                                                        <span>{{ program.name }}</span>
+                                                        <button type="button" class="ml-3 text-blue-600 hover:text-blue-800 font-bold text-lg remove-chip transition-colors">×</button>
+                                                    </span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-3 flex items-start">
+                                            <i class="fas fa-info-circle mr-2 mt-0.5 text-blue-500"></i>
+                                            <span>Click "Select Programs" to add affiliated academic programs</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t-2 border-gray-200">
+                                        <a href="{% url 'organization_profile' organization.id %}"
+                                           class="px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all inline-flex items-center justify-center font-medium text-gray-700 shadow-sm hover:shadow">
+                                            <i class="fas fa-times mr-2"></i> Cancel
+                                        </a>
+
+                                        <button type="submit" class="btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            <span>Save Changes</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-
-        <div>
-            <label for="id_is_public" class="block text-sm font-medium text-gray-700 mb-2">
-                Visibility
-            </label>
-            <select id="id_is_public" name="is_public" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="true" {% if organization.is_public %}selected{% endif %}>Public</option>
-                <option value="false" {% if not organization.is_public %}selected{% endif %}>Private</option>
-            </select>
-            <p class="text-xs text-gray-500 mt-1">
-                Public organizations are open to all students. Private ones are limited to specific programs or invited members.
-            </p>
-        </div>
     </div>
+    {% endif %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="mb-4">
-            <label for="id_adviser" class="block text-sm font-medium text-gray-700 mb-2">
-                Adviser
-            </label>
-            <select id="id_adviser" name="adviser" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Select Adviser</option>
-                {% for user in users %}
-                <option value="{{ user.id }}" {% if organization.adviser and organization.adviser.id == user.id %}selected{% endif %}>{{ user.last_name }}, {{ user.first_name }}</option>
-                {% endfor %}
-            </select>
-            <p class="text-xs text-gray-500 mt-1">Select the organization adviser.</p>
-        </div>
+    {% include 'organization/programs_affiliated_modal.html' %}
 
-    </div>
-
-    <div>
-        <label for="id_description" class="block text-sm font-medium text-gray-700 mb-2">
-            About Organization
-        </label>
-        <textarea id="id_description" name="description" rows="4"
-                  placeholder="Enter organization description"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ organization.description }}</textarea>
-    </div>
-
-    <div class="mt-6">
-        <div class="flex justify-between items-center mb-2">
-            <label class="block text-sm font-medium text-gray-700">Programs Affiliated</label>
-            <button id="openProgramsModal" type="button"
-                    class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-600">
-                + Select
-            </button>
-        </div>
-
-        <div id="displayChips"
-              class="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-md bg-gray-50 min-h-[50px]">
+    {{ programs|json_script:"programs-data" }}
+    
+    <script>
+        const currentAllowedPrograms = [
             {% if not organization.is_public %}
-                {% for program in organization.allowed_programs.all %}
-                    <span class="inline-flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm" data-id="{{ program.id }}">
-                        <span>{{ program.name }}</span>
-                        <button type="button" class="ml-2 text-blue-800 font-bold remove-chip">×</button>
-                    </span>
-                {% endfor %}
+            {% for program in organization.allowed_programs.all %}
+            "{{ program.id }}",
+            {% endfor %}
             {% endif %}
-        </div>
-    </div>
+        ];
+        const programsData = JSON.parse(document.getElementById('programs-data').textContent);
+    </script>
 
-    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-        <a href="{% url 'organization_profile' organization.id %}"
-           class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition inline-flex items-center">
-            <i class="fas fa-times mr-1"></i> Cancel
-        </a>
-
-        <button type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            <i class="fas fa-save mr-1"></i> Save Changes
-        </button>
-    </div>
-</form>
-
-            </div>
-
-                {% if success %}
-                <div class="success-message bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Changes saved successfully!</span>
-                </div>
-                {% endif %}
-
-                {% if error %}
-                <div class="error-message bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span>Error saving changes. Please try again.</span>
-                </div>
-                {% endif %}
-            </div>
-        </main>
-    </div>
-</div>
-        {% include 'organization/programs_affiliated_modal.html' %}
-
-        {{ programs|json_script:"programs-data" }}
-        
-        <script>
-            const currentAllowedPrograms = [
-                {% if not organization.is_public %}
-                {% for program in organization.allowed_programs.all %}
-                "{{ program.id }}",
-                {% endfor %}
-                {% endif %}
-            ];
-            const programsData = JSON.parse(document.getElementById('programs-data').textContent);
-        </script>
-
-        <script src="{% static 'js/organization/func_editorgprofile.js' %}"></script>
-        <script src="{% static 'js/organization/program_affiliated_modal.js' %}"></script>
-    </body>
+    <script src="{% static 'js/organization/func_editorgprofile.js' %}"></script>
+    <script src="{% static 'js/organization/program_affiliated_modal.js' %}"></script>
+</body>
 </html>

@@ -231,22 +231,34 @@ def join_org(request, org_id):
 
 @login_required
 def org_overview(request, org_id):
-    organization = get_object_or_404(Organization, id=org_id)
-    allowed_programs = organization.allowed_programs.all()
-    user_program = getattr(request.user, 'course', None)
-    can_join = organization.is_public or allowed_programs.filter(name=user_program).exists()
-    # Check if user is org officer or leader
-    is_org_officer_or_leader = False
-    try:
-        member = OrganizationMember.objects.get(organization=organization, student=request.user)
-        is_org_officer_or_leader = member.role in ["officer", "leader"]
-    except OrganizationMember.DoesNotExist:
-        is_org_officer_or_leader = False
-    return render(request, 'organization/organization_profile.html', {
-        'organization': organization,
-        'programs': Program.objects.all(),
-        'can_join': can_join,
-        'user_program': user_program,
-        'allowed_programs': allowed_programs,
-        'is_org_officer_or_leader': is_org_officer_or_leader,
-    })
+    org = get_object_or_404(Organization, id=org_id)
+    
+    # Check if user is a member of this organization
+    is_member = OrganizationMember.objects.filter(
+        organization=org,
+        student=request.user,
+        is_approved=True
+    ).exists()
+    
+    if not is_member:
+        messages.error(request, "You don't have permission to view this organization.")
+        return redirect('organizations_page')
+    
+    # Get all approved members
+    members = org.members.filter(is_approved=True).select_related('student')
+    
+    context = {
+        'org': org,
+        'members': members,
+        'is_member': is_member,
+    }
+    return render(request, 'organization/org_overview.html', context)
+
+@login_required
+def notifications_view(request):
+    """View for displaying user notifications."""
+    context = {
+        'unread_count': 5,  # Example count, replace with actual count from your notification model
+        'hide_header': True  # This will be used to hide the header in the template
+    }
+    return render(request, 'accounts/Notifications.html', context)
