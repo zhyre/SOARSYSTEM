@@ -10,6 +10,7 @@ router.register(r'programs', views.ProgramViewSet, basename='program')
 
 urlpatterns = [
     path('orgpage/<uuid:org_id>/', views.orgpage, name='orgpage'),
+    path('orgpage/<uuid:org_id>/calendar/', views.calendar_view, name='calendar'),
     #path('profile/', views.organization_profile, name='organization_profile'),
     path('profile/<uuid:org_id>/edit/', views.organization_editprofile, name='organization_editprofile'),
     #path('members/', views.membermanagement, name='membermanagement'),

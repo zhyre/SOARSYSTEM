@@ -44,11 +44,6 @@
                 {% endif %}
             </a>
             
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-calendar-check text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">My Events</span>
-            </a>
-            
             <!-- NOTIFICATIONS LINK -->
             <a href="{% url 'notifications' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
@@ -58,11 +53,6 @@
                 {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                 {% endif %}
-            </a>
-            
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-bullhorn text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">Announcements</span>
             </a>
             
             <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
@@ -130,14 +120,12 @@
                 {% endif %}
             </a>
             
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-calendar-alt text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">Events</span>
-            </a>
-            
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-bullhorn text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">Announcements</span>
+            <a href="{% url 'calendar' organization.id %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'calendar' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
+                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'calendar' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'calendar' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Events</span>
+                {% if request.resolver_match.url_name == 'calendar' %}
+                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                {% endif %}
             </a>
             
             <a href="{% url 'membermanagement' organization.id %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'membermanagement' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
@@ -216,11 +204,6 @@
                 {% endif %}
             </a>
             
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-calendar-check text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">My Events</span>
-            </a>
-            
             <!-- NOTIFICATIONS LINK -->
             <a href="{% url 'notifications' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
@@ -230,11 +213,6 @@
                 {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                 {% endif %}
-            </a>
-            
-            <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
-                <i class="fas fa-bullhorn text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">Announcements</span>
             </a>
             
             <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200 ease-in-out">
