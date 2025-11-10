@@ -545,6 +545,26 @@ def get_programs(request):
 
 
 @login_required
+@login_required
+def calendar_view(request, org_id):
+    """Render the calendar page for the organization."""
+    organization = get_object_or_404(Organization, id=org_id)
+    
+    # Check if the current user is a member of the organization
+    is_member = OrganizationMember.objects.filter(
+        student=request.user,
+        organization=organization
+    ).exists()
+    
+    if not is_member:
+        messages.error(request, 'You are not a member of this organization.')
+        return redirect('home')
+    
+    return render(request, 'organization/calendar.html', {
+        'organization': organization,
+    })
+
+
 def leave_organization(request, org_id):
     """Allow the current user to leave the given organization.
 
