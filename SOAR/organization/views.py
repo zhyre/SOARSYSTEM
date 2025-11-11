@@ -10,6 +10,7 @@ from django.http import JsonResponse
 import json
 from .models import Organization, OrganizationMember, Program, ROLE_MEMBER, ROLE_OFFICER, ROLE_LEADER, ROLE_ADVISER
 from accounts.models import User
+from event.models import OrganizationEvent
 from .forms import OrganizationEditForm
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, ProgramSerializer
 from .permissions import IsOrgOfficerOrAdviser
@@ -275,9 +276,11 @@ def orgpage(request, org_id):
             user_role = org_member.role
         except OrganizationMember.DoesNotExist:
             user_role = None
+    activities = OrganizationEvent.objects.filter(organization=organization).order_by('-event_date')
     return render(request, 'organization/orgpage.html', {
         'organization': organization,
         'user_role': user_role,
+        'activities': activities,
     })
 
 
