@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("organization/", include("organization.urls")),
+    path("event/", include("event.urls")),
     path("", landing_page, name='home'),
 ]
 
