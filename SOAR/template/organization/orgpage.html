@@ -281,25 +281,22 @@
                     </div>
                 </div>
 
-                <!-- Empty State (hidden by default, shown by JS when no activities) -->
-                <div id="emptyState" class="hidden text-center py-16">
-                    <div class="float-animation inline-block mb-4">
-                        <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
-                    <p class="text-gray-500">Create one to get started!</p>
-                </div>
-
-                <!-- Activity Feed Container -->
-                <div id="activityFeed" class="space-y-6">
-                    <!-- Dynamically added activities will appear here -->
-                </div>
-
-                <!-- Server-side activities -->
-                <div id="activitiesList" class="space-y-6 mt-6">
-                    {% for activity in activities %}
-                        {% include 'event/event_activitycard.html' %} <!-- Ari i-call ang template sa event nga card-->
-                    {% endfor %}
+                <!-- Activity Feed -->
+                <div class="space-y-6">
+                    {% if activities %}
+                        {% for event in activities %}
+                            {% include 'event/eventcard_upload.html' with event=event organization=organization user_role=user_role %}
+                        {% endfor %}
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-16">
+                            <div class="float-animation inline-block mb-4">
+                                <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
+                            <p class="text-gray-500">Create one to get started!</p>
+                        </div>
+                    {% endif %}
                 </div>
 
             </main>
@@ -409,449 +406,55 @@
     </div>
     
     <script>
-        // Activity Feed State Management
-        let activities = [];
-        const userRole = '{{ user_role|default:"member" }}';
-        const isAdvisor = userRole === 'adviser' || userRole === 'leader';
-
-        // Initialize
+        // Simple modal toggle functionality
         document.addEventListener('DOMContentLoaded', () => {
-            renderActivityFeed();
-            initializeEventHandlers();
-        });
-
-        function initializeEventHandlers() {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const overlay = document.getElementById('overlay');
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-
-            sidebarToggle?.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-            mobileMenuToggle?.addEventListener('click', () => {
-                sidebar.classList.toggle('mobile-open');
-                overlay.classList.toggle('hidden');
-            });
-            overlay?.addEventListener('click', () => {
-                sidebar.classList.remove('mobile-open');
-                overlay.classList.add('hidden');
-            });
-
-            const mobileActionsBtn = document.getElementById('mobileActionsBtn');
-            const mobileActionsMenu = document.getElementById('mobileActionsMenu');
-            mobileActionsBtn?.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mobileActionsMenu.classList.toggle('hidden');
-            });
-            document.addEventListener('click', () => mobileActionsMenu?.classList.add('hidden'));
-
-            // Event modal handlers
+            // Toggle event modal
             const openEventModal = document.getElementById('openEventModal');
             const closeEventModal = document.getElementById('closeEventModal');
             const cancelEventBtn = document.getElementById('cancelEventBtn');
             const eventModal = document.getElementById('eventModal');
-            const createEventForm = document.getElementById('createEventForm');
-
-            openEventModal?.addEventListener('click', () => {
-                resetEventForm();
-                eventModal.classList.remove('hidden');
-                eventModal.classList.add('flex');
-            });
-
+            
+            if (openEventModal) {
+                openEventModal.addEventListener('click', () => {
+                    eventModal.classList.remove('hidden');
+                    eventModal.classList.add('flex');
+                });
+            }
+            
             const closeModal = () => {
                 eventModal.classList.add('hidden');
                 eventModal.classList.remove('flex');
-                resetEventForm();
             };
-
-            closeEventModal?.addEventListener('click', closeModal);
-            cancelEventBtn?.addEventListener('click', closeModal);
             
+            if (closeEventModal) closeEventModal.addEventListener('click', closeModal);
+            if (cancelEventBtn) cancelEventBtn.addEventListener('click', closeModal);
+            
+            // Close modal when clicking outside
             eventModal?.addEventListener('click', (e) => {
                 if (e.target === eventModal) {
                     closeModal();
                 }
             });
-
-            // Form submission
-           //createEventForm?.addEventListener('submit', (e) => {
-            //    e.preventDefault();
-            //   handleCreateOrUpdateEvent();
-            //});
-
-
-            // Image upload handler
-            const eventImageInput = document.getElementById('eventImage');
-            const imagePreview = document.getElementById('imagePreview');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            const imageFileName = document.getElementById('imageFileName');
-            const removeImageBtn = document.getElementById('removeImage');
-
-            eventImageInput?.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    imageFileName.textContent = file.name;
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        imagePreview.src = e.target.result;
-                        imagePreviewContainer.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            removeImageBtn?.addEventListener('click', () => {
-                eventImageInput.value = '';
-                imageFileName.textContent = 'No file chosen';
-                imagePreview.src = '';
-                imagePreviewContainer.classList.add('hidden');
-            });
-        }
-
-        function resetEventForm() {
-            document.getElementById('createEventForm').reset();
-            document.getElementById('eventId').value = '';
-            document.getElementById('modalTitle').textContent = 'Create New Event';
-            document.getElementById('submitEventBtn').textContent = 'Create Event';
-            document.getElementById('imageFileName').textContent = 'No file chosen';
-            document.getElementById('imagePreview').src = '';
-            document.getElementById('imagePreviewContainer').classList.add('hidden');
-        }
-
-        function handleCreateOrUpdateEvent() {
-            const eventId = document.getElementById('eventId').value;
-            const title = document.getElementById('eventTitle').value;
-            const description = document.getElementById('eventDescription').value;
-            const date = document.getElementById('eventDate').value;
-            const time = document.getElementById('eventTime').value;
-            const location = document.getElementById('eventLocation').value;
-            const imagePreview = document.getElementById('imagePreview').src;
-
-            if (eventId) {
-                // Update existing event
-                const activity = activities.find(a => a.id == eventId);
-                if (activity) {
-                    activity.title = title;
-                    activity.description = description;
-                    activity.date = date;
-                    activity.time = time;
-                    activity.location = location;
-                    activity.image = imagePreview || activity.image;
-                }
-            } else {
-                // Create new event
-                const newActivity = {
-                    id: Date.now(),
-                    title: title,
-                    description: description,
-                    date: date,
-                    time: time,
-                    location: location,
-                    image: imagePreview || null,
-                    author: '{{ user.first_name }} {{ user.last_name }}',
-                    authorImage: '{{ user.profile_picture.url|default:"" }}' || `https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff`,
-                    timestamp: new Date().toISOString(),
-                    type: 'event',
-                    responses: { going: 0, interested: 0, notGoing: 0 },
-                    likes: 0,
-                    liked: false,
-                    comments: 0
-                };
-                activities.unshift(newActivity);
+            
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('hidden');
+                });
             }
             
-            renderActivityFeed();
-            document.getElementById('eventModal').classList.add('hidden');
-            document.getElementById('eventModal').classList.remove('flex');
-            resetEventForm();
-
-            if (typeof showToast === 'function') {
-                showToast(eventId ? 'Event updated successfully!' : 'Event created successfully!', 'success');
+            if (overlay) {
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.add('hidden');
+                });
             }
-        }
-
-        function editEvent(eventId) {
-            const activity = activities.find(a => a.id == eventId);
-            if (!activity) return;
-
-            document.getElementById('eventId').value = activity.id;
-            document.getElementById('eventTitle').value = activity.title;
-            document.getElementById('eventDescription').value = activity.description;
-            document.getElementById('eventDate').value = activity.date;
-            document.getElementById('eventTime').value = activity.time;
-            document.getElementById('eventLocation').value = activity.location;
-            
-            if (activity.image) {
-                document.getElementById('imagePreview').src = activity.image;
-                document.getElementById('imagePreviewContainer').classList.remove('hidden');
-                document.getElementById('imageFileName').textContent = 'Current image';
-            }
-
-            document.getElementById('modalTitle').textContent = 'Edit Event';
-            document.getElementById('submitEventBtn').textContent = 'Update Event';
-            document.getElementById('eventModal').classList.remove('hidden');
-            document.getElementById('eventModal').classList.add('flex');
-        }
-
-        function deleteEvent(eventId) {
-            const confirmDelete = confirm('Are you sure you want to delete this event?');
-            if (!confirmDelete) return;
-
-            activities = activities.filter(a => a.id != eventId);
-            renderActivityFeed();
-
-            if (typeof showToast === 'function') {
-                showToast('Event deleted successfully!', 'success');
-            }
-        }
-
-        function handleResponse(eventId, responseType) {
-            const activity = activities.find(a => a.id == eventId);
-            if (!activity) return;
-
-            if (!activity.userResponse) {
-                activity.userResponse = null;
-            }
-
-            // Remove previous response count
-            if (activity.userResponse) {
-                activity.responses[activity.userResponse]--;
-            }
-
-            // Toggle response
-            if (activity.userResponse === responseType) {
-                activity.userResponse = null;
-            } else {
-                activity.userResponse = responseType;
-                activity.responses[responseType]++;
-            }
-
-            renderActivityFeed();
-        }
-
-        function handleLike(eventId) {
-            const activity = activities.find(a => a.id == eventId);
-            if (!activity) return;
-
-            if (activity.liked) {
-                activity.likes--;
-                activity.liked = false;
-            } else {
-                activity.likes++;
-                activity.liked = true;
-            }
-
-            renderActivityFeed();
-        }
-
-        function handleComment(eventId) {
-            const activity = activities.find(a => a.id == eventId);
-            if (!activity) return;
-
-            // Placeholder for comment functionality
-            const comment = prompt('Add a comment:');
-            if (comment && comment.trim()) {
-                activity.comments++;
-                renderActivityFeed();
-                
-                if (typeof showToast === 'function') {
-                    showToast('Comment added!', 'success');
-                }
-            }
-        }
-
-        function handleShare(eventId) {
-            const activity = activities.find(a => a.id == eventId);
-            if (!activity) return;
-
-            // Placeholder for share functionality
-            if (typeof showToast === 'function') {
-                showToast('Share link copied to clipboard!', 'success');
-            } else {
-                alert('Share functionality: Link copied to clipboard!');
-            }
-        }
-
-        function renderActivityFeed() {
-            const feedContainer = document.getElementById('activityFeed');
-            const emptyState = document.getElementById('emptyState');
-            const activitiesList = document.getElementById('activitiesList');
-
-            const hasBackendActivities = activitiesList && activitiesList.children.length > 0;
-            const hasFrontendActivities = activities.length > 0;
-
-            if (!hasFrontendActivities && !hasBackendActivities) {
-                emptyState.classList.remove('hidden');
-                feedContainer.innerHTML = '';
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            feedContainer.innerHTML = activities.map(activity => createActivityCard(activity)).join('');
-        }
-
-        function createActivityCard(activity) {
-            const formattedDate = new Date(activity.date).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            
-            const timeAgo = getTimeAgo(activity.timestamp);
-
-            const imageSection = activity.image ? `
-                <div class="mb-4">
-                    <img src="${activity.image}" alt="${activity.title}" class="w-full rounded-lg image-preview">
-                </div>
-            ` : '';
-
-            const advisorActions = isAdvisor ? `
-                <div class="flex items-center space-x-2">
-                    <button onclick="editEvent(${activity.id})" class="text-blue-600 hover:text-blue-800 transition">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteEvent(${activity.id})" class="text-red-600 hover:text-red-800 transition">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            ` : '';
-
-            // Response buttons for all users (everyone can interact)
-            const responseActions = `
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="handleResponse(${activity.id}, 'going')" 
-                        class="response-btn going ${activity.userResponse === 'going' ? 'active' : ''} px-4 py-2 border border-gray-300 rounded-lg hover:bg-green-50 transition inline-flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Going ${activity.responses?.going > 0 ? `(${activity.responses.going})` : ''}</span>
-                    </button>
-                    <button onclick="handleResponse(${activity.id}, 'interested')" 
-                        class="response-btn interested ${activity.userResponse === 'interested' ? 'active' : ''} px-4 py-2 border border-gray-300 rounded-lg hover:bg-yellow-50 transition inline-flex items-center gap-2">
-                        <i class="fas fa-star"></i>
-                        <span>Interested ${activity.responses?.interested > 0 ? `(${activity.responses.interested})` : ''}</span>
-                    </button>
-                    <button onclick="handleResponse(${activity.id}, 'notGoing')" 
-                        class="response-btn not-going ${activity.userResponse === 'notGoing' ? 'active' : ''} px-4 py-2 border border-gray-300 rounded-lg hover:bg-red-50 transition inline-flex items-center gap-2">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Not Going ${activity.responses?.notGoing > 0 ? `(${activity.responses.notGoing})` : ''}</span>
-                    </button>
-                </div>
-            `;
-
-            return `
-                <div class="activity-card bg-white rounded-xl shadow-md hover:shadow-lg p-6 border border-gray-100 animate-slide-in">
-                    <!-- Header -->
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <img src="${activity.authorImage}" 
-                                alt="${activity.author}" 
-                                class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover">
-                            <div>
-                                <h3 class="font-semibold text-gray-900">${activity.author}</h3>
-                                <p class="text-sm text-gray-500">${timeAgo}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                                <i class="fas fa-calendar-alt mr-1"></i> Event
-                            </span>
-                            ${advisorActions}
-                        </div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="mb-4">
-                        <h4 class="text-xl font-bold text-gray-800 mb-3">${activity.title}</h4>
-                        ${imageSection}
-                        <p class="text-gray-600 leading-relaxed">${activity.description}</p>
-                    </div>
-
-                    <!-- Event Details -->
-                    <div class="bg-gray-50 rounded-lg p-4 space-y-2 mb-4">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-calendar text-blue-600 w-5"></i>
-                            <span class="ml-2">${formattedDate}</span>
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-clock text-blue-600 w-5"></i>
-                            <span class="ml-2">${activity.time}</span>
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-map-marker-alt text-blue-600 w-5"></i>
-                            <span class="ml-2">${activity.location}</span>
-                        </div>
-                    </div>
-
-                    <!-- Response Actions for All Users -->
-                    ${responseActions}
-
-                    <!-- Social Actions (Like, Comment, Share) -->
-                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                        <div class="flex space-x-4">
-                            <button onclick="handleLike(${activity.id})" class="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition ${activity.liked ? 'text-blue-600' : ''}">
-                                <i class="${activity.liked ? 'fas' : 'far'} fa-heart"></i>
-                                <span class="text-sm">Like${activity.likes > 0 ? ` (${activity.likes})` : ''}</span>
-                            </button>
-                            <button onclick="handleComment(${activity.id})" class="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition">
-                                <i class="far fa-comment"></i>
-                                <span class="text-sm">Comment${activity.comments > 0 ? ` (${activity.comments})` : ''}</span>
-                            </button>
-                            <button onclick="handleShare(${activity.id})" class="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition">
-                                <i class="fas fa-share"></i>
-                                <span class="text-sm">Share</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function getTimeAgo(timestamp) {
-            const now = new Date();
-            const past = new Date(timestamp);
-            const diffInSeconds = Math.floor((now - past) / 1000);
-
-            if (diffInSeconds < 60) return 'Just now';
-            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-            return past.toLocaleDateString();
-        }
-
-        // Leave organization (called by leave button)
-        function leaveOrganization(orgId) {
-            if (typeof showConfirmModal === 'function') {
-                showConfirmModal('Leave organization', 'Are you sure you want to leave this organization?')
-                    .then(confirmed => {
-                        if (!confirmed) return;
-                        performLeaveOrganization(orgId);
-                    });
-            } else if (confirm('Are you sure you want to leave this organization?')) {
-                performLeaveOrganization(orgId);
-            }
-        }
-
-        function performLeaveOrganization(orgId) {
-            const csrftoken = document.cookie.split('; ').find(c => c.startsWith('csrftoken='))?.split('=')[1] || '';
-            fetch(`/organization/orgpage/${orgId}/leave/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
-                credentials: 'same-origin'
-            }).then(async res => {
-                const data = await res.json().catch(() => null);
-                if (!res.ok) throw new Error((data && (data.error || data.detail)) || res.statusText || 'Request failed');
-                
-                if (typeof showToast === 'function') {
-                    showToast((data && data.message) || 'You have left the organization.', 'success');
-                }
-                setTimeout(() => window.location.href = '/accounts/organizations/', 800);
-            }).catch(err => {
-                if (typeof showToast === 'function') {
-                    showToast('Unable to leave organization: ' + (err.message || err), 'error');
-                } else {
-                    alert('Unable to leave organization: ' + (err.message || err));
-                }
-                console.error(err);
-            });
-        }
+        });
     </script>
 </body>
 </html>
