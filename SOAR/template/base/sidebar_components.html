@@ -35,6 +35,14 @@
                 <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
                 {% endif %}
             </a>
+
+            <a href="{% url 'global_event_page' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'global_event_page' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
+                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'global_event_page' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'global_event_page' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Events</span>
+                {% if request.resolver_match.url_name == 'global_event_page' %}
+                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                {% endif %}
+            </a>
             
             <a href="{% url 'profile' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
                 <i class="fas fa-user-circle text-lg {% if request.resolver_match.url_name == 'profile' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>

@@ -38,9 +38,71 @@ def upload_to_supabase(file, org_id, org_name):
 
 
 from django.shortcuts import render, redirect, get_object_or_404
-from event.models import OrganizationEvent
-from organization.models import Organization
+from django.urls import reverse
+from event.models import OrganizationEvent, EventRSVP
+from organization.models import Organization, OrganizationMember
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+
+@login_required
+def global_event_page(request):
+    """Global events page showing upcoming events from organizations the user has joined."""
+    # Get organizations the user has joined
+    user_organizations = OrganizationMember.objects.filter(
+        student=request.user,
+        is_approved=True
+    ).values_list('organization', flat=True)
+
+    events = OrganizationEvent.objects.filter(
+        event_date__gte=timezone.now(),
+        organization__in=user_organizations
+    ).order_by('event_date')
+
+    # Add RSVP data to each event
+    for event in events:
+        event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
+        event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        try:
+            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+            event.user_rsvp_status = user_rsvp.status
+        except EventRSVP.DoesNotExist:
+            event.user_rsvp_status = None
+
+        # Get RSVPed users for attendee avatars (limit to 5 for display)
+        event.rsvp_users = EventRSVP.objects.filter(
+            event=event,
+            status='going'
+        ).select_related('user').order_by('date_created')[:5]
+
+    # Prepare events data for calendar JSON
+    events_json = []
+    for event in events:
+        events_json.append({
+            'id': str(event.id),
+            'title': event.title,
+            'organization': event.organization.name,
+            'organization_id': str(event.organization.id),
+            'date': event.event_date.isoformat(),
+            'description': event.description,
+            'type': event.activity_type,
+            'going_count': event.going_count,
+            'interested_count': event.interested_count,
+            'user_rsvp_status': event.user_rsvp_status,
+            'location': event.location,
+            'max_participants': event.max_participants
+        })
+
+    import json
+    events_json_str = json.dumps(events_json)
+
+    return render(request, 'event/global_event_page.html', {
+        'events': events,
+        'events_json': events_json_str,
+    })
 
 def create_event(request, org_id):
     print(f"=== CREATE EVENT STARTED for org_id: {org_id} ===")  # Debug log
@@ -118,3 +180,76 @@ def create_event(request, org_id):
         "user": request.user,
     }
     return render(request, 'organization/orgpage.html', context)
+
+@login_required
+@require_POST
+def rsvp_event(request, event_id):
+    """Handle RSVP for an event"""
+    try:
+        event = get_object_or_404(OrganizationEvent, id=event_id)
+        status = request.POST.get('status')
+
+        if status not in ['going', 'not_going', 'interested']:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
+            return redirect('orgpage', org_id=event.organization.id)
+
+        # Check if max participants reached for 'going' status
+        if status == 'going' and event.max_participants:
+            current_going_count = event.rsvps.filter(status='going').count()
+            if current_going_count >= event.max_participants:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Maximum participants reached ({event.max_participants}). Cannot RSVP as going.'
+                    }, status=400)
+                # For non-AJAX requests, redirect back
+                return redirect('orgpage', org_id=event.organization.id)
+
+        # Get or create RSVP
+        rsvp, created = EventRSVP.objects.get_or_create(
+            user=request.user,
+            event=event,
+            defaults={'status': status}
+        )
+
+        if not created:
+            rsvp.status = status
+            rsvp.save()
+
+        # Get updated counts
+        going_count = event.rsvps.filter(status='going').count()
+        interested_count = event.rsvps.filter(status='interested').count()
+
+        # Get updated attendee list for avatars
+        rsvp_users = event.rsvps.filter(status='going').select_related('user').order_by('date_created')[:5]
+        attendees = []
+        for rsvp in rsvp_users:
+            user = rsvp.user
+            attendees.append({
+                'id': str(user.id),
+                'name': user.get_full_name() or user.username,
+                'avatar_url': user.profile_picture.url if user.profile_picture else None,
+                'initials': f"{user.first_name[0] if user.first_name else ''}{user.last_name[0] if user.last_name else ''}".upper() or user.username[0].upper()
+            })
+
+        # Check if request is AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'status': status,
+                'going_count': going_count,
+                'interested_count': interested_count,
+                'attendees': attendees
+            })
+
+        # Redirect back to org page with anchor to the event
+        return redirect(f"{reverse('orgpage', args=[event.organization.id])}#event-{event.id}")
+
+    except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        # On error, redirect back
+        event = get_object_or_404(OrganizationEvent, id=event_id)
+        return redirect(f"{reverse('orgpage', args=[event.organization.id])}#event-{event.id}")
+

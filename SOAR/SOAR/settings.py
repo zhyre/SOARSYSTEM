@@ -90,22 +90,14 @@ ASGI_APPLICATION = 'SOAR.asgi.application'
 # Database configuration
 # Prefer DATABASE_URL (Supabase Postgres) with SSL; fallback to local SQLite if not set
 DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASES = {
+    'default': dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=0,
+        ssl_require=True
+    )
+}
 
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=0,  # keep-alive for performance
-            ssl_require=True   # Supabase requires SSL
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
 
 
 # Password validation

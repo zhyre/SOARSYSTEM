@@ -141,9 +141,13 @@
                 <div>
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Upcoming Events</h2>
-                        <span class="text-gray-400 italic">Coming soon</span>
+                        {% if not user_events %}
+                        <span class="text-gray-400 italic">No upcoming events</span>
+                        {% endif %}
                     </div>
-                    <!-- Next sprint: dynamically list upcoming events here -->
+                    {% for event in user_events %}
+                        {% include 'event/event_activitycard.html' %}
+                    {% endfor %}
                 </div>
             </div>
         </main>
