@@ -79,9 +79,9 @@ TEMPLATES = [
     },
 ]
 
-ROOT_URLCONF = 'SOAR.urls'
-WSGI_APPLICATION = 'SOAR.wsgi.application'
-ASGI_APPLICATION = 'SOAR.asgi.application'
+ROOT_URLCONF = 'SOAR.SOAR.urls'
+WSGI_APPLICATION = 'SOAR.SOAR.wsgi.application'
+ASGI_APPLICATION = 'SOAR.SOAR.asgi.application'
 
 
 # Database
