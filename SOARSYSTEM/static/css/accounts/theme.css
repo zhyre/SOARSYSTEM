@@ -1,0 +1,48 @@
+/* theme.css */
+
+:root {
+    /* Vibrant, deeper color palette */
+    --auth-bg-start: #0f1c3a;
+    --auth-bg-mid: #1d3557;
+    --auth-bg-end: #457b9d;
+  
+    --panel-gradient-start: #1c2a4d;
+    --panel-gradient-end: #2d4572;
+    --panel-text: #f0f4f8;
+  
+    --form-bg: #ffffff;
+    --form-shadow: 0 30px 90px rgba(0, 0, 0, 0.15);
+  
+    --primary: #2a69d8;
+    --primary-2: #1e5ad3;
+  
+    --input-border: #e0e8f0;
+    --input-focus: #1d4ed8;
+  
+    --success: #1a9953;
+    --success-bg: #d4f7e1;
+    --error: #c53030;
+    --error-bg: #fde8e8;
+    
+    --site-text: #1a202c;
+    --site-header-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  html,
+  body {
+    height: 100%;
+  }
+  
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--site-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }

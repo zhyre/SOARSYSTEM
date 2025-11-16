@@ -1,0 +1,1129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAR - Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/organization/organization_page.css' %}">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+        .org-card {
+            transition: all 0.3s ease;
+        }
+        .org-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .org-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.5rem;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:hover {
+            background-color: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .event-dot:hover {
+            transform: scale(1.3);
+        }
+
+        .event-popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            width: 280px;
+            animation: fadeIn 0.2s ease;
+            pointer-events: auto;
+            max-width: calc(100vw - 40px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calendar-header-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% csrf_token %}
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        {% include 'base/sidebar_components.html' with sidebar_type='dashboard' %}
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-bars text-gray-600"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Discover Events</h1>
+                        </div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="flex items-center space-x-3">
+                        <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
+                            <i class="far fa-bell text-gray-600 text-xl"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div class="hidden md:block text-right">
+                            <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
+                            
+                        </div>
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Debug panel shown when a search query is present -->
+                {% if q %}
+                <div id="debugPanel" class="mb-4 p-4 rounded bg-yellow-50 border-l-4 border-yellow-400 text-sm text-gray-700">
+                    <strong>Debug</strong>: query = "{{ q }}" — server matched {{ all_orgs|length }} organization(s).
+                    <div class="mt-2 text-xs text-gray-600">Matched names: {% for o in all_orgs %}{% if not forloop.first %}, {% endif %}{{ o.name }}{% empty %}— none —{% endfor %}</div>
+                </div>
+                {% endif %}
+                <!-- Search Events -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="eventSearch" type="text" placeholder="Search events" aria-label="Search events" value="" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap gap-3 mb-8">
+                    <button id="filterAll" class="filter-btn px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition active" data-filter="all">
+                        <i class="fas fa-list mr-2"></i>All Events
+                    </button>
+                    <button id="filterCalendar" class="filter-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition" data-filter="calendar">
+                        <i class="fas fa-calendar-alt mr-2"></i>Calendar
+                    </button>
+                    <button id="filterGoing" class="filter-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition" data-filter="going">
+                        <i class="fas fa-check-circle mr-2"></i>I'm Going
+                    </button>
+                    <button id="filterInterested" class="filter-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition" data-filter="interested">
+                        <i class="fas fa-star mr-2"></i>Interested
+                    </button>
+                </div>
+
+                <!-- Upcoming Events Section -->
+                <div id="eventsView" class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
+
+                    <div id="eventsSection" class="space-y-6">
+                        {% for event in events %}
+                            {% include 'event/event_activitycard.html' %}
+                        {% empty %}
+                            <div class="text-center py-12">
+                                <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2">No upcoming events</h3>
+                                <p class="text-gray-500">Check back later for new events from organizations.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div id="calendarView" class="mb-8 hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Event Calendar</h2>
+
+                    <!-- Month Navigation -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <button onclick="previousMonth()" class="p-3 hover:bg-gray-100 rounded-xl transition-all group">
+                                <i class="fas fa-chevron-left text-gray-600 group-hover:text-blue-600 transition-colors"></i>
+                            </button>
+                            <div class="text-center">
+                                <h2 id="currentMonth" class="text-2xl font-bold text-gray-800"></h2>
+                                <p id="currentYear" class="text-sm text-gray-500"></p>
+                            </div>
+                            <button onclick="nextMonth()" class="p-3 hover:bg-gray-100 rounded-xl transition-all group">
+                                <i class="fas fa-chevron-right text-gray-600 group-hover:text-blue-600 transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="bg-white rounded-2xl shadow-lg p-4 mb-6">
+                        <div class="space-y-3">
+                            <div class="text-sm font-medium text-gray-800 mb-2">Event Types</div>
+                            <div class="flex items-center justify-center space-x-6 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                                    <span class="text-gray-600">Event</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
+                                    <span class="text-gray-600">Workshop</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
+                                    <span class="text-gray-600">Meeting</span>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-2">
+                                <div class="text-sm font-medium text-gray-800 mb-2">RSVP Status</div>
+                                <div class="flex items-center justify-center space-x-6 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span class="text-gray-600">Going</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                        <span class="text-gray-600">Interested</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                        <span class="text-gray-600">Not Going</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Weekday Headers -->
+                        <div class="grid grid-cols-7 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                            <div class="py-4 text-center font-semibold">Sun</div>
+                            <div class="py-4 text-center font-semibold">Mon</div>
+                            <div class="py-4 text-center font-semibold">Tue</div>
+                            <div class="py-4 text-center font-semibold">Wed</div>
+                            <div class="py-4 text-center font-semibold">Thu</div>
+                            <div class="py-4 text-center font-semibold">Fri</div>
+                            <div class="py-4 text-center font-semibold">Sat</div>
+                        </div>
+
+                        <!-- Calendar Days -->
+                        <div id="calendarGrid" class="grid grid-cols-7 divide-x divide-y divide-gray-200">
+                            <!-- Days will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden mt-6 text-center py-12">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                            <i class="fas fa-calendar-plus text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Events This Month</h3>
+                        <p class="text-gray-500">Create posts with dates to see them appear on the calendar</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between rounded-t-2xl">
+                    <h2 class="text-2xl font-bold text-gray-900" id="modalEventTitle">Event Details</h2>
+                    <button onclick="closeEventModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    <!-- Organization Info -->
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="flex-shrink-0">
+                            <div id="modalOrgLogo" class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                <span class="text-white font-bold text-2xl">O</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <button id="modalOrgLink" class="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors text-left">
+                                Organization Name
+                            </button>
+                            <p class="text-sm text-gray-500 mt-1">Click to view organization page</p>
+                        </div>
+                    </div>
+
+                    <!-- Event Image -->
+                    <div class="relative h-64 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-xl overflow-hidden mb-6">
+                        <img id="modalEventImage" src="https://source.unsplash.com/random/800x600/?event,conference,meeting" alt="Event" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                        <div class="absolute top-4 left-4">
+                            <span id="modalEventType" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-sm text-blue-600 rounded-full text-sm font-semibold shadow-lg">
+                                Event
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Event Description -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">About This Event</h3>
+                        <p id="modalEventDescription" class="text-gray-700 leading-relaxed">
+                            Join us for an exciting event filled with learning and networking opportunities. Don't miss out on this amazing experience!
+                        </p>
+                    </div>
+
+                    <!-- Event Details -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <!-- Date & Time -->
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900" id="modalEventDate">Friday, January 1, 2024</p>
+                                <p class="text-xs text-gray-500 mt-0.5" id="modalEventTime">10:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center text-purple-600 shadow-sm">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900" id="modalEventLocation">Virtual Event</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Click to see map</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RSVP Stats -->
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-green-50 text-green-700" id="modalGoingCount">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
+                            0 Going
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-amber-50 text-amber-700" id="modalInterestedCount">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            0 Interested
+                        </span>
+                    </div>
+
+                    <!-- RSVP Buttons -->
+                    <div id="modalRSVPSection" class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Will you attend?</h3>
+                        <div class="rsvp-buttons flex justify-between items-center gap-3 w-full" id="modalRSVPButtons">
+                            <button onclick="rsvpFromModal('going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-green-600">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Going</span>
+                            </button>
+                            <button onclick="rsvpFromModal('interested')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-yellow-50 hover:border-yellow-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-yellow-600">
+                                <i class="fas fa-star"></i>
+                                <span>Interested</span>
+                            </button>
+                            <button onclick="rsvpFromModal('not_going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-red-600">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Not Going</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSRF token for AJAX requests
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        // Events data from backend
+        const eventsData = JSON.parse('{{ events_json|escapejs }}');
+        const allEventsData = JSON.parse('{{ all_events_json|escapejs }}');
+
+        // Calendar events (only from joined organizations)
+        const sampleEvents = eventsData.map(event => ({
+            id: event.id,
+            title: event.title,
+            organization: event.organization,
+            organization_id: event.organization_id,
+            date: new Date(event.date),
+            description: event.description,
+            type: event.type,
+            going_count: event.going_count,
+            interested_count: event.interested_count,
+            user_rsvp_status: event.user_rsvp_status,
+            location: event.location,
+            max_participants: event.max_participants
+        }));
+
+        // All events for modal (including non-joined organizations)
+        const allEvents = allEventsData.map(event => ({
+            id: event.id,
+            title: event.title,
+            organization: event.organization,
+            organization_id: event.organization_id,
+            date: new Date(event.date),
+            description: event.description,
+            type: event.type,
+            going_count: event.going_count,
+            interested_count: event.interested_count,
+            user_rsvp_status: event.user_rsvp_status,
+            is_user_member: event.is_user_member,
+            location: event.location,
+            max_participants: event.max_participants
+        }));
+
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        function renderCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                              "July", "August", "September", "October", "November", "December"];
+
+            document.getElementById('currentMonth').textContent = monthNames[currentMonth];
+            document.getElementById('currentYear').textContent = currentYear;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            let hasEventsThisMonth = false;
+
+            // Previous month's days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayElement = createDayElement(day, true, currentMonth - 1);
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Current month's days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = createDayElement(day, false, currentMonth);
+                const dayEvents = getEventsForDate(day, currentMonth, currentYear);
+
+                if (dayEvents.length > 0) {
+                    hasEventsThisMonth = true;
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.className = 'mt-2 space-y-1 px-2';
+
+                    dayEvents.forEach(event => {
+                        const eventDot = createEventDot(event);
+                        eventsContainer.appendChild(eventDot);
+                    });
+
+                    dayElement.appendChild(eventsContainer);
+                }
+
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Next month's days to fill the grid
+            const totalCells = calendarGrid.children.length;
+            const remainingCells = 35 - totalCells; // Ensure at least 5 rows
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = createDayElement(day, true, currentMonth + 1);
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Show/hide empty state
+            document.getElementById('emptyState').classList.toggle('hidden', hasEventsThisMonth);
+        }
+
+        function createDayElement(day, isOtherMonth, month) {
+            const dayElement = document.createElement('div');
+            dayElement.className = `calendar-day p-3 bg-white relative ${isOtherMonth ? 'bg-gray-50' : ''}`;
+
+            const today = new Date();
+            const isToday = day === today.getDate() &&
+                           month === today.getMonth() &&
+                           currentYear === today.getFullYear();
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = `text-sm font-semibold mb-1 ${isOtherMonth ? 'text-gray-400' : 'text-gray-700'}`;
+
+            if (isToday && !isOtherMonth) {
+                dayNumber.className = 'text-sm font-bold mb-1 inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full';
+            }
+
+            dayNumber.textContent = day;
+            dayElement.appendChild(dayNumber);
+
+            return dayElement;
+        }
+
+        function createEventDot(event) {
+            const container = document.createElement('div');
+            container.className = 'relative group';
+
+            // Dot and label
+            const dot = document.createElement('div');
+            dot.className = 'flex items-center space-x-2 cursor-pointer p-1 rounded hover:bg-blue-50 active:scale-95 transition-all';
+
+            const colorClasses = {
+                'event': 'bg-gradient-to-r from-blue-500 to-blue-600',
+                'workshop': 'bg-gradient-to-r from-green-500 to-green-600',
+                'meeting': 'bg-gradient-to-r from-purple-500 to-purple-600'
+            };
+
+            const dotCircle = document.createElement('div');
+            dotCircle.className = `event-dot ${colorClasses[event.type] || colorClasses['event']} relative`;
+
+            // RSVP status small dot
+            if (event.user_rsvp_status) {
+                const statusIndicator = document.createElement('div');
+                statusIndicator.className = `absolute -top-1 -right-1 w-2 h-2 rounded-full border border-white ${
+                    event.user_rsvp_status === 'going' ? 'bg-green-500' :
+                    event.user_rsvp_status === 'interested' ? 'bg-yellow-500' : 'bg-red-500'
+                }`;
+                dotCircle.appendChild(statusIndicator);
+            }
+
+            const eventTitle = document.createElement('span');
+            eventTitle.className = 'text-xs text-gray-700 truncate flex-1';
+            eventTitle.textContent = event.title;
+
+            dot.appendChild(dotCircle);
+            dot.appendChild(eventTitle);
+            container.appendChild(dot);
+
+            // Create popup
+            const popup = document.createElement('div');
+            popup.className = 'event-popup';
+            popup.style.position = 'fixed'; // important for viewport positioning
+            popup.style.zIndex = '9999';
+            popup.style.display = 'none';
+            popup.style.width = '280px';
+            popup.style.pointerEvents = 'auto';
+            popup.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-start space-x-3 flex-1 min-w-0">
+                        <div class="w-10 h-10 ${colorClasses[event.type] || colorClasses['event']} rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-${event.type === 'workshop' ? 'graduation-cap' : event.type === 'meeting' ? 'users' : 'calendar'} text-white"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-800 text-sm mb-1">${event.title}</h4>
+                            <p class="text-xs text-blue-600 font-medium">${event.organization}</p>
+                        </div>
+                    </div>
+                    <button onclick="closeAllPopups()" class="w-6 h-6 rounded-full hover:bg-gray-100 flex items-center justify-center flex-shrink-0 ml-2">
+                        <i class="fas fa-times text-gray-400 text-xs"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-600 mb-3">${event.description}</p>
+                <div class="space-y-2 mb-3">
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="far fa-calendar mr-2"></i>
+                        <span>${event.date.toLocaleDateString()} at ${event.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    ${event.location ? `<div class="flex items-center text-xs text-gray-500"><i class="fas fa-map-marker-alt mr-2"></i><span>${event.location}</span></div>` : ''}
+                </div>
+            `;
+            document.body.appendChild(popup); // append directly to body
+
+            // Show popup on dot click
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllPopups();
+
+                popup.style.display = 'block';
+
+                const rect = dot.getBoundingClientRect();
+                const popupWidth = popup.offsetWidth;
+                const popupHeight = popup.offsetHeight;
+
+                // Horizontal positioning
+                let left = rect.right + 10;
+                if (window.innerWidth - rect.right < popupWidth + 20) {
+                    if (rect.left > popupWidth + 20) {
+                        left = rect.left - popupWidth - 10;
+                    } else {
+                        left = (window.innerWidth - popupWidth) / 2;
+                    }
+                }
+
+                // Vertical positioning
+                let top = rect.top;
+                if (window.innerHeight - rect.bottom < popupHeight + 20) {
+                    if (rect.top > popupHeight + 20) {
+                        top = rect.bottom - popupHeight;
+                    } else {
+                        top = (window.innerHeight - popupHeight) / 2;
+                    }
+                }
+
+                // Ensure popup stays inside viewport
+                left = Math.max(10, Math.min(left, window.innerWidth - popupWidth - 10));
+                top = Math.max(10, Math.min(top, window.innerHeight - popupHeight - 10));
+
+                popup.style.left = `${left}px`;
+                popup.style.top = `${top}px`;
+            });
+
+            return container;
+        }
+
+        // Close all popups
+        function closeAllPopups() {
+            document.querySelectorAll('.event-popup').forEach(popup => {
+                popup.style.display = 'none';
+            });
+        }
+
+        // Close popups when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.event-popup') && !e.target.closest('.group')) {
+                closeAllPopups();
+            }
+        });
+
+        function getEventsForDate(day, month, year) {
+            return sampleEvents.filter(event => {
+                return event.date.getDate() === day &&
+                       event.date.getMonth() === month &&
+                       event.date.getFullYear() === year;
+            });
+        }
+
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
+        }
+
+        function closeAllPopups() {
+            document.querySelectorAll('.event-popup').forEach(popup => {
+                popup.style.display = 'none';
+            });
+        }
+
+        function rsvpFromCalendar(eventId, status) {
+            // Create form data
+            const formData = new FormData();
+            formData.append('status', status);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            // Make AJAX request
+            fetch(`/event/rsvp/${eventId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the event data in our local array
+                    const event = sampleEvents.find(e => e.id === eventId);
+                    if (event) {
+                        event.user_rsvp_status = status;
+                        event.going_count = data.going_count;
+                        event.interested_count = data.interested_count;
+                    }
+
+                    // Close any open popups and re-render to show updated status
+                    closeAllPopups();
+
+                    // Re-render calendar to update all popups
+                    renderCalendar();
+
+                    // Show success message
+                    showNotification('RSVP updated successfully!', 'success');
+                } else {
+                    showNotification('Failed to update RSVP. Please try again.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred. Please try again.', 'error');
+            });
+        }
+
+        // Close popups when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.event-popup') && !e.target.closest('.event-dot')) {
+                closeAllPopups();
+            }
+        });
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-sm font-medium z-50 ${
+                type === 'success'
+                ? 'bg-green-100 text-green-800 border border-green-200'
+                : 'bg-red-100 text-red-800 border border-red-200'
+            }`;
+            notification.textContent = message;
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        mobileMenuToggle?.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay?.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.add('hidden');
+        });
+
+    // Search and filter functionality
+    const searchInput = document.getElementById('eventSearch');
+    const eventsSection = document.getElementById('eventsSection');
+    const eventsView = document.getElementById('eventsView');
+    const calendarView = document.getElementById('calendarView');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    let currentFilter = 'all';
+
+    function normalize(str) { return (str || '').toString().toLowerCase(); }
+
+    // Helper to extract title/description from event card
+    function eventCardText(card){
+        const titleEl = card.querySelector('h3');
+        const descEl = card.querySelector('p');
+        const orgEl = card.querySelector('p.text-sm.font-semibold.text-blue-600');
+        const name = titleEl ? titleEl.textContent : '';
+        const desc = descEl ? descEl.textContent : '';
+        const org = orgEl ? orgEl.textContent : '';
+        return { name: normalize(name), desc: normalize(desc), org: normalize(org) };
+    }
+
+    // Get RSVP status from card
+    function getRSVPStatus(card) {
+        const statusEl = card.querySelector('[aria-label*="attending"], [aria-label*="interested"]');
+        if (statusEl) {
+            const label = statusEl.getAttribute('aria-label').toLowerCase();
+            if (label.includes('attending')) return 'going';
+            if (label.includes('interested')) return 'interested';
+        }
+        return null;
+    }
+
+    function filterEvents(query = '', rsvpFilter = 'all'){
+        const q = normalize(query);
+        if (!eventsSection) return;
+        eventsSection.querySelectorAll('article').forEach(card => {
+            const { name, desc, org } = eventCardText(card);
+            const searchMatch = !q || name.includes(q) || desc.includes(q) || org.includes(q);
+            let rsvpMatch = true;
+            if (rsvpFilter !== 'all') {
+                const status = getRSVPStatus(card);
+                rsvpMatch = status === rsvpFilter;
+            }
+            card.style.display = (searchMatch && rsvpMatch) ? '' : 'none';
+        });
+    }
+
+    function setActiveFilter(button) {
+        filterButtons.forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white', 'active');
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        button.classList.remove('bg-gray-200', 'text-gray-700');
+        button.classList.add('bg-blue-600', 'text-white', 'active');
+    }
+
+    function switchView(view) {
+        if (view === 'calendar') {
+            eventsView.classList.add('hidden');
+            calendarView.classList.remove('hidden');
+            renderCalendar(); // Initialize calendar when switching to calendar view
+        } else {
+            eventsView.classList.remove('hidden');
+            calendarView.classList.add('hidden');
+        }
+    }
+
+    // Filter button event listeners
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const filter = button.getAttribute('data-filter');
+            setActiveFilter(button);
+            currentFilter = filter;
+
+            if (filter === 'calendar') {
+                switchView('calendar');
+            } else {
+                switchView('events');
+                filterEvents(searchInput.value, filter);
+            }
+        });
+    });
+
+    // Search input event listeners
+    searchInput?.addEventListener('input', (e) => filterEvents(e.target.value, currentFilter));
+    searchInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); filterEvents(searchInput.value, currentFilter); }
+    });
+
+    // Initialize with All Events active
+    document.getElementById('filterAll').classList.add('active');
+
+    // Event Modal Functions
+    let currentModalEventId = null;
+
+    function openEventModal(eventId) {
+        currentModalEventId = eventId;
+
+        // Find event data from all events
+        const eventData = allEvents.find(event => event.id === eventId);
+        if (!eventData) {
+            console.error('Event data not found for ID:', eventId);
+            return;
+        }
+
+        // Populate modal with event data
+        document.getElementById('modalEventTitle').textContent = eventData.title;
+        document.getElementById('modalOrgLink').textContent = eventData.organization;
+        document.getElementById('modalOrgLink').onclick = () => {
+            // Navigate to organization page using the org ID
+            window.location.href = `/organization/orgpage/${eventData.organization_id}/`;
+        };
+
+        // Set organization logo (placeholder for now)
+        const orgLogo = document.getElementById('modalOrgLogo');
+        orgLogo.innerHTML = `<span class="text-white font-bold text-2xl">${eventData.organization.charAt(0).toUpperCase()}</span>`;
+
+        document.getElementById('modalEventDescription').textContent = eventData.description;
+        document.getElementById('modalEventType').textContent = eventData.type.charAt(0).toUpperCase() + eventData.type.slice(1);
+
+        // Format date and time
+        const eventDate = new Date(eventData.date);
+        document.getElementById('modalEventDate').textContent = eventDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById('modalEventTime').textContent = eventDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        // Set location
+        document.getElementById('modalEventLocation').textContent = eventData.location || 'TBD';
+
+        // Update RSVP counts
+        document.getElementById('modalGoingCount').innerHTML = `
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            </svg>
+            ${eventData.going_count} Going
+        `;
+        document.getElementById('modalInterestedCount').innerHTML = `
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            ${eventData.interested_count} Interested
+        `;
+
+        // Handle membership-based UI
+        const rsvpSection = document.getElementById('modalRSVPSection');
+        const rsvpButtons = document.getElementById('modalRSVPButtons');
+
+        if (eventData.is_user_member) {
+            // User is a member - show RSVP buttons
+            rsvpSection.style.display = 'block';
+            rsvpButtons.style.display = 'flex';
+            updateModalRSVPButtons(eventData.user_rsvp_status);
+        } else {
+            // User is not a member - show Join Organization button
+            rsvpSection.style.display = 'block';
+            rsvpButtons.style.display = 'none';
+
+            // Create or update Join Organization button
+            let joinButton = document.getElementById('modalJoinOrgButton');
+            if (!joinButton) {
+                joinButton = document.createElement('div');
+                joinButton.id = 'modalJoinOrgButton';
+                joinButton.className = 'text-center';
+                rsvpSection.appendChild(joinButton);
+            }
+
+            joinButton.innerHTML = `
+                <button onclick="joinOrganization('${eventData.organization_id}')"
+                        class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Join ${eventData.organization} to RSVP</span>
+                </button>
+                <p class="text-sm text-gray-500 mt-2">Become a member to attend this event and see more details</p>
+            `;
+        }
+
+        // Show modal
+        document.getElementById('eventModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeEventModal() {
+        document.getElementById('eventModal').classList.add('hidden');
+        document.body.style.overflow = ''; // Restore scrolling
+        currentModalEventId = null;
+
+        // Clean up dynamic Join Organization button
+        const joinButton = document.getElementById('modalJoinOrgButton');
+        if (joinButton) {
+            joinButton.remove();
+        }
+    }
+
+    function updateModalRSVPButtons(activeStatus) {
+        const buttons = ['going', 'interested', 'not_going'];
+
+        buttons.forEach(status => {
+            const button = document.getElementById(`modalRSVPButtons`).querySelector(`[onclick="rsvpFromModal('${status}')"]`);
+            if (button) {
+                // Remove all active state classes
+                button.classList.remove('bg-green-500', 'border-green-500', 'text-white', 'shadow-md');
+                button.classList.remove('bg-yellow-500', 'border-yellow-500', 'text-white', 'shadow-md');
+                button.classList.remove('bg-red-500', 'border-red-500', 'text-white', 'shadow-md');
+
+                // Reset to default state
+                button.classList.add('text-gray-700', 'border-gray-300');
+                button.classList.remove('text-white');
+
+                // Add active class if this is the selected status
+                if (status === activeStatus) {
+                    button.classList.remove('text-gray-700', 'border-gray-300');
+                    button.classList.add('text-white', 'shadow-md');
+                    if (status === 'going') {
+                        button.classList.add('bg-green-500', 'border-green-500');
+                    } else if (status === 'interested') {
+                        button.classList.add('bg-yellow-500', 'border-yellow-500');
+                    } else if (status === 'not_going') {
+                        button.classList.add('bg-red-500', 'border-red-500');
+                    }
+                }
+            }
+        });
+    }
+
+    function rsvpFromModal(status) {
+        if (!currentModalEventId) return;
+
+        // Check if user is a member of the organization
+        const eventData = allEvents.find(event => event.id === currentModalEventId);
+        if (!eventData || !eventData.is_user_member) {
+            showNotification('You must join the organization to RSVP for this event.', 'error');
+            return;
+        }
+
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('status', status);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        // Make AJAX request
+        fetch(`/event/rsvp/${currentModalEventId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the event data in our local array
+                const event = sampleEvents.find(e => e.id === currentModalEventId);
+                if (event) {
+                    event.user_rsvp_status = status;
+                    event.going_count = data.going_count;
+                    event.interested_count = data.interested_count;
+                }
+
+                // Update modal RSVP buttons
+                updateModalRSVPButtons(status);
+
+                // Update modal counts
+                document.getElementById('modalGoingCount').innerHTML = `
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                    ${data.going_count} Going
+                `;
+                document.getElementById('modalInterestedCount').innerHTML = `
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    ${data.interested_count} Interested
+                `;
+
+                // Update the original event card in the list view
+                updateEventCardRSVP(currentModalEventId, status, data.going_count, data.interested_count);
+
+                // Show success message
+                showNotification('RSVP updated successfully!', 'success');
+            } else {
+                showNotification('Failed to update RSVP. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        });
+    }
+
+    function updateEventCardRSVP(eventId, status, goingCount, interestedCount) {
+        // Update the event card in the list view
+        const eventCard = document.querySelector(`[onclick="openEventModal('${eventId}')"]`);
+        if (!eventCard) return;
+
+        // Update status indicator
+        const statusContainer = eventCard.querySelector('.mt-4.pt-4.border-t.border-gray-100 .flex.items-center.justify-between');
+        if (statusContainer) {
+            // Remove existing status spans
+            const existingStatus = statusContainer.querySelector('.inline-flex.items-center.px-3.py-1.rounded-full');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+
+            // Add new status if applicable
+            if (status === 'going' || status === 'interested') {
+                const statusSpan = document.createElement('span');
+                statusSpan.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    status === 'going' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                }`;
+
+                const icon = document.createElement('svg');
+                icon.className = 'w-3 h-3 mr-1';
+                icon.setAttribute('fill', 'currentColor');
+                icon.setAttribute('viewBox', '0 0 20 20');
+
+                if (status === 'going') {
+                    icon.innerHTML = '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />';
+                    statusSpan.appendChild(icon);
+                    statusSpan.appendChild(document.createTextNode('Attending'));
+                } else {
+                    icon.innerHTML = '<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />';
+                    statusSpan.appendChild(icon);
+                    statusSpan.appendChild(document.createTextNode('Interested'));
+                }
+
+                statusContainer.insertBefore(statusSpan, statusContainer.firstChild);
+            }
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('eventModal').addEventListener('click', (e) => {
+        if (e.target.id === 'eventModal') {
+            closeEventModal();
+        }
+    });
+
+    function joinOrganization(orgId) {
+        // Redirect to organization page where user can join
+        window.location.href = `/organization/orgpage/${orgId}/`;
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !document.getElementById('eventModal').classList.contains('hidden')) {
+            closeEventModal();
+        }
+    });
+</script>
+</body>
+</html>
