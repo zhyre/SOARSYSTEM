@@ -50,37 +50,62 @@ from django.utils import timezone
 
 @login_required
 def global_event_page(request):
-    """Global events page showing upcoming events from organizations the user has joined."""
+    """Global events page showing all upcoming events with membership-based UI."""
     # Get organizations the user has joined
-    user_organizations = OrganizationMember.objects.filter(
+    user_organization_ids = set(OrganizationMember.objects.filter(
         student=request.user,
         is_approved=True
-    ).values_list('organization', flat=True)
+    ).values_list('organization', flat=True))
 
-    events = OrganizationEvent.objects.filter(
-        event_date__gte=timezone.now(),
-        organization__in=user_organizations
-    ).order_by('event_date')
+    # Get all upcoming events for the list view
+    all_events = list(OrganizationEvent.objects.filter(
+        event_date__gte=timezone.now()
+    ).order_by('event_date'))
 
-    # Add RSVP data to each event
-    for event in events:
-        event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
-        event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
-        try:
-            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
-            event.user_rsvp_status = user_rsvp.status
-        except EventRSVP.DoesNotExist:
-            event.user_rsvp_status = None
+    # Create event data dictionary
+    events_data = {}
+    for event in all_events:
+        going_count = EventRSVP.objects.filter(event=event, status='going').count()
+        interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        is_user_member = event.organization.id in user_organization_ids
+
+        user_rsvp_status = None
+        if is_user_member:
+            try:
+                user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+                user_rsvp_status = user_rsvp.status
+            except EventRSVP.DoesNotExist:
+                pass
 
         # Get RSVPed users for attendee avatars (limit to 5 for display)
-        event.rsvp_users = EventRSVP.objects.filter(
+        rsvp_users = EventRSVP.objects.filter(
             event=event,
             status='going'
         ).select_related('user').order_by('date_created')[:5]
 
-    # Prepare events data for calendar JSON
+        events_data[str(event.id)] = {
+            'event': event,
+            'going_count': going_count,
+            'interested_count': interested_count,
+            'user_rsvp_status': user_rsvp_status,
+            'is_user_member': is_user_member,
+            'rsvp_users': rsvp_users
+        }
+
+        # Set attributes on event object for template compatibility
+        event.going_count = going_count
+        event.interested_count = interested_count
+        event.user_rsvp_status = user_rsvp_status
+        event.is_user_member = is_user_member
+        event.rsvp_users = rsvp_users
+
+    # Get events only from joined organizations for the calendar
+    calendar_events = [event for event in all_events if event.organization.id in user_organization_ids]
+
+    # Prepare events data for calendar JSON (only joined organizations)
     events_json = []
-    for event in events:
+    for event in calendar_events:
+        event_data = events_data[str(event.id)]
         events_json.append({
             'id': str(event.id),
             'title': event.title,
@@ -89,19 +114,41 @@ def global_event_page(request):
             'date': event.event_date.isoformat(),
             'description': event.description,
             'type': event.activity_type,
-            'going_count': event.going_count,
-            'interested_count': event.interested_count,
-            'user_rsvp_status': event.user_rsvp_status,
+            'going_count': event_data['going_count'],
+            'interested_count': event_data['interested_count'],
+            'user_rsvp_status': event_data['user_rsvp_status'],
+            'location': event.location,
+            'max_participants': event.max_participants
+        })
+
+    # Prepare all events data for modal JSON
+    all_events_json = []
+    for event in all_events:
+        event_data = events_data[str(event.id)]
+        all_events_json.append({
+            'id': str(event.id),
+            'title': event.title,
+            'organization': event.organization.name,
+            'organization_id': str(event.organization.id),
+            'date': event.event_date.isoformat(),
+            'description': event.description,
+            'type': event.activity_type,
+            'going_count': event_data['going_count'],
+            'interested_count': event_data['interested_count'],
+            'user_rsvp_status': event_data['user_rsvp_status'],
+            'is_user_member': event_data['is_user_member'],
             'location': event.location,
             'max_participants': event.max_participants
         })
 
     import json
     events_json_str = json.dumps(events_json)
+    all_events_json_str = json.dumps(all_events_json)
 
     return render(request, 'event/global_event_page.html', {
-        'events': events,
+        'events': all_events,
         'events_json': events_json_str,
+        'all_events_json': all_events_json_str,
     })
 
 def create_event(request, org_id):

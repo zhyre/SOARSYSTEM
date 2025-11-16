@@ -415,41 +415,41 @@
             const closeEventModal = document.getElementById('closeEventModal');
             const cancelEventBtn = document.getElementById('cancelEventBtn');
             const eventModal = document.getElementById('eventModal');
-            
+
             if (openEventModal) {
                 openEventModal.addEventListener('click', () => {
                     eventModal.classList.remove('hidden');
                     eventModal.classList.add('flex');
                 });
             }
-            
+
             const closeModal = () => {
                 eventModal.classList.add('hidden');
                 eventModal.classList.remove('flex');
             };
-            
+
             if (closeEventModal) closeEventModal.addEventListener('click', closeModal);
             if (cancelEventBtn) cancelEventBtn.addEventListener('click', closeModal);
-            
+
             // Close modal when clicking outside
             eventModal?.addEventListener('click', (e) => {
                 if (e.target === eventModal) {
                     closeModal();
                 }
             });
-            
+
             // Mobile menu toggle
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
-            
+
             if (mobileMenuToggle) {
                 mobileMenuToggle.addEventListener('click', () => {
                     sidebar.classList.toggle('mobile-open');
                     overlay.classList.toggle('hidden');
                 });
             }
-            
+
             if (overlay) {
                 overlay.addEventListener('click', () => {
                     sidebar.classList.remove('mobile-open');
@@ -457,6 +457,33 @@
                 });
             }
         });
+
+        // Leave Organization functionality
+        function leaveOrganization(orgId) {
+            if (confirm('Are you sure you want to leave this organization? This action cannot be undone.')) {
+                fetch(`/organization/orgpage/${orgId}/leave/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        // Redirect to dashboard
+                        window.location.href = '/accounts/index/';
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Network error occurred. Please try again.');
+                });
+            }
+        }
     </script>
 </body>
 </html>

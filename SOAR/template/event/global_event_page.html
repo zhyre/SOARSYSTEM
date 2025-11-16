@@ -399,6 +399,9 @@
 
         // Events data from backend
         const eventsData = JSON.parse('{{ events_json|escapejs }}');
+        const allEventsData = JSON.parse('{{ all_events_json|escapejs }}');
+
+        // Calendar events (only from joined organizations)
         const sampleEvents = eventsData.map(event => ({
             id: event.id,
             title: event.title,
@@ -410,6 +413,23 @@
             going_count: event.going_count,
             interested_count: event.interested_count,
             user_rsvp_status: event.user_rsvp_status,
+            location: event.location,
+            max_participants: event.max_participants
+        }));
+
+        // All events for modal (including non-joined organizations)
+        const allEvents = allEventsData.map(event => ({
+            id: event.id,
+            title: event.title,
+            organization: event.organization,
+            organization_id: event.organization_id,
+            date: new Date(event.date),
+            description: event.description,
+            type: event.type,
+            going_count: event.going_count,
+            interested_count: event.interested_count,
+            user_rsvp_status: event.user_rsvp_status,
+            is_user_member: event.is_user_member,
             location: event.location,
             max_participants: event.max_participants
         }));
@@ -842,8 +862,8 @@
     function openEventModal(eventId) {
         currentModalEventId = eventId;
 
-        // Find event data from events_json
-        const eventData = sampleEvents.find(event => event.id === eventId);
+        // Find event data from all events
+        const eventData = allEvents.find(event => event.id === eventId);
         if (!eventData) {
             console.error('Event data not found for ID:', eventId);
             return;
@@ -895,8 +915,38 @@
             ${eventData.interested_count} Interested
         `;
 
-        // Update RSVP button states
-        updateModalRSVPButtons(eventData.user_rsvp_status);
+        // Handle membership-based UI
+        const rsvpSection = document.getElementById('modalRSVPSection');
+        const rsvpButtons = document.getElementById('modalRSVPButtons');
+
+        if (eventData.is_user_member) {
+            // User is a member - show RSVP buttons
+            rsvpSection.style.display = 'block';
+            rsvpButtons.style.display = 'flex';
+            updateModalRSVPButtons(eventData.user_rsvp_status);
+        } else {
+            // User is not a member - show Join Organization button
+            rsvpSection.style.display = 'block';
+            rsvpButtons.style.display = 'none';
+
+            // Create or update Join Organization button
+            let joinButton = document.getElementById('modalJoinOrgButton');
+            if (!joinButton) {
+                joinButton = document.createElement('div');
+                joinButton.id = 'modalJoinOrgButton';
+                joinButton.className = 'text-center';
+                rsvpSection.appendChild(joinButton);
+            }
+
+            joinButton.innerHTML = `
+                <button onclick="joinOrganization('${eventData.organization_id}')"
+                        class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Join ${eventData.organization} to RSVP</span>
+                </button>
+                <p class="text-sm text-gray-500 mt-2">Become a member to attend this event and see more details</p>
+            `;
+        }
 
         // Show modal
         document.getElementById('eventModal').classList.remove('hidden');
@@ -907,6 +957,12 @@
         document.getElementById('eventModal').classList.add('hidden');
         document.body.style.overflow = ''; // Restore scrolling
         currentModalEventId = null;
+
+        // Clean up dynamic Join Organization button
+        const joinButton = document.getElementById('modalJoinOrgButton');
+        if (joinButton) {
+            joinButton.remove();
+        }
     }
 
     function updateModalRSVPButtons(activeStatus) {
@@ -942,6 +998,13 @@
 
     function rsvpFromModal(status) {
         if (!currentModalEventId) return;
+
+        // Check if user is a member of the organization
+        const eventData = allEvents.find(event => event.id === currentModalEventId);
+        if (!eventData || !eventData.is_user_member) {
+            showNotification('You must join the organization to RSVP for this event.', 'error');
+            return;
+        }
 
         // Get CSRF token
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -1049,6 +1112,11 @@
             closeEventModal();
         }
     });
+
+    function joinOrganization(orgId) {
+        // Redirect to organization page where user can join
+        window.location.href = `/organization/orgpage/${orgId}/`;
+    }
 
     // Close modal on escape key
     document.addEventListener('keydown', (e) => {
