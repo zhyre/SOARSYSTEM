@@ -1,0 +1,43 @@
+/* Sidebar Styling */
+#sidebar {
+    background-color: #0f172a !important;
+    background-image: none !important;
+}
+
+/* Logo and Icon Colors */
+#sidebar .fa-graduation-cap {
+    color: #0f172a !important;
+}
+
+/* Navigation Links */
+#sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0;
+}
+
+/* Hover and Active States */
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+    background-color: #1e1f3b !important;
+    color: white !important;
+}
+
+/* Active Link Indicator */
+#sidebar .nav-link.active {
+    border-left: 3px solid #0c37d4;
+    padding-left: 1rem;
+}
+
+/* Logout Button */
+#sidebar .logout-button {
+    border-top: 1px solid #1e293b;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+/* Mobile Menu Toggle */
+#mobileMenuToggle {
+    color: white;
+}

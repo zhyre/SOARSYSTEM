@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/accounts/auth.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<div class="auth-card">
+    <section class="auth-hero">
+        <div class="brand">
+            <img src="{% static 'images/soar-logo.png' %}" alt="SOAR logo" class="w-8 h-8" />
+        </div>
+        <h1>Welcome</h1>
+        <p>Log in to continue access</p>
+    </section>
+
+    <section class="auth-form">
+        <div class="brand mobile">
+            <img src="{% static 'images/soar-logo.png' %}" alt="SOAR logo" class="w-8 h-8" />
+        </div>
+        <h2>Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <p>
+                    {{ field }}
+                    {{ field.label_tag }}
+                    {% for error in field.errors %}
+                        <div class="errorlist">{{ error }}</div>
+                    {% endfor %}
+                </p>
+            {% endfor %}
+            <button class="btn-primary" type="submit">Login</button>
+            <a href="{% url 'home' %}" class="btn-secondary" style="display: block; margin-top: 10px; text-align: center; text-decoration: none;">
+                Back to Dashboard
+            </a>
+        </form>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <div style="margin-top: 20px; text-align: center;">
+            <p>Don't have an account?
+                <a href="{% url 'register' %}" style="color: #0B5DD8; font-weight: 500;">Create Account</a>
+            </p>
+        </div>
+    </section>
+</div>
+</body>
+</html>

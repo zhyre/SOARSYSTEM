@@ -1,0 +1,114 @@
+<div class="bg-white rounded-2xl shadow-sm p-8 mb-8 border border-gray-100 transition-all duration-300 hover:shadow-md">
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Create New Event</h3>
+                            <p class="text-sm text-gray-500 mt-1">Fill in the details about the new event</p>
+                        </div>
+                        <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'create_event' organization.id %}" enctype="multipart/form-data">
+
+                         {% csrf_token %}
+                        <!-- Activity Title -->
+                        <div class="form-group">
+                            <label for="activityTitle" class="block text-sm font-medium text-gray-700 mb-2">Activity Title</label>
+                            <input type="text" id="activityTitle" name="title" 
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Enter activity title" required>
+                        </div>
+                        
+                        <!-- Activity Description -->
+                        <div class="form-group">
+                            <label for="activityDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="activityDescription" name="description" rows="4"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                placeholder="Describe the activity in detail" required></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Date -->
+                            <div class="form-group">
+                                <label for="activityDate" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                                <input type="date" id="activityDate" name="date" 
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    required>
+                            </div>
+                            
+                            <!-- Time -->
+                            <div class="form-group">
+                                <label for="activityTime" class="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                                <input type="time" id="activityTime" name="time" 
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    required>
+                            </div>
+                            
+                            <!-- Location -->
+                            <div class="form-group">
+                                <label for="activityLocation" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                <input type="text" id="activityLocation" name="location" 
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="Enter location" required>
+                            </div>
+                            
+                            <!-- Activity Type -->
+                            <div class="form-group">
+                                <label for="activityType" class="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
+                                <div class="relative">
+                                    <select id="activityType" name="type" 
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white transition-all duration-200">
+                                        <option value="">Select activity type</option>
+                                        <option value="workshop">Workshop</option>
+                                        <option value="seminar">Seminar</option>
+                                        <option value="meeting">Meeting</option>
+                                        <option value="social">Social Event</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Max Participants -->
+                            <div class="form-group">
+                                <label for="maxParticipants" class="block text-sm font-medium text-gray-700 mb-2">Max Participants</label>
+                                <input type="number" id="maxParticipants" name="max_participants" min="1"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="No limit">
+                            </div>
+                            
+                            <!-- Attachments -->
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                                <div class="relative">
+                                    <label class="flex flex-col w-full h-32 border-2 border-dashed border-gray-200 rounded-xl hover:border-blue-300 group transition-all duration-200 hover:bg-blue-50">
+                                        <div class="flex flex-col items-center justify-center h-full pt-2">
+                                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mb-2 group-hover:bg-blue-100 transition-colors duration-200">
+                                                <i class="fas fa-cloud-upload-alt text-blue-500 text-lg"></i>
+                                            </div>
+                                            <p class="text-sm text-gray-500 group-hover:text-blue-500 transition-colors duration-200">
+                                                <span class="font-medium text-blue-600">Upload files</span> or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">PNG, JPG, PDF up to 10MB</p>
+                                        </div>
+                                        <input type="file" name="attachment" class="hidden" multiple>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-8">
+                            <button type="button" class="px-6 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 flex items-center">
+                                <i class="fas fa-paper-plane mr-2 text-sm"></i>
+                                Post Activity
+                            </button>
+                        </div>
+                    </form>
+                </div>
