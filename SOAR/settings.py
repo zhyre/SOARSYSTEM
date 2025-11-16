@@ -47,9 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'organization',
-    'accounts',
-    'event',
+    'SOAR.organization',
+    'SOAR.accounts',
+    'SOAR.event',
 ]
 
 MIDDLEWARE = [
