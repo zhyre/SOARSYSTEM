@@ -22,19 +22,19 @@ load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j^nqw*ah5!xhr_thchmpv+093lq6*0j)2m-%m2rs6#0+k_2jn_'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j^nqw*ah5!xhr_thchmpv+093lq6*0j)2m-%m2rs6#0+k_2jn_')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
 
 
 # Application definition
@@ -62,12 +62,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# ROOT_URLCONF = 'SOAR.urls'
+ROOT_URLCONF = 'SOAR.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "template"], 
+        'DIRS': [BASE_DIR / "template"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,9 +79,8 @@ TEMPLATES = [
     },
 ]
 
-ROOT_URLCONF = 'SOAR.SOAR.urls'
-WSGI_APPLICATION = 'SOAR.SOAR.wsgi.application'
-ASGI_APPLICATION = 'SOAR.SOAR.asgi.application'
+WSGI_APPLICATION = 'SOAR.wsgi.application'
+ASGI_APPLICATION = 'SOAR.asgi.application'
 
 
 # Database
