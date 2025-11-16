@@ -8,9 +8,11 @@ from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 from organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
+from event.models import OrganizationEvent, EventRSVP
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 @login_required
 def index(request):
@@ -26,11 +28,35 @@ def index(request):
     total_user_orgs = user_orgs.count()
     show_see_more = total_user_orgs > 3
 
+    # Get upcoming events user is going to
+    user_events = OrganizationEvent.objects.filter(
+        rsvps__user=request.user,
+        rsvps__status='going',
+        event_date__gte=timezone.now()
+    ).distinct().order_by('event_date')
+
+    # Add RSVP data to each event
+    for event in user_events:
+        event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
+        event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        try:
+            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+            event.user_rsvp_status = user_rsvp.status
+        except EventRSVP.DoesNotExist:
+            event.user_rsvp_status = None
+
+        # Get RSVPed users for attendee avatars (limit to 5 for display)
+        event.rsvp_users = EventRSVP.objects.filter(
+            event=event,
+            status='going'
+        ).select_related('user').order_by('date_created')[:5]
+
     context = {
         "user_orgs": user_orgs,  # for counting
         "org_data": org_data,    # for detailed display (limited to 3)
         "show_see_more": show_see_more,
         "total_orgs_count": total_user_orgs,
+        "user_events": user_events,
     }
     return render(request, "accounts/index.html", context)
 
@@ -66,7 +92,7 @@ def organizations_page(request):
 def organization_page(request):
     """Display all organizations dynamically."""
     organizations = Organization.objects.all()
-    return render(request, 'organization/orgpage.html', {'organizations': organizations})
+    return render(request, 'organization/organizations_page.html', {'organizations': organizations})
 
 @login_required
 def profile(request):

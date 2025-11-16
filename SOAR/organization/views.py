@@ -10,7 +10,7 @@ from django.http import JsonResponse
 import json
 from .models import Organization, OrganizationMember, Program, ROLE_MEMBER, ROLE_OFFICER, ROLE_LEADER, ROLE_ADVISER
 from accounts.models import User
-from event.models import OrganizationEvent
+from event.models import OrganizationEvent, EventRSVP
 from .forms import OrganizationEditForm
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, ProgramSerializer
 from .permissions import IsOrgOfficerOrAdviser
@@ -276,7 +276,24 @@ def orgpage(request, org_id):
             user_role = org_member.role
         except OrganizationMember.DoesNotExist:
             user_role = None
-    activities = OrganizationEvent.objects.filter(organization=organization).order_by('-event_date')
+    activities = OrganizationEvent.objects.filter(organization=organization).order_by('-date_created')
+
+    # Add RSVP data to each event
+    for event in activities:
+        event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
+        event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        try:
+            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+            event.user_rsvp_status = user_rsvp.status
+        except EventRSVP.DoesNotExist:
+            event.user_rsvp_status = None
+
+        # Get RSVPed users for attendee avatars (limit to 5 for display)
+        event.rsvp_users = EventRSVP.objects.filter(
+            event=event,
+            status='going'
+        ).select_related('user').order_by('date_created')[:5]
+
     return render(request, 'organization/orgpage.html', {
         'organization': organization,
         'user_role': user_role,
@@ -552,19 +569,50 @@ def get_programs(request):
 def calendar_view(request, org_id):
     """Render the calendar page for the organization."""
     organization = get_object_or_404(Organization, id=org_id)
-    
+
     # Check if the current user is a member of the organization
     is_member = OrganizationMember.objects.filter(
         student=request.user,
         organization=organization
     ).exists()
-    
+
     if not is_member:
         messages.error(request, 'You are not a member of this organization.')
         return redirect('home')
-    
+
+    # Fetch events for the organization
+    events = OrganizationEvent.objects.filter(organization=organization).order_by('event_date')
+
+    # Add RSVP data to each event
+    for event in events:
+        event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
+        event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        try:
+            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+            event.user_rsvp_status = user_rsvp.status
+        except EventRSVP.DoesNotExist:
+            event.user_rsvp_status = None
+
+    # Serialize events for JavaScript
+    events_data = []
+    for event in events:
+        events_data.append({
+            'id': str(event.id),
+            'title': event.title,
+            'organization': organization.name,
+            'date': event.event_date.strftime('%Y-%m-%d %H:%M:%S'),  # ISO format for JS parsing
+            'description': event.description or '',
+            'type': event.activity_type if event.activity_type != 'other' else 'event',
+            'going_count': event.going_count,
+            'interested_count': event.interested_count,
+            'user_rsvp_status': event.user_rsvp_status,
+            'location': event.location or '',
+            'max_participants': event.max_participants,
+        })
+
     return render(request, 'organization/calendar.html', {
         'organization': organization,
+        'events_json': json.dumps(events_data),
     })
 
 
