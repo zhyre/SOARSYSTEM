@@ -19,12 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from SOAR.accounts.views import landing_page
+from .views import terms_and_policy, privacy_policy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("SOAR.accounts.urls")),
     path("organization/", include("SOAR.organization.urls")),
     path("event/", include("SOAR.event.urls")),
+    path("terms-and-policy/", terms_and_policy, name='terms_and_policy'),
+    path("privacy-policy/", privacy_policy, name='privacy_policy'),
     path("", landing_page, name='home'),
 ]
 

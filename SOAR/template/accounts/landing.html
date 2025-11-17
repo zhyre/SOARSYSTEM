@@ -332,7 +332,7 @@
                 </div>
                 
                 <!-- Centered Navigation Links -->
-                <div class="hidden md:flex md:items-center md:space-x-1">
+                <div class="hidden md:flex md:items-right md:space-x-1">
                     <a href="#features" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
                         Features
                     </a>
@@ -344,16 +344,6 @@
                     </a>
                     <a href="#organizations" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
                         Organizations
-                    </a>
-                </div>
-                
-                <!-- Auth Buttons -->
-                <div class="flex items-center space-x-3">
-                    <a href="{% url 'login' %}" class="hidden md:block text-white/90 hover:text-white hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40">
-                        Log In
-                    </a>
-                    <a href="{% url 'register' %}" class="hidden md:block relative bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 btn-shimmer overflow-hidden">
-                        <span class="relative z-10">Get Started</span>
                     </a>
                 </div>
                 
@@ -409,9 +399,9 @@
                         </span>
                     </div>
                     
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight animate-slide-up">
-                        Empower Your
-                        <span class="block text-gradient mt-3 drop-shadow-lg">Student Journey</span>
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-wide animate-slide-up">
+                        SOAR
+                        <span class="block text-gradient mt-3 drop-shadow-lg text-3xl md:text-4xl lg:text-5xl">Student Organization Activity Resource</span>
                     </h1>
                     
                     <p class="text-xl md:text-2xl text-blue-100/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-slide-up font-light" style="animation-delay: 0.1s;">
@@ -419,20 +409,20 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up" style="animation-delay: 0.2s;">
-                        <a href="#register" class="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-blue-900 rounded-2xl text-base font-bold shadow-2xl hover:shadow-blue-400/50 transition-all duration-500 transform hover:scale-105 overflow-hidden">
+                        <a href="{% url 'register' %}" class="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-blue-900 rounded-2xl text-base font-bold shadow-2xl hover:shadow-blue-400/50 transition-all duration-500 transform hover:scale-105 overflow-hidden">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Get Started
                                 <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-2"></i>
                             </span>
                             <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
                         </a>
-                        
-                        <a href="#how-it-works" class="group inline-flex items-center justify-center px-8 py-4 glass text-white hover:bg-white/20 rounded-2xl text-base font-bold transition-all duration-300 transform hover:scale-105 border-2 border-white/30">
+
+                        <a href="{% url 'login' %}" class="group inline-flex items-center justify-center px-8 py-4 glass text-white hover:bg-white/20 rounded-2xl text-base font-bold transition-all duration-300 transform hover:scale-105 border-2 border-white/30">
                             <div class="flex items-center gap-3">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors duration-300">
-                                    <i class="fas fa-play text-lg"></i>
+                                    <i class="fas fa-sign-in-alt text-lg"></i>
                                 </div>
-                                <span>Watch Demo</span>
+                                <span>Log in</span>
                             </div>
                         </a>
                     </div>
@@ -440,15 +430,15 @@
                     <!-- Enhanced Stats -->
                     <div class="grid grid-cols-3 gap-8 pt-12 animate-slide-up" style="animation-delay: 0.3s;">
                         <div class="text-center lg:text-left group">
-                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">50+</div>
+                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">{{ total_organizations }}</div>
                             <div class="text-white/90 text-sm font-medium">Organizations</div>
                         </div>
                         <div class="text-center lg:text-left group">
-                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">1000+</div>
+                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">{{ total_active_students }}</div>
                             <div class="text-white/90 text-sm font-medium">Active Students</div>
                         </div>
                         <div class="text-center lg:text-left group">
-                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">500+</div>
+                            <div class="text-4xl md:text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">{{ total_events }}</div>
                             <div class="text-white/90 text-sm font-medium">Events Hosted</div>
                         </div>
                     </div>
@@ -492,9 +482,13 @@
                                 <div class="absolute bottom-6 left-6 glass rounded-2xl px-5 py-4 shadow-2xl animate-float-delayed border border-white/30" style="animation-delay: 1s;">
                                     <div class="flex items-center gap-4">
                                         <div class="flex -space-x-3">
-                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
-                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
-                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
+                                            {% for user in sample_users %}
+                                                <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name|default:user.username }}" class="w-10 h-10 rounded-full border-3 border-white shadow-lg ring-2 ring-white/50 object-cover">
+                                            {% empty %}
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 border-3 border-white shadow-lg ring-2 ring-white/50"></div>
+                                            {% endfor %}
                                         </div>
                                         <div>
                                             <div class="text-sm font-bold text-white">+1K Members</div>
@@ -573,10 +567,6 @@
                                 Streamline your organization's operations with our comprehensive management tools. Handle members, events, and communications effortlessly.
                             </p>
                         </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
-                        </div>
                     </div>
                 </div>
 
@@ -593,10 +583,6 @@
                             <p class="text-gray-600 leading-relaxed text-base">
                                 Create unforgettable experiences with our powerful event management system. From planning to execution, we've got you covered.
                             </p>
-                        </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
                         </div>
                     </div>
                 </div>
@@ -615,10 +601,6 @@
                                 Keep your team connected and productive with built-in messaging, file sharing, and real-time collaboration features.
                             </p>
                         </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
-                        </div>
                     </div>
                 </div>
 
@@ -635,10 +617,6 @@
                             <p class="text-gray-600 leading-relaxed text-base">
                                 Track your organization's growth with detailed analytics. Make data-driven decisions to improve engagement and reach.
                             </p>
-                        </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
                         </div>
                     </div>
                 </div>
@@ -657,10 +635,6 @@
                                 Never miss important updates with intelligent notifications that keep everyone informed and engaged at the right time.
                             </p>
                         </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
-                        </div>
                     </div>
                 </div>
 
@@ -677,10 +651,6 @@
                             <p class="text-gray-600 leading-relaxed text-base">
                                 Your data is protected with enterprise-grade security. We take privacy seriously and comply with all regulations.
                             </p>
-                        </div>
-                        <div class="flex items-center text-blue-600 font-bold group-hover:gap-3 gap-2 transition-all duration-300">
-                            <span>Learn more</span>
-                            <i class="fas fa-arrow-right text-sm transform group-hover:translate-x-2 transition-transform duration-300"></i>
                         </div>
                     </div>
                 </div>
@@ -705,28 +675,6 @@
                     
                     Our mission is to make student engagement simple, inclusive, and discoverable.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                    <a href="#register" class="group inline-flex items-center justify-center px-10 py-5 bg-white text-blue-900 rounded-2xl text-lg font-black shadow-2xl hover:shadow-white/30 transition-all duration-300 transform hover:scale-105">
-                        <span class="flex items-center gap-3">
-                            Start Free Trial
-                            <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-2"></i>
-                        </span>
-                    </a>
-                </div>
-                <div class="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-blue-300"></i>
-                        <span>No credit card required</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-blue-300"></i>
-                        <span>14-day free trial</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle text-blue-300"></i>
-                        <span>Cancel anytime</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -741,13 +689,13 @@
                         Empowering student organizations to connect, collaborate, and grow together.
                     </p>
                     <div class="flex gap-4">
-                        <a href="#" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <a href="https://www.facebook.com/CITUniversity" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
                             <i class="fab fa-facebook-f"></i>
                         </a>
                         <a href="#" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <a href="https://www.instagram.com/cituniversity/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
                             <i class="fab fa-instagram"></i>
                         </a>
                         <a href="#" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
@@ -760,9 +708,6 @@
                     <h3 class="text-lg font-bold mb-4">Product</h3>
                     <ul class="space-y-3">
                         <li><a href="#features" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Features</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Pricing</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Security</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Roadmap</a></li>
                     </ul>
                 </div>
                 
@@ -770,9 +715,6 @@
                     <h3 class="text-lg font-bold mb-4">Company</h3>
                     <ul class="space-y-3">
                         <li><a href="#about" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">About Us</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Careers</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Blog</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">News</a></li>
                     </ul>
                 </div>
                 
@@ -788,7 +730,7 @@
                         <li class="text-gray-400 text-sm">
                             <div class="flex items-center gap-2">
                                 <i class="fas fa-envelope text-blue-400"></i>
-                                <a href="mailto:info@soar.edu.ph" class="hover:text-blue-400 transition-colors duration-300">info@soar.edu.ph</a>
+                                <a href="mailto:zhyrecoritico@gmail.com" class="hover:text-blue-400 transition-colors duration-300">zhyrecoritico@gmail.com</a>
                             </div>
                         </li>
                         <li class="text-gray-400 text-sm">
@@ -804,13 +746,49 @@
             <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-gray-400 text-sm">© 2024 SOAR - Cebu Institute of Technology. All rights reserved.</p>
                 <div class="flex gap-6 text-sm">
-                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Privacy Policy</a>
-                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Terms of Service</a>
-                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Cookie Policy</a>
+                    <a href="#" id="terms-link" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Terms of Service</a>
+                    <a href="#" id="privacy-link" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Privacy Policy</a>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">Terms of Service</h2>
+                <button id="close-terms-modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="terms-modal-content" class="p-6 overflow-y-auto max-h-[70vh]">
+                <!-- Content will be loaded here via AJAX -->
+                <div class="flex justify-center items-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacy-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">Privacy Policy</h2>
+                <button id="close-privacy-modal" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="privacy-modal-content" class="p-6 overflow-y-auto max-h-[70vh]">
+                <!-- Content will be loaded here via AJAX -->
+                <div class="flex justify-center items-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // Mobile menu toggle
@@ -873,6 +851,78 @@
             card.style.transition = 'all 0.6s ease-out';
             observer.observe(card);
         });
+
+        // Terms Modal Functionality
+        const termsLink = document.getElementById('terms-link');
+        const termsModal = document.getElementById('terms-modal');
+        const closeTermsModal = document.getElementById('close-terms-modal');
+        const termsModalContent = document.getElementById('terms-modal-content');
+
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            termsModal.classList.remove('hidden');
+            loadTermsContent();
+        });
+
+        closeTermsModal.addEventListener('click', () => {
+            termsModal.classList.add('hidden');
+        });
+
+        termsModal.addEventListener('click', (e) => {
+            if (e.target === termsModal) {
+                termsModal.classList.add('hidden');
+            }
+        });
+
+        async function loadTermsContent() {
+            try {
+                const response = await fetch('/terms-and-policy/');
+                if (response.ok) {
+                    const html = await response.text();
+                    termsModalContent.innerHTML = html;
+                } else {
+                    termsModalContent.innerHTML = '<div class="text-center py-12"><p class="text-red-600">Failed to load terms content.</p></div>';
+                }
+            } catch (error) {
+                termsModalContent.innerHTML = '<div class="text-center py-12"><p class="text-red-600">Error loading terms content.</p></div>';
+            }
+        }
+
+        // Privacy Modal Functionality
+        const privacyLink = document.getElementById('privacy-link');
+        const privacyModal = document.getElementById('privacy-modal');
+        const closePrivacyModal = document.getElementById('close-privacy-modal');
+        const privacyModalContent = document.getElementById('privacy-modal-content');
+
+        privacyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            privacyModal.classList.remove('hidden');
+            loadPrivacyContent();
+        });
+
+        closePrivacyModal.addEventListener('click', () => {
+            privacyModal.classList.add('hidden');
+        });
+
+        privacyModal.addEventListener('click', (e) => {
+            if (e.target === privacyModal) {
+                privacyModal.classList.add('hidden');
+            }
+        });
+
+        async function loadPrivacyContent() {
+            try {
+                const response = await fetch('/privacy-policy/');
+                if (response.ok) {
+                    const html = await response.text();
+                    privacyModalContent.innerHTML = html;
+                } else {
+                    privacyModalContent.innerHTML = '<div class="text-center py-12"><p class="text-red-600">Failed to load privacy content.</p></div>';
+                }
+            } catch (error) {
+                privacyModalContent.innerHTML = '<div class="text-center py-12"><p class="text-red-600">Error loading privacy content.</p></div>';
+            }
+        }
     </script>
 </body>
 </html>

@@ -175,7 +175,24 @@ def register(request):
 
 def landing_page(request):
     """Landing page view that shows for all users."""
-    return render(request, 'accounts/landing.html')
+    # Get dynamic stats for the landing page
+    total_organizations = Organization.objects.count()
+    total_active_students = User.objects.filter(is_active=True).count()
+    total_events = OrganizationEvent.objects.count()
+
+    # Get sample users with profile pictures for the landing page display
+    sample_users = User.objects.filter(
+        is_active=True,
+        profile_picture__isnull=False
+    ).exclude(profile_picture='').order_by('?')[:3]
+
+    context = {
+        'total_organizations': total_organizations,
+        'total_active_students': total_active_students,
+        'total_events': total_events,
+        'sample_users': sample_users,
+    }
+    return render(request, 'accounts/landing.html', context)
 
 def login_view(request):
     if request.user.is_authenticated:
