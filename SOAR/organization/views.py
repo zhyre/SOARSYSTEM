@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
 from .models import Organization, OrganizationMember, Program, ROLE_MEMBER, ROLE_OFFICER, ROLE_LEADER, ROLE_ADVISER
-from accounts.models import User
-from event.models import OrganizationEvent, EventRSVP
+from SOAR.accounts.models import User
+from SOAR.event.models import OrganizationEvent, EventRSVP
 from .forms import OrganizationEditForm
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, ProgramSerializer
 from .permissions import IsOrgOfficerOrAdviser

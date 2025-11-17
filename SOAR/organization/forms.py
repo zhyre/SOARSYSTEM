@@ -1,6 +1,6 @@
 from django import forms
 from .models import Program, Organization
-from accounts.models import User
+from SOAR.accounts.models import User
 
 class ProgramForm(forms.ModelForm):
     class Meta:

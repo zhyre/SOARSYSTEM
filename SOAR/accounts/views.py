@@ -7,8 +7,8 @@ from .models import User
 from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
-from organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
-from event.models import OrganizationEvent, EventRSVP
+from SOAR.organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
+from SOAR.event.models import OrganizationEvent, EventRSVP
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404
@@ -75,11 +75,19 @@ def organizations_page(request):
     q = request.GET.get('q', '').strip()
     if q:
         # Only search by organization name (avoid matching description)
+        # Filter out organizations user is already a member of
         all_orgs = Organization.objects.filter(
             Q(name__icontains=q)
+        ).exclude(
+            members__student=request.user,
+            members__is_approved=True
         ).distinct()
     else:
-        all_orgs = Organization.objects.all()
+        # Filter out organizations user is already a member of
+        all_orgs = Organization.objects.exclude(
+            members__student=request.user,
+            members__is_approved=True
+        ).all()
 
     return render(request, "organization/organizations_page.html", {
         "org_data": org_data,
@@ -175,7 +183,24 @@ def register(request):
 
 def landing_page(request):
     """Landing page view that shows for all users."""
-    return render(request, 'accounts/landing.html')
+    # Get dynamic stats for the landing page
+    total_organizations = Organization.objects.count()
+    total_active_students = User.objects.filter(is_active=True).count()
+    total_events = OrganizationEvent.objects.count()
+
+    # Get sample users with profile pictures for the landing page display
+    sample_users = User.objects.filter(
+        is_active=True,
+        profile_picture__isnull=False
+    ).exclude(profile_picture='').order_by('?')[:3]
+
+    context = {
+        'total_organizations': total_organizations,
+        'total_active_students': total_active_students,
+        'total_events': total_events,
+        'sample_users': sample_users,
+    }
+    return render(request, 'accounts/landing.html', context)
 
 def login_view(request):
     if request.user.is_authenticated:

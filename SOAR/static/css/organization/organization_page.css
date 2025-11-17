@@ -8,3 +8,51 @@
   text-overflow: ellipsis;
   min-height: 2.5rem; /* keeps card heights even */
 }
+
+/* Modal responsive improvements */
+@media (max-width: 768px) {
+  #joinModal .org-card {
+    margin-bottom: 1rem;
+  }
+
+  #joinModal .feature-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Ensure modal content doesn't overflow on small screens */
+  #joinModal {
+    padding: 0.5rem;
+  }
+
+  #joinModal .bg-white {
+    max-height: calc(100vh - 1rem);
+    overflow-y: auto;
+  }
+
+  /* Adjust search input for mobile */
+  #modalOrgSearch {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Smooth transitions for modal */
+#joinModal {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#joinModal.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+#joinModal:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+}

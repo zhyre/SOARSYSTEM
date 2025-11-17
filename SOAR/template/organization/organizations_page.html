@@ -120,22 +120,22 @@
                 <!-- Join Organizations Modal -->
                 <div id="joinModal" class="fixed inset-0 z-50 hidden">
                     <div id="joinModalOverlay" class="absolute inset-0 bg-black bg-opacity-50"></div>
-                    <div class="absolute inset-0 flex items-center justify-center p-4 md:p-10 overflow-y-auto">
-                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl relative">
+                    <div class="absolute inset-0 flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto min-h-screen">
+                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] relative flex flex-col">
                             <!-- Always-visible close button (viewport-fixed so it's always reachable) -->
-                            <button id="joinModalCloseTop" style="position:fixed;top:1rem;right:1rem;z-index:9999;" class="p-3 bg-white rounded-full shadow hover:bg-gray-100" aria-label="Close join modal">
-                                <i class="fas fa-times text-gray-700"></i>
+                            <button id="joinModalCloseTop" class="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 md:p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors" aria-label="Close join modal">
+                                <i class="fas fa-times text-gray-700 text-lg"></i>
                             </button>
-                            <div class="flex items-center justify-between p-6 border-b">
-                                <div>
-                                    <h3 class="text-xl font-semibold text-gray-900">Browse All Organizations</h3>
+                            <div class="flex items-center justify-between p-4 md:p-6 border-b flex-shrink-0">
+                                <div class="pr-8">
+                                    <h3 class="text-lg md:text-xl font-semibold text-gray-900">Browse All Organizations</h3>
                                     <p class="text-sm text-gray-500">Find and join student organizations</p>
                                 </div>
-                                <button id="joinModalClose" class="p-2 rounded hover:bg-gray-100" aria-label="Close">
+                                <button id="joinModalClose" class="p-2 rounded hover:bg-gray-100 hidden md:block" aria-label="Close">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <div class="p-6 md:p-8">
+                            <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
                                 {% include 'organization/join_org_card.html' %}
                             </div>
                         </div>
@@ -234,6 +234,7 @@
             if (!joinModal) return;
             lastFocused = document.activeElement;
             joinModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
             document.addEventListener('keydown', onModalKeydown);
             // Focus search input first, fallback to visible close button
             setTimeout(() => { (modalSearch || document.getElementById('joinModalCloseTop') || joinModalClose)?.focus(); }, 0);
@@ -241,6 +242,7 @@
         function closeJoinModal(){
             if (!joinModal) return;
             joinModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
             document.removeEventListener('keydown', onModalKeydown);
             // restore focus to opener
             setTimeout(() => { lastFocused?.focus?.(); }, 0);

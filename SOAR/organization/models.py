@@ -2,8 +2,8 @@ import uuid
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from organization.validators import validate_image_file_type, validate_image_file_size
-from accounts.models import organization_profile_upload_path, OrganizationSupabaseStorage
+from SOAR.organization.validators import validate_image_file_type, validate_image_file_size
+from SOAR.accounts.models import organization_profile_upload_path, OrganizationSupabaseStorage
 
 class Program(models.Model):
     abbreviation = models.CharField(max_length=10, unique=True)

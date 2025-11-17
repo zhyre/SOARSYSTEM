@@ -16,8 +16,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
 
     path('members/', views.members_management, name='members_management'),
-    path('event/', include('event.urls')),
-    path('organization/', include('organization.urls')),
+    path('event/', include('SOAR.event.urls')),
+    path('organization/', include('SOAR.organization.urls')),
     # Join organization
     path('join_org/<uuid:org_id>/', views.join_org, name='join_org'),
     
