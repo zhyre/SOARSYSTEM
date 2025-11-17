@@ -22,9 +22,9 @@ from SOAR.accounts.views import landing_page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("accounts/", include("accounts.urls")),
-    path("organization/", include("organization.urls")),
-    path("event/", include("event.urls")),
+    path("accounts/", include("SOAR.accounts.urls")),
+    path("organization/", include("SOAR.organization.urls")),
+    path("event/", include("SOAR.event.urls")),
     path("", landing_page, name='home'),
 ]
 
