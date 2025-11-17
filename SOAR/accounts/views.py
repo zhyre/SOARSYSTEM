@@ -75,11 +75,19 @@ def organizations_page(request):
     q = request.GET.get('q', '').strip()
     if q:
         # Only search by organization name (avoid matching description)
+        # Filter out organizations user is already a member of
         all_orgs = Organization.objects.filter(
             Q(name__icontains=q)
+        ).exclude(
+            members__student=request.user,
+            members__is_approved=True
         ).distinct()
     else:
-        all_orgs = Organization.objects.all()
+        # Filter out organizations user is already a member of
+        all_orgs = Organization.objects.exclude(
+            members__student=request.user,
+            members__is_approved=True
+        ).all()
 
     return render(request, "organization/organizations_page.html", {
         "org_data": org_data,
