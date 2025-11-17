@@ -7,8 +7,8 @@ from .models import User
 from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
-from organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
-from event.models import OrganizationEvent, EventRSVP
+from SOAR.organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
+from SOAR.event.models import OrganizationEvent, EventRSVP
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404

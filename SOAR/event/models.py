@@ -1,5 +1,5 @@
 from django.db import models
-from organization.models import Organization
+from SOAR.organization.models import Organization
 from django.conf import settings
 import uuid
 
@@ -44,6 +44,7 @@ class EventRSVP(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = 'event'
         unique_together = ('event', 'user')  # A user can only RSVP once per event
 
     def __str__(self):

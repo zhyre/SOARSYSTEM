@@ -1,5 +1,5 @@
 from django.contrib import admin
-from event.models import OrganizationEvent, EventRSVP
+from .models import OrganizationEvent, EventRSVP
 # Register your models here.
 @admin.register(OrganizationEvent)
 class OrganizationEventAdmin(admin.ModelAdmin):

@@ -39,8 +39,8 @@ def upload_to_supabase(file, org_id, org_name):
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from event.models import OrganizationEvent, EventRSVP
-from organization.models import Organization, OrganizationMember
+from SOAR.event.models import OrganizationEvent, EventRSVP
+from SOAR.organization.models import Organization, OrganizationMember
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse

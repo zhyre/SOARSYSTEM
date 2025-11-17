@@ -29,9 +29,9 @@ INSTALLED_APPS = [
     "rest_framework",
 
     # Project apps
-    "organization",
-    "accounts",
-    "event",
+    "SOAR.organization",
+    "SOAR.accounts",
+    "SOAR.event",
 ]
 
 # Middleware
