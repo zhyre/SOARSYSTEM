@@ -37,25 +37,38 @@
           <p class="text-sm text-gray-500 mt-1">View organization details and information</p>
         </div>
         <div class="flex items-center gap-3">
-          {% if request.user.is_superuser or request.user.is_staff or is_org_officer_or_leader %}
-          <a href="{% url 'organization_editprofile' organization.id %}" 
+          {% if can_edit %}
+          <a href="{% url 'organization_editprofile' organization.id %}"
              class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 font-medium">
             <i class="fas fa-edit"></i>
             <span class="hidden sm:inline">Edit Profile</span>
           </a>
           {% endif %}
-          {% if can_join %}
-          <form method="POST" action="{% url 'join_org' organization.id %}">
-            {% csrf_token %}
-            <button type="submit" 
-                    class="bg-gradient-to-r from-green-600 to-green-700 text-white px-5 py-2.5 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-              <i class="fas fa-user-plus mr-2"></i>Join Club
-            </button>
-          </form>
+          {% if not is_member %}
+            {% if can_join %}
+            <form method="POST" action="{% url 'join_org' organization.id %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="bg-gradient-to-r from-green-600 to-green-700 text-white px-5 py-2.5 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                <i class="fas fa-user-plus mr-2"></i>Join Club
+              </button>
+            </form>
+            {% else %}
+            <span class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-lg border border-gray-200 text-sm">
+              <i class="fas fa-lock mr-2"></i>Not Eligible
+            </span>
+            {% endif %}
           {% else %}
-          <span class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-lg border border-gray-200 text-sm">
-            <i class="fas fa-lock mr-2"></i>Not Eligible
-          </span>
+            {% if show_not_eligible %}
+            <span class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-lg border border-gray-200 text-sm">
+              <i class="fas fa-lock mr-2"></i>Not Eligible
+            </span>
+            {% else %}
+            <!-- <button onclick="leaveOrganization('{{ organization.id }}')"
+                    class="bg-gradient-to-r from-red-600 to-red-700 text-white px-5 py-2.5 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+              <i class="fas fa-sign-out-alt mr-2"></i>Leave Organization
+            </button> -->
+            {% endif %}
           {% endif %}
         </div>
       </div>
@@ -174,5 +187,33 @@
     </main>
   </div>
 </div>
+
+<script>
+function leaveOrganization(orgId) {
+    if (confirm('Are you sure you want to leave this organization? This action cannot be undone.')) {
+        fetch(`/organization/orgpage/${orgId}/leave/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                // Redirect to dashboard
+                window.location.href = '/accounts/index/';
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error occurred. Please try again.');
+        });
+    }
+}
+</script>
 </body>
 </html>

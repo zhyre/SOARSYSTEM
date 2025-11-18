@@ -307,6 +307,43 @@ def organization_profile(request, org_id):
     organization = get_object_or_404(Organization, id=org_id)
     programs = Program.objects.all()
 
+    # Check permissions for edit button
+    user = request.user
+    can_edit = False
+    if organization.adviser_id == user.id:
+        can_edit = True
+    else:
+        try:
+            membership = OrganizationMember.objects.get(organization=organization, student=user)
+            if membership.role in [ROLE_ADVISER, ROLE_OFFICER, ROLE_LEADER]:
+                can_edit = True
+        except OrganizationMember.DoesNotExist:
+            pass
+    # Staff users who are not advisers or officers/leaders do not have access
+    if (user.is_superuser or user.is_staff) and not can_edit:
+        can_edit = False
+
+    # Check membership and join/leave logic
+    is_member = False
+    show_not_eligible = False
+    can_join = False
+    try:
+        membership = OrganizationMember.objects.get(organization=organization, student=user)
+        is_member = True
+        # Check if can leave: not if adviser or officer/leader
+        if organization.adviser_id == user.id or membership.role in [ROLE_ADVISER, ROLE_OFFICER, ROLE_LEADER]:
+            show_not_eligible = True
+    except OrganizationMember.DoesNotExist:
+        is_member = False
+        # Check if can join
+        can_join = organization.is_public
+        if not can_join:
+            allowed_programs = organization.allowed_programs.all()
+            program_names = [p.name for p in allowed_programs]
+            program_abbrevs = [p.abbreviation for p in allowed_programs]
+            if user.course and (user.course in program_names or user.course in program_abbrevs):
+                can_join = True
+
     if request.method == 'POST':
         name = (request.POST.get('org_name') or organization.name).strip()
         about = (request.POST.get('org_about') or organization.description or '').strip()
@@ -332,6 +369,10 @@ def organization_profile(request, org_id):
     return render(request, 'organization/organization_profile.html', {
         'organization': organization,
         'programs': programs,
+        'can_edit': can_edit,
+        'is_member': is_member,
+        'can_join': can_join,
+        'show_not_eligible': show_not_eligible,
     })
 
 
@@ -339,6 +380,24 @@ def organization_profile(request, org_id):
 @login_required
 def organization_editprofile(request, org_id):
     organization = get_object_or_404(Organization, id=org_id)
+
+    # Check permissions: adviser, leader, officer, or org adviser; staff only if they have the role
+    user = request.user
+    has_permission = False
+    if organization.adviser_id == user.id:
+        has_permission = True
+    else:
+        try:
+            membership = OrganizationMember.objects.get(organization=organization, student=user)
+            if membership.role in [ROLE_ADVISER, ROLE_OFFICER, ROLE_LEADER]:
+                has_permission = True
+        except OrganizationMember.DoesNotExist:
+            pass
+
+    if not has_permission:
+        messages.error(request, "You do not have permission to edit this organization's profile.")
+        return redirect('organization_profile', org_id=organization.id)
+
     programs = list(Program.objects.values('id', 'name', 'abbreviation'))
 
     if request.method == 'POST':
@@ -392,6 +451,7 @@ def organization_editprofile(request, org_id):
         'SUPABASE_URL': SUPABASE_URL,
         'SUPABASE_KEY': SUPABASE_KEY,
         'current_allowed_programs': [str(p.id) for p in organization.allowed_programs.all()],
+        'can_edit': True,  # Since we already checked permission
     })
 
 

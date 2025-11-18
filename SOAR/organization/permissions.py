@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from .models import OrganizationMember, ROLE_OFFICER, ROLE_LEADER
+from .models import OrganizationMember, ROLE_OFFICER, ROLE_LEADER, ROLE_ADVISER
 
 class IsOrgOfficerOrAdviser(BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -14,6 +14,6 @@ class IsOrgOfficerOrAdviser(BasePermission):
             return True
         try:
             membership = OrganizationMember.objects.get(organization=org, student=user)
-            return membership.role in [ROLE_OFFICER, ROLE_LEADER]
+            return membership.role in [ROLE_ADVISER, ROLE_OFFICER, ROLE_LEADER]
         except OrganizationMember.DoesNotExist:
             return False
