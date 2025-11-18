@@ -255,6 +255,14 @@ def login_view(request):
 
 
 def logout_view(request):
+    # Sign out from Supabase first
+    try:
+        supabase.auth.sign_out()
+    except Exception as e:
+        # Log the error but continue with Django logout
+        print(f"Supabase logout error: {e}")
+
+    # Sign out from Django
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect('login')
