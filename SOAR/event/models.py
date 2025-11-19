@@ -23,9 +23,25 @@ class OrganizationEvent(models.Model):
     )
     max_participants = models.PositiveIntegerField(null=True, blank=True)
     attachments_url = models.URLField(blank=True, null=True)
+    cancelled = models.BooleanField(default=False)
 
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def status(self):
+        from django.utils import timezone
+        now = timezone.now()
+        if self.cancelled:
+            return 'Cancelled'
+        if self.event_date > now:
+            return 'Upcoming'
+        # Assume 2-hour duration
+        end_time = self.event_date + timezone.timedelta(hours=2)
+        if now < end_time:
+            return 'Ongoing'
+        else:
+            return 'Completed'
 
     def __str__(self):
         return f"{self.title} ({self.organization.name})"

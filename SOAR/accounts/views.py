@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -283,10 +284,19 @@ def join_org(request, org_id):
             role=ROLE_MEMBER,
             is_approved=False
         )
-        messages.success(request, f"Request to join {organization.name} sent.")
+        message = f"Request to join {organization.name} sent."
     else:
-        messages.info(request, f"You are already a member or have a pending request.")
-    return redirect('index')
+        message = f"You are already a member or have a pending request."
+
+    # Handle AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': message})
+    else:
+        if not already_member:
+            messages.success(request, message)
+        else:
+            messages.info(request, message)
+        return redirect('index')
 
 @login_required
 def org_overview(request, org_id):
