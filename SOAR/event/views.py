@@ -7,6 +7,7 @@ import uuid
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 from django.utils.text import slugify
+from SOAR.notification.models import Notification
 
 def upload_to_supabase(file, org_id, org_name):
     # Handle both file objects and raw bytes
@@ -213,6 +214,25 @@ def create_event(request, org_id):
             # Check total count
             total_events = OrganizationEvent.objects.count()
             print(f"Total events in database: {total_events}")  # Debug log
+
+            # Create notifications for all approved organization members
+            approved_members = OrganizationMember.objects.filter(
+                organization=organization,
+                is_approved=True
+            ).select_related('student')
+
+            message = "New Event Created"
+            notifications = []
+            for member in approved_members:
+                notifications.append(Notification(
+                    user=member.student,
+                    message=message,
+                    notification_type='event_created'
+                ))
+
+            # Bulk create notifications for efficiency
+            Notification.objects.bulk_create(notifications)
+            print(f"Created {len(notifications)} notifications for event: {event.title}")  # Debug log
 
         except Exception as e:
             print(f"Event creation error: {str(e)}")  # Debug log

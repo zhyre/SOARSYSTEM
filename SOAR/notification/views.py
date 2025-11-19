@@ -13,7 +13,7 @@ def notifications_view(request):
     # Group notifications by type for tabs
     all_notifications = notifications
     unread_notifications = notifications.filter(is_read=False)
-    organization_notifications = notifications.filter(notification_type='organization_approval')
+    organization_notifications = notifications.filter(notification_type__in=['organization_approval', 'event_created'])
 
     context = {
         'all_notifications': all_notifications,
