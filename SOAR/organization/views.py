@@ -625,7 +625,7 @@ def get_programs(request):
 
 
 @login_required
-@login_required
+
 def calendar_view(request, org_id):
     """Render the calendar page for the organization."""
     organization = get_object_or_404(Organization, id=org_id)

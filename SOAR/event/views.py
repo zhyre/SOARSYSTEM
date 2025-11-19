@@ -60,7 +60,7 @@ def global_event_page(request):
     # Get all upcoming events for the list view
     all_events = list(OrganizationEvent.objects.filter(
         event_date__gte=timezone.now()
-    ).order_by('event_date'))
+    ).order_by('event_date').prefetch_related('organization__allowed_programs'))
 
     # Create event data dictionary
     events_data = {}

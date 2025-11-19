@@ -1,5 +1,5 @@
 {% load static %}
-<article class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1">
+<article class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1" data-status="{{ event.status }}">
 
     {% csrf_token %}
     <!-- Event Content -->
@@ -64,11 +64,25 @@
 
         <!-- Status Badge -->
         <div class="absolute top-4 left-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-sm text-blue-600 rounded-full text-xs font-semibold shadow-lg">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg {% if event.status == 'Upcoming' %}bg-blue-100 text-blue-800{% elif event.status == 'Ongoing' %}bg-green-100 text-green-800{% elif event.status == 'Completed' %}bg-gray-100 text-gray-800{% elif event.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                {% if event.status == 'Upcoming' %}
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Upcoming
+                {% elif event.status == 'Ongoing' %}
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m-8 4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2" />
+                </svg>
+                {% elif event.status == 'Completed' %}
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {% elif event.status == 'Cancelled' %}
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {% endif %}
+                {{ event.status }}
             </span>
         </div>
 
@@ -125,7 +139,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-900">{{ event.event_date|date:"l, F j, Y"|default:"Friday, January 1, 2024" }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ event.time|time:"g:i A"|default:"10:00 AM" }} - {{ event.end_time|time:"g:i A"|default:"4:00 PM" }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ event.event_date|time:"g:i A"|default:"10:00 AM" }} - {{ event.end_time|time:"g:i A"|default:"4:00 PM" }}</p>
                 </div>
             </div>
 

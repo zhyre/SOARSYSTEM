@@ -166,6 +166,7 @@
                     </button>
                 </div>
 
+
                 <!-- Upcoming Events Section -->
                 <div id="eventsView" class="mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
@@ -782,7 +783,10 @@
         const name = titleEl ? titleEl.textContent : '';
         const desc = descEl ? descEl.textContent : '';
         const org = orgEl ? orgEl.textContent : '';
-        return { name: normalize(name), desc: normalize(desc), org: normalize(org) };
+        const activity = card.getAttribute('data-activity-type') || '';
+        const programs = card.getAttribute('data-programs') || '';
+        const status = card.getAttribute('data-status') || '';
+        return { name: normalize(name), desc: normalize(desc), org: normalize(org), activity: normalize(activity), programs: normalize(programs), status: normalize(status) };
     }
 
     // Get RSVP status from card
@@ -800,12 +804,12 @@
         const q = normalize(query);
         if (!eventsSection) return;
         eventsSection.querySelectorAll('article').forEach(card => {
-            const { name, desc, org } = eventCardText(card);
-            const searchMatch = !q || name.includes(q) || desc.includes(q) || org.includes(q);
+            const { name, desc, org, activity, programs, status } = eventCardText(card);
+            const searchMatch = !q || name.includes(q) || desc.includes(q) || org.includes(q) || activity.includes(q) || programs.includes(q) || status.includes(q);
             let rsvpMatch = true;
             if (rsvpFilter !== 'all') {
-                const status = getRSVPStatus(card);
-                rsvpMatch = status === rsvpFilter;
+                const rsvpStatus = getRSVPStatus(card);
+                rsvpMatch = rsvpStatus === rsvpFilter;
             }
             card.style.display = (searchMatch && rsvpMatch) ? '' : 'none';
         });
@@ -819,6 +823,7 @@
         button.classList.remove('bg-gray-200', 'text-gray-700');
         button.classList.add('bg-blue-600', 'text-white', 'active');
     }
+
 
     function switchView(view) {
         if (view === 'calendar') {
@@ -846,6 +851,7 @@
             }
         });
     });
+
 
     // Search input event listeners
     searchInput?.addEventListener('input', (e) => filterEvents(e.target.value, currentFilter));
@@ -1114,8 +1120,40 @@
     });
 
     function joinOrganization(orgId) {
-        // Redirect to organization page where user can join
-        window.location.href = `/organization/orgpage/${orgId}/`;
+        // Make AJAX request to join organization
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch(`/accounts/join_org/${orgId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                // Update the modal UI to show request sent
+                const joinButton = document.getElementById('modalJoinOrgButton');
+                if (joinButton) {
+                    joinButton.innerHTML = `
+                        <button disabled class="w-full px-6 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed">
+                            <i class="fas fa-clock"></i>
+                            <span>Request Sent - Awaiting Approval</span>
+                        </button>
+                        <p class="text-sm text-gray-500 mt-2">Your request has been submitted. You'll be notified once approved.</p>
+                    `;
+                }
+            } else {
+                showNotification('Failed to send join request. Please try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        });
     }
 
     // Close modal on escape key
