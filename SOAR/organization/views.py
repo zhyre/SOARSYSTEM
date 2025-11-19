@@ -220,12 +220,23 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
-        """Approve a join request and notify the user by email."""
+        """Approve a join request and notify the user by email and notification."""
+        from SOAR.notification.models import Notification
         member = self.get_object()
         if member.is_approved:
             return Response({'error': 'Already approved.'}, status=status.HTTP_400_BAD_REQUEST)
         member.is_approved = True
         member.save()
+
+        # Create notification
+        approval_date = member.date_joined.strftime('%B %d, %Y')
+        message = f"Your membership request to {member.organization.name} has been approved on {approval_date}."
+        Notification.objects.create(
+            user=member.student,
+            message=message,
+            notification_type='organization_approval'
+        )
+
         send_mail(
             subject=f"Accepted to {member.organization.name}",
             message=f"Congratulations! You have been accepted as a member of {member.organization.name}.",

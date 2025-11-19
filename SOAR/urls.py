@@ -26,6 +26,7 @@ urlpatterns = [
     path("accounts/", include("SOAR.accounts.urls")),
     path("organization/", include("SOAR.organization.urls")),
     path("event/", include("SOAR.event.urls")),
+    path("notifications/", include("SOAR.notification.urls")),
     path("terms-and-policy/", terms_and_policy, name='terms_and_policy'),
     path("privacy-policy/", privacy_policy, name='privacy_policy'),
     path("", landing_page, name='home'),
