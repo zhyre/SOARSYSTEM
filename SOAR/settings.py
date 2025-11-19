@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "SOAR.organization",
     "SOAR.accounts",
     "SOAR.event",
+    "SOAR.notification",
 ]
 
 # Middleware
