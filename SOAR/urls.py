@@ -23,6 +23,7 @@ from .views import terms_and_policy, privacy_policy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("admin-panel/", include("SOAR.AdminSoar.urls")),
     path("accounts/", include("SOAR.accounts.urls")),
     path("organization/", include("SOAR.organization.urls")),
     path("event/", include("SOAR.event.urls")),

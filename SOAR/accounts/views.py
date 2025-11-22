@@ -243,7 +243,14 @@ def login_view(request):
 
                         login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
                         messages.success(request, f"Welcome back, {user_obj.username}!")
-                        return redirect('index')
+
+                        # Check if user is superuser from Supabase
+                        response = supabase.table('accounts_user').select('is_superuser').eq('id', str(user_obj.id)).execute()
+                        is_superuser = response.data[0]['is_superuser'] if response.data else False
+                        if is_superuser:
+                            return redirect('admin_panel')
+                        else:
+                            return redirect('index')
                 else:
                     messages.error(request, "Invalid login credentials.")
 
