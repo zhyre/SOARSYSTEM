@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "rest_framework",
 
     # Project apps
+    "SOAR.AdminSoar",
     "SOAR.organization",
     "SOAR.accounts",
     "SOAR.event",
