@@ -1,11 +1,662 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SOAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .admin-nav-link.active {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+        
+        .admin-nav-link.active i,
+        .admin-nav-link.active span {
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="admin-sidebar" class="bg-[#0F172A] text-white w-64 min-h-screen border-r border-[#1e293b] flex-shrink-0 overflow-y-auto">
+            <div class="p-6">
+                <!-- Logo Section -->
+                <div class="flex items-center justify-between mb-8 pb-4 border-b border-[#1e293b]">
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-12 w-auto">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0F172A]"></div>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">SOAR</span>
+                            <p class="text-xs text-gray-400">Administration</p>
+                        </div>
+                    </div>
+                </div>
 
-{% block title %}Admin Panel{% endblock %}
+                <!-- Navigation -->
+                <nav class="space-y-1">
+                    <!-- Accounts Section -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Accounts</h3>
+                        <a href="#" onclick="loadAdminSection('users'); return false;" class="admin-nav-link active group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="users">
+                            <i class="fas fa-users text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Users</span>
+                        </a>
+                    </div>
 
-{% block content %}
-<div class="flex items-center justify-center min-h-screen bg-gray-50">
-    <div class="text-center">
-        <h1 class="text-4xl font-bold text-gray-800 mb-4">Admin Page Here</h1>
-        <p class="text-lg text-gray-600">This page is for administrative purposes.</p>
+                    <!-- Authentication Section -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Authentication</h3>
+                        <a href="#" onclick="loadAdminSection('groups'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="groups">
+                            <i class="fas fa-user-shield text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Groups</span>
+                        </a>
+                    </div>
+
+                    <!-- Event Section -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Event</h3>
+                        <a href="#" onclick="loadAdminSection('event-rsvps'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="event-rsvps">
+                            <i class="fas fa-check-circle text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Event RSVPs</span>
+                        </a>
+                        <a href="#" onclick="loadAdminSection('organization-events'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organization-events">
+                            <i class="fas fa-calendar-alt text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organization Events</span>
+                        </a>
+                    </div>
+
+                    <!-- Organization Section -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Organization</h3>
+                        <a href="#" onclick="loadAdminSection('organization-members'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organization-members">
+                            <i class="fas fa-user-friends text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organization Members</span>
+                        </a>
+                        <a href="#" onclick="loadAdminSection('organizations'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organizations">
+                            <i class="fas fa-building text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organizations</span>
+                        </a>
+                        <a href="#" onclick="loadAdminSection('programs'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="programs">
+                            <i class="fas fa-graduation-cap text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Programs</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- View Site -->
+                <div class="mt-8 pt-6 border-t border-[#1e293b]">
+                    <a href="#" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200">
+                        <i class="fas fa-external-link-alt text-sm text-gray-400 group-hover:text-blue-400"></i>
+                        <span class="font-medium text-gray-300 group-hover:text-white text-sm">View Site</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+                <div class="px-8 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800" id="page-title">Django administration</h1>
+                            <p class="text-sm text-gray-500 mt-1">Home › <span id="breadcrumb">Accounts › Users</span></p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input type="text" id="search-input" placeholder="Start typing to filter..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <span class="text-sm text-gray-600">WELCOME, <strong>SAMANTHA ZHYRE</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="p-8">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <!-- Action Bar -->
+                    <div class="border-b border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-gray-800" id="section-title">Select user to change</h2>
+                            <button onclick="openAddModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                                <i class="fas fa-plus"></i>
+                                <span id="add-button-text">ADD USER</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Filters -->
+                        <div class="mt-4 flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option>---------</option>
+                                    <option>Action 1</option>
+                                    <option>Action 2</option>
+                                </select>
+                                <button class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium">Go</button>
+                            </div>
+                            <span class="text-sm text-gray-500"><span id="selected-count">0</span> of <span id="total-count">0</span> selected</span>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full" id="data-table">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left">
+                                        <input type="checkbox" id="select-all" onclick="toggleSelectAll()" class="rounded border-gray-300">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                                        <div class="flex items-center space-x-1">
+                                            <span id="col1-header">USERNAME</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                                        <div class="flex items-center space-x-1">
+                                            <span id="col2-header">EMAIL</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                                        <div class="flex items-center space-x-1">
+                                            <span id="col3-header">FIRST NAME</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                                        <div class="flex items-center space-x-1">
+                                            <span id="col4-header">LAST NAME</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Add/Edit Modal -->
+    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800" id="modal-title">Add New Item</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="add-form" onsubmit="handleSubmit(event)">
+                    <div id="form-fields" class="space-y-4">
+                        <!-- Form fields will be dynamically inserted here -->
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                        <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all shadow-md hover:shadow-lg">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">Confirm Delete</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors">Cancel</button>
+                <button onclick="confirmDelete()" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium transition-all shadow-md hover:shadow-lg">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 z-60 hidden">
+        <div class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+            <i class="fas fa-check-circle text-xl"></i>
+            <span id="toast-message">Success!</span>
+        </div>
+    </div>
+
+    <script>
+        // Data structure for all sections
+        const sectionData = {
+            users: {
+                title: 'Select user to change',
+                addButton: 'ADD USER',
+                columns: ['USERNAME', 'EMAIL', 'FIRST NAME', 'LAST NAME'],
+                formFields: [
+                    { name: 'username', label: 'Username', type: 'text', required: true },
+                    { name: 'email', label: 'Email', type: 'email', required: true },
+                    { name: 'firstName', label: 'First Name', type: 'text', required: true },
+                    { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+                    { name: 'password', label: 'Password', type: 'password', required: true }
+                ],
+                data: [
+                    { id: 1, username: 'smnta', email: 'samantha@example.com', firstName: 'Samantha', lastName: 'Zhyre' },
+                    { id: 2, username: 'andi', email: 'andi@example.com', firstName: 'Andi', lastName: 'Cruz' },
+                    { id: 3, username: 'nico', email: 'nico@example.com', firstName: 'Nico', lastName: 'Reyes' }
+                ]
+            },
+            groups: {
+                title: 'Select group to change',
+                addButton: 'ADD GROUP',
+                columns: ['GROUP NAME', 'PERMISSIONS', 'MEMBERS', 'CREATED'],
+                formFields: [
+                    { name: 'groupName', label: 'Group Name', type: 'text', required: true },
+                    { name: 'permissions', label: 'Permissions', type: 'textarea', required: false },
+                    { name: 'description', label: 'Description', type: 'textarea', required: false }
+                ],
+                data: [
+                    { id: 1, groupName: 'Administrators', permissions: 'All permissions', members: '3', created: 'Nov. 1, 2025' },
+                    { id: 2, groupName: 'Moderators', permissions: 'Limited permissions', members: '5', created: 'Oct. 15, 2025' }
+                ]
+            },
+            'event-rsvps': {
+                title: 'Select event RSVP to change',
+                addButton: 'ADD EVENT RSVP',
+                columns: ['EVENT NAME', 'STUDENT', 'STATUS', 'RSVP DATE'],
+                formFields: [
+                    { name: 'eventName', label: 'Event Name', type: 'text', required: true },
+                    { name: 'student', label: 'Student', type: 'text', required: true },
+                    { name: 'status', label: 'Status', type: 'select', options: ['Attending', 'Not Attending', 'Maybe'], required: true },
+                    { name: 'rsvpDate', label: 'RSVP Date', type: 'date', required: true }
+                ],
+                data: [
+                    { id: 1, eventName: 'Tech Summit 2025', student: 'smnta', status: 'Attending', rsvpDate: 'Nov. 18, 2025' },
+                    { id: 2, eventName: 'Code Workshop', student: 'andi', status: 'Maybe', rsvpDate: 'Nov. 17, 2025' }
+                ]
+            },
+            'organization-events': {
+                title: 'Select organization event to change',
+                addButton: 'ADD ORGANIZATION EVENT',
+                columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION'],
+                formFields: [
+                    { name: 'eventName', label: 'Event Name', type: 'text', required: true },
+                    { name: 'organization', label: 'Organization', type: 'text', required: true },
+                    { name: 'date', label: 'Event Date', type: 'datetime-local', required: true },
+                    { name: 'location', label: 'Location', type: 'text', required: true },
+                    { name: 'description', label: 'Description', type: 'textarea', required: false }
+                ],
+                data: [
+                    { id: 1, eventName: 'Annual Coding Competition', organization: 'College of Computer Studies', date: 'Dec. 15, 2025', location: 'Main Auditorium' },
+                    { id: 2, eventName: 'Tech Talk Series', organization: 'Technologian Wit', date: 'Dec. 1, 2025', location: 'Room 301' }
+                ]
+            },
+            'organization-members': {
+                title: 'Select organization member to change',
+                addButton: 'ADD ORGANIZATION MEMBER',
+                columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED'],
+                formFields: [
+                    { name: 'organization', label: 'Organization', type: 'text', required: true },
+                    { name: 'student', label: 'Student', type: 'text', required: true },
+                    { name: 'role', label: 'Role', type: 'select', options: ['Member', 'Officer', 'Leader', 'Adviser'], required: true },
+                    { name: 'dateJoined', label: 'Date Joined', type: 'date', required: true }
+                ],
+                data: [
+                    { id: 1, organization: 'Test Organization 1', student: 'smnta', role: 'Adviser', dateJoined: 'Nov. 1, 2025' },
+                    { id: 2, organization: 'College of Computer Studies', student: 'andi', role: 'Officer', dateJoined: 'Oct. 18, 2025' }
+                ]
+            },
+            organizations: {
+                title: 'Select organization to change',
+                addButton: 'ADD ORGANIZATION',
+                columns: ['ORGANIZATION NAME', 'TYPE', 'MEMBERS', 'CREATED'],
+                formFields: [
+                    { name: 'orgName', label: 'Organization Name', type: 'text', required: true },
+                    { name: 'type', label: 'Type', type: 'select', options: ['Academic', 'Sports', 'Cultural', 'Special Interest'], required: true },
+                    { name: 'description', label: 'Description', type: 'textarea', required: false },
+                    { name: 'contactEmail', label: 'Contact Email', type: 'email', required: false }
+                ],
+                data: [
+                    { id: 1, orgName: 'Test Organization 1', type: 'Academic', members: '15', created: 'Oct. 1, 2025' },
+                    { id: 2, orgName: 'College of Computer Studies', type: 'Academic', members: '42', created: 'Sept. 15, 2025' }
+                ]
+            },
+            programs: {
+                title: 'Select program to change',
+                addButton: 'ADD PROGRAM',
+                columns: ['PROGRAM NAME', 'CODE', 'DEPARTMENT', 'STUDENTS'],
+                formFields: [
+                    { name: 'programName', label: 'Program Name', type: 'text', required: true },
+                    { name: 'code', label: 'Program Code', type: 'text', required: true },
+                    { name: 'department', label: 'Department', type: 'text', required: true },
+                    { name: 'description', label: 'Description', type: 'textarea', required: false }
+                ],
+                data: [
+                    { id: 1, programName: 'Bachelor of Science in Computer Science', code: 'BSCS', department: 'CCS', students: '150' },
+                    { id: 2, programName: 'Bachelor of Science in Information Technology', code: 'BSIT', department: 'CCS', students: '120' }
+                ]
+            }
+        };
+
+        let currentSection = 'users';
+        let deleteItemId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdminSection('users');
+        });
+
+        // Load section
+        function loadAdminSection(section) {
+            currentSection = section;
+            const data = sectionData[section];
+            
+            // Update active nav link
+            document.querySelectorAll('.admin-nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            
+            // Update page title and breadcrumb
+            const sectionNames = {
+                'users': 'Accounts › Users',
+                'groups': 'Authentication › Groups',
+                'event-rsvps': 'Event › Event RSVPs',
+                'organization-events': 'Event › Organization Events',
+                'organization-members': 'Organization › Organization Members',
+                'organizations': 'Organization › Organizations',
+                'programs': 'Organization › Programs'
+            };
+            document.getElementById('breadcrumb').textContent = sectionNames[section];
+            document.getElementById('section-title').textContent = data.title;
+            document.getElementById('add-button-text').textContent = data.addButton;
+            
+            // Update table headers
+            document.getElementById('col1-header').textContent = data.columns[0];
+            document.getElementById('col2-header').textContent = data.columns[1];
+            document.getElementById('col3-header').textContent = data.columns[2];
+            document.getElementById('col4-header').textContent = data.columns[3];
+            
+            // Render table data
+            renderTable();
+        }
+
+        // Render table
+        function renderTable() {
+            const data = sectionData[currentSection];
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            data.data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                const values = Object.values(item).slice(1); // Skip id
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${item.id}">
+                    </td>
+                    <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${values[0]}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updateCounts();
+        }
+
+        // Update counts
+        function updateCounts() {
+            const total = sectionData[currentSection].data.length;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('item-count').textContent = total;
+            
+            const selected = document.querySelectorAll('.item-checkbox:checked').length;
+            document.getElementById('selected-count').textContent = selected;
+        }
+
+        // Toggle select all
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            document.querySelectorAll('.item-checkbox').forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateCounts();
+        }
+
+        // Open add modal
+        function openAddModal() {
+            const data = sectionData[currentSection];
+            document.getElementById('modal-title').textContent = 'Add ' + data.title.replace('Select ', '').replace(' to change', '');
+            
+            // Generate form fields
+            const formFields = document.getElementById('form-fields');
+            formFields.innerHTML = '';
+            
+            data.formFields.forEach(field => {
+                const fieldDiv = document.createElement('div');
+                
+                if (field.type === 'textarea') {
+                    fieldDiv.innerHTML = `
+                        <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                        <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${field.required ? 'required' : ''}></textarea>
+                    `;
+                } else if (field.type === 'select') {
+                    fieldDiv.innerHTML = `
+                        <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                        <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                            <option value="">Select ${field.label}</option>
+                            ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    `;
+                } else {
+                    fieldDiv.innerHTML = `
+                        <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                        <input type="${field.type}" name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                    `;
+                }
+                
+                formFields.appendChild(fieldDiv);
+            });
+            
+            document.getElementById('add-modal').classList.remove('hidden');
+            document.getElementById('add-modal').classList.add('flex');
+        }
+
+        // Close add modal
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.add('hidden');
+            document.getElementById('add-modal').classList.remove('flex');
+            document.getElementById('add-form').reset();
+        }
+
+        // Handle form submit
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const itemData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                itemData[key] = value;
+            }
+            
+            // Check if editing existing item
+            if (window.editingItemId) {
+                // Update existing item
+                const index = sectionData[currentSection].data.findIndex(item => item.id === window.editingItemId);
+                if (index > -1) {
+                    // Update the item with new data, preserving id
+                    sectionData[currentSection].data[index] = { 
+                        ...sectionData[currentSection].data[index], 
+                        ...itemData 
+                    };
+                    showToast('Item updated successfully!', 'success');
+                }
+                // Clear editing id
+                window.editingItemId = null;
+            } else {
+                // Add new item
+                const newItem = { id: Date.now(), ...itemData };
+                sectionData[currentSection].data.push(newItem);
+                showToast('Item added successfully!', 'success');
+            }
+            
+            // Re-render table
+            renderTable();
+            
+            // Close modal
+            closeAddModal();
+        }
+
+        // Edit item
+        function editItem(id) {
+            const data = sectionData[currentSection];
+            const item = data.data.find(item => item.id === id);
+            
+            if (item) {
+                // Update modal title
+                document.getElementById('modal-title').textContent = 'Edit ' + data.title.replace('Select ', '').replace(' to change', '');
+                
+                // Generate form fields with existing data
+                const formFields = document.getElementById('form-fields');
+                formFields.innerHTML = '';
+                
+                data.formFields.forEach(field => {
+                    const fieldDiv = document.createElement('div');
+                    const value = item[field.name] || '';
+                    
+                    if (field.type === 'textarea') {
+                        fieldDiv.innerHTML = `
+                            <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                            <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${field.required ? 'required' : ''}>${value}</textarea>
+                        `;
+                    } else if (field.type === 'select') {
+                        fieldDiv.innerHTML = `
+                            <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                            <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                                <option value="">Select ${field.label}</option>
+                                ${field.options.map(opt => `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`).join('')}
+                            </select>
+                        `;
+                    } else {
+                        fieldDiv.innerHTML = `
+                            <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                            <input type="${field.type}" name="${field.name}" value="${value}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                        `;
+                    }
+                    
+                    formFields.appendChild(fieldDiv);
+                });
+                
+                // Store editing item id
+                window.editingItemId = id;
+                
+                // Show modal
+                document.getElementById('add-modal').classList.remove('hidden');
+                document.getElementById('add-modal').classList.add('flex');
+            }
+        }
+
+        // Delete item
+        function deleteItem(id) {
+            deleteItemId = id;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('delete-modal').classList.add('flex');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            document.getElementById('delete-modal').classList.remove('flex');
+            deleteItemId = null;
+        }
+
+        // Confirm delete
+        function confirmDelete() {
+            if (deleteItemId) {
+                const index = sectionData[currentSection].data.findIndex(item => item.id === deleteItemId);
+                if (index > -1) {
+                    sectionData[currentSection].data.splice(index, 1);
+                    renderTable();
+                    showToast('Item deleted successfully!', 'success');
+                }
+            }
+            closeDeleteModal();
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastDiv = toast.querySelector('div');
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastDiv.className = 'bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3';
+            } else if (type === 'error') {
+                toastDiv.className = 'bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#table-body tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Update selected count on checkbox change
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('item-checkbox')) {
+                updateCounts();
+            }
+        });
+    </script>
+</body>
+</html>
