@@ -61,8 +61,13 @@
                         </div>
                     </div>
 
-                    <!-- User Profile -->
-                    <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
+                    <!-- Right Side: Notification Bell + User Profile -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Notification Bell Dropdown -->
+                        {% include 'base/notification_bell.html' %}
+                        
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
                             <div class="hidden md:block text-right">
                                 <p class="text-base font-semibold text-gray-800">
                                     {{ user.first_name|title }} {{ user.last_name|title }}
@@ -79,6 +84,7 @@
                                     class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm">
                             {% endif %}
                         </div>
+                    </div>
                 </div>
             </header>
 

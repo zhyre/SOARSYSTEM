@@ -135,7 +135,7 @@
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
                 <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Notifications</span>
                 <!-- Badge Count - Replace 5 with {{ unread_count }} for dynamic count -->
-                <span class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center">5</span>
+                <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
                 {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                 {% endif %}
@@ -295,7 +295,7 @@
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
                 <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Notifications</span>
                 <!-- Badge Count - Replace 5 with {{ unread_count }} for dynamic count -->
-                <span class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center">5</span>
+                <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
                 {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
                 {% endif %}
@@ -532,3 +532,6 @@
     animation: pulse-dot 2s infinite;
 }
 </style>
+
+<!-- Notification Badge Update Script -->
+<script src="{% static 'js/notification_badge.js' %}"></script>

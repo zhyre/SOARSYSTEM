@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Organization - SOAR Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <a href="{% url 'admin_panel' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Admin Panel
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">Create New Organization</h1>
+                <p class="mt-2 text-gray-600">Fill in the details below to create a new student organization</p>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="rounded-lg p-4 {% if message.tags == 'success' %}bg-green-100 border border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-100 border border-red-200 text-red-800{% else %}bg-blue-100 border border-blue-200 text-blue-800{% endif %}">
+                            <div class="flex items-center">
+                                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Form -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white">Organization Details</h2>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="p-6 space-y-6" id="create-org-form">
+                    {% csrf_token %}
+
+                    <!-- Organization Name -->
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Organization Name <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="mt-2">
+                                {% for error in form.name.errors %}
+                                    <p class="text-sm text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">Must be unique across all organizations</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="mt-2">
+                                {% for error in form.description.errors %}
+                                    <p class="text-sm text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="mt-1 flex justify-between items-center">
+                            <p class="text-xs text-gray-500">Provide a brief overview of the organization</p>
+                            <p class="text-xs text-gray-500">
+                                <span id="char-count">0</span> / 500 characters
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Category/Tags -->
+                    <div>
+                        <label for="{{ form.tags.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Categories/Tags <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.tags }}
+                        {% if form.tags.errors %}
+                            <div class="mt-2">
+                                {% for error in form.tags.errors %}
+                                    <p class="text-sm text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.tags.help_text }}</p>
+                        
+                        <!-- Tag Suggestions -->
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-600 mb-2">Common categories:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="addTag('Academic')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs hover:bg-blue-100 border border-blue-200">
+                                    Academic
+                                </button>
+                                <button type="button" onclick="addTag('Sports')" class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs hover:bg-green-100 border border-green-200">
+                                    Sports
+                                </button>
+                                <button type="button" onclick="addTag('Cultural')" class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs hover:bg-purple-100 border border-purple-200">
+                                    Cultural
+                                </button>
+                                <button type="button" onclick="addTag('Technology')" class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs hover:bg-indigo-100 border border-indigo-200">
+                                    Technology
+                                </button>
+                                <button type="button" onclick="addTag('Arts')" class="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs hover:bg-pink-100 border border-pink-200">
+                                    Arts
+                                </button>
+                                <button type="button" onclick="addTag('Community Service')" class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs hover:bg-yellow-100 border border-yellow-200">
+                                    Community Service
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Picture -->
+                    <div>
+                        <label for="{{ form.profile_picture.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Profile Picture
+                        </label>
+                        <div class="mt-1 flex items-center space-x-4">
+                            <div id="image-preview" class="hidden">
+                                <img src="" alt="Preview" class="h-24 w-24 object-cover rounded-lg border-2 border-gray-300">
+                            </div>
+                            <div class="flex-1">
+                                {{ form.profile_picture }}
+                                {% if form.profile_picture.errors %}
+                                    <div class="mt-2">
+                                        {% for error in form.profile_picture.errors %}
+                                            <p class="text-sm text-red-600">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-xs text-gray-500">Optional. JPG or PNG format only. Max 10MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                        <a href="{% url 'admin_panel' %}" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Create Organization</span>
+                        </button>
+                    </div>
+
+                    <!-- Required Fields Note -->
+                    <div class="pt-4 border-t border-gray-200">
+                        <p class="text-xs text-gray-500">
+                            <span class="text-red-500">*</span> Required fields
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Information Box -->
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>You will be automatically assigned as the Head Officer (Leader) of this organization</li>
+                                <li>Organization names must be unique</li>
+                                <li>The description should be clear and informative (max 500 characters)</li>
+                                <li>At least one category/tag is required to help students find the organization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Character counter for description
+        const descriptionField = document.querySelector('textarea[name="description"]');
+        const charCount = document.getElementById('char-count');
+        
+        if (descriptionField && charCount) {
+            descriptionField.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+                if (this.value.length > 500) {
+                    charCount.classList.add('text-red-600', 'font-semibold');
+                } else {
+                    charCount.classList.remove('text-red-600', 'font-semibold');
+                }
+            });
+            // Initialize count
+            charCount.textContent = descriptionField.value.length;
+        }
+
+        // Image preview
+        const imageInput = document.querySelector('input[name="profile_picture"]');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.classList.add('hidden');
+                }
+            });
+        }
+
+        // Add tag to input field
+        function addTag(tagName) {
+            const tagsInput = document.querySelector('input[name="tags"]');
+            if (tagsInput) {
+                const currentTags = tagsInput.value.trim();
+                // Check if tag already exists
+                const existingTags = currentTags.split(',').map(t => t.trim().toLowerCase());
+                if (existingTags.includes(tagName.toLowerCase())) {
+                    return; // Tag already exists
+                }
+                // Add tag
+                if (currentTags) {
+                    tagsInput.value = currentTags + ', ' + tagName;
+                } else {
+                    tagsInput.value = tagName;
+                }
+            }
+        }
+
+        // Form validation
+        document.getElementById('create-org-form').addEventListener('submit', function(e) {
+            let isValid = true;
+            const name = document.querySelector('input[name="name"]').value.trim();
+            const description = document.querySelector('textarea[name="description"]').value.trim();
+            const tags = document.querySelector('input[name="tags"]').value.trim();
+
+            if (!name) {
+                alert('Organization name is required.');
+                isValid = false;
+            }
+            
+            if (!description) {
+                alert('Description is required.');
+                isValid = false;
+            } else if (description.length > 500) {
+                alert('Description cannot exceed 500 characters.');
+                isValid = false;
+            }
+
+            if (!tags) {
+                alert('At least one category/tag is required.');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

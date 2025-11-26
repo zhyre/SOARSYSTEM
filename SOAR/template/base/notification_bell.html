@@ -1,0 +1,303 @@
+{% load static %}
+<!-- Notification Bell Dropdown Component -->
+<div class="relative" id="notification-bell-container">
+    <!-- Bell Icon with Badge -->
+    <button 
+        id="notification-bell-btn" 
+        class="relative p-2 text-gray-400 hover:text-white transition-colors focus:outline-none group"
+        aria-label="Notifications"
+        onclick="toggleNotificationDropdown()"
+    >
+        <i class="fas fa-bell text-xl group-hover:scale-110 transition-transform"></i>
+        
+        <!-- Unread Badge -->
+        <span 
+            id="notification-badge" 
+            class="absolute top-0 right-0 hidden inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-[#0F172A] animate-pulse"
+        >
+            0
+        </span>
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div 
+        id="notification-dropdown" 
+        class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
+        style="max-height: 600px;"
+    >
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white flex items-center">
+                <i class="fas fa-bell mr-2"></i>
+                Notifications
+            </h3>
+            <div class="flex items-center space-x-2">
+                <span id="dropdown-unread-count" class="text-sm text-blue-100"></span>
+                <button 
+                    onclick="markAllAsRead()" 
+                    class="text-xs text-white hover:text-blue-200 underline transition-colors"
+                    title="Mark all as read"
+                >
+                    Clear all
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="notification-loading" class="hidden py-12 text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-600"></div>
+            <p class="mt-4 text-gray-500">Loading notifications...</p>
+        </div>
+
+        <!-- Notifications List -->
+        <div id="notification-list" class="divide-y divide-gray-100 overflow-y-auto" style="max-height: 450px;">
+            <!-- Notifications will be inserted here dynamically -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="notification-empty" class="hidden py-12 text-center px-6">
+            <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-bell-slash text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-sm font-semibold text-gray-900 mb-1">No new notifications</h4>
+            <p class="text-xs text-gray-500">You're all caught up!</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+            <a 
+                href="{% url 'notifications' %}" 
+                class="block text-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+            >
+                View all notifications
+                <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Bell Script -->
+<script>
+(function() {
+    let notificationDropdownOpen = false;
+
+    // Toggle dropdown
+    window.toggleNotificationDropdown = function() {
+        notificationDropdownOpen = !notificationDropdownOpen;
+        const dropdown = document.getElementById('notification-dropdown');
+        
+        if (notificationDropdownOpen) {
+            dropdown.classList.remove('hidden');
+            loadNotifications();
+        } else {
+            dropdown.classList.add('hidden');
+        }
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const container = document.getElementById('notification-bell-container');
+        if (container && !container.contains(event.target)) {
+            notificationDropdownOpen = false;
+            document.getElementById('notification-dropdown').classList.add('hidden');
+        }
+    });
+
+    // Load notifications
+    function loadNotifications() {
+        const loadingEl = document.getElementById('notification-loading');
+        const listEl = document.getElementById('notification-list');
+        const emptyEl = document.getElementById('notification-empty');
+        
+        // Show loading state
+        loadingEl.classList.remove('hidden');
+        listEl.classList.add('hidden');
+        emptyEl.classList.add('hidden');
+        
+        fetch('/notifications/api/get/?limit=10')
+            .then(response => response.json())
+            .then(data => {
+                loadingEl.classList.add('hidden');
+                
+                if (data.notifications && data.notifications.length > 0) {
+                    listEl.classList.remove('hidden');
+                    renderNotifications(data.notifications);
+                    updateUnreadCount(data.unread_count);
+                } else {
+                    emptyEl.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                loadingEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+            });
+    }
+
+    // Render notifications
+    function renderNotifications(notifications) {
+        const listEl = document.getElementById('notification-list');
+        listEl.innerHTML = '';
+        
+        notifications.forEach(notif => {
+            const notifEl = document.createElement('div');
+            notifEl.className = `notification-item px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.is_read ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`;
+            notifEl.setAttribute('data-notification-id', notif.id);
+            notifEl.onclick = function() { markAsRead(notif.id, notif.link); };
+            
+            notifEl.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 ${notif.color_class} rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                        <i class="fas ${notif.icon_class} text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900 line-clamp-2 mb-1">
+                            ${escapeHtml(notif.message)}
+                        </p>
+                        <div class="flex items-center text-xs text-gray-500">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>${notif.time_ago}</span>
+                            ${!notif.is_read ? '<span class="ml-2 w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            listEl.appendChild(notifEl);
+        });
+    }
+
+    // Mark notification as read
+    window.markAsRead = function(notificationId, link) {
+        fetch(`/notifications/mark-read/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateUnreadCount(data.unread_count);
+                // Redirect to link if provided
+                if (link && link !== '#') {
+                    window.location.href = link;
+                }
+            }
+        })
+        .catch(error => console.error('Error marking notification as read:', error));
+    };
+
+    // Mark all as read
+    window.markAllAsRead = function() {
+        fetch('/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateUnreadCount(0);
+                loadNotifications();
+            }
+        })
+        .catch(error => console.error('Error marking all as read:', error));
+    };
+
+    // Update unread count
+    function updateUnreadCount(count) {
+        const badge = document.getElementById('notification-badge');
+        const dropdownCount = document.getElementById('dropdown-unread-count');
+        
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('hidden');
+            if (dropdownCount) {
+                dropdownCount.textContent = `${count} unread`;
+            }
+        } else {
+            badge.classList.add('hidden');
+            if (dropdownCount) {
+                dropdownCount.textContent = 'All caught up!';
+            }
+        }
+    }
+
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Escape HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Load unread count on page load
+    function loadUnreadCount() {
+        fetch('/notifications/api/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                updateUnreadCount(data.unread_count);
+            })
+            .catch(error => console.error('Error loading unread count:', error));
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadUnreadCount);
+    } else {
+        loadUnreadCount();
+    }
+
+    // Refresh unread count every 60 seconds
+    setInterval(loadUnreadCount, 60000);
+})();
+</script>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#notification-dropdown {
+    animation: slideDown 0.2s ease-out;
+}
+</style>
