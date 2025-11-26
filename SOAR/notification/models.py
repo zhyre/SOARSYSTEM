@@ -69,12 +69,12 @@ class Notification(models.Model):
         return icons.get(self.notification_type, 'fa-bell')
     
     def get_color_class(self):
-        """Return color class based on notification type."""
+        """Return gradient color classes based on notification type."""
         colors = {
-            self.TYPE_SYSTEM: 'bg-red-500',
-            self.TYPE_MEMBERSHIP: 'bg-green-500',
-            self.TYPE_EVENT: 'bg-blue-500',
-            self.TYPE_ORGANIZATION: 'bg-purple-500',
-            self.TYPE_GENERAL: 'bg-gray-500',
+            self.TYPE_SYSTEM: 'from-red-500 to-red-600',
+            self.TYPE_MEMBERSHIP: 'from-green-500 to-green-600',
+            self.TYPE_EVENT: 'from-blue-500 to-blue-600',
+            self.TYPE_ORGANIZATION: 'from-purple-500 to-purple-600',
+            self.TYPE_GENERAL: 'from-gray-500 to-gray-600',
         }
-        return colors.get(self.notification_type, 'bg-gray-500')
+        return colors.get(self.notification_type, 'from-gray-500 to-gray-600')

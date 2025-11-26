@@ -221,13 +221,18 @@ def create_event(request, org_id):
                 is_approved=True
             ).select_related('student')
 
-            message = "New Event Created"
+            event_date_str = event_datetime.strftime("%B %d, %Y at %I:%M %p")
+            message = f"📅 New event '{title}' has been created in {organization.name}! Event date: {event_date_str}. Location: {location}."
+            event_link = f"/event/{event.id}/"  # Link to event detail page
+            
             notifications = []
             for member in approved_members:
                 notifications.append(Notification(
                     user=member.student,
                     message=message,
-                    notification_type='event_created'
+                    notification_type=Notification.TYPE_EVENT,
+                    priority=Notification.PRIORITY_MEDIUM,
+                    link=event_link
                 ))
 
             # Bulk create notifications for efficiency
@@ -247,6 +252,47 @@ def create_event(request, org_id):
         "user": request.user,
     }
     return render(request, 'organization/orgpage.html', context)
+
+@login_required
+def event_detail(request, event_id):
+    """Display event detail page with RSVP options"""
+    event = get_object_or_404(OrganizationEvent, id=event_id)
+    organization = event.organization
+    
+    # Check if user is a member of the organization
+    is_member = OrganizationMember.objects.filter(
+        organization=organization,
+        student=request.user,
+        is_approved=True
+    ).exists()
+    
+    # Get user's RSVP status
+    user_rsvp = None
+    if request.user.is_authenticated:
+        try:
+            user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
+        except EventRSVP.DoesNotExist:
+            pass
+    
+    # Get RSVP counts
+    going_count = event.rsvps.filter(status='going').count()
+    interested_count = event.rsvps.filter(status='interested').count()
+    not_going_count = event.rsvps.filter(status='not_going').count()
+    
+    # Check if event is full
+    is_full = event.max_participants and going_count >= event.max_participants
+    
+    context = {
+        'event': event,
+        'organization': organization,
+        'is_member': is_member,
+        'user_rsvp': user_rsvp,
+        'going_count': going_count,
+        'interested_count': interested_count,
+        'not_going_count': not_going_count,
+        'is_full': is_full,
+    }
+    return render(request, 'event/event_detail.html', context)
 
 @login_required
 @require_POST

@@ -270,10 +270,15 @@ def logout_view(request):
         # Log the error but continue with Django logout
         print(f"Supabase logout error: {e}")
 
-    # Sign out from Django
+    # Sign out from Django (this clears the session including messages)
     logout(request)
-    messages.info(request, "You have been logged out.")
-    return redirect('login')
+    
+    # Clear any messages that might still be in storage
+    storage = messages.get_messages(request)
+    for _ in storage:
+        pass  # Iterate to consume all messages
+    
+    return redirect('home')
 
 def organization_view(request):
     organization = get_object_or_404(Organization, user=request.user)
