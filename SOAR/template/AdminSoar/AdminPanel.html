@@ -79,6 +79,10 @@
                     <!-- Organization Section -->
                     <div class="mb-4">
                         <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Organization</h3>
+                        <a href="{% url 'admin_create_organization' %}" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200 border border-blue-500/30">
+                            <i class="fas fa-plus-circle text-sm text-blue-400 group-hover:text-blue-300"></i>
+                            <span class="font-medium text-blue-300 group-hover:text-white text-sm">Create Organization</span>
+                        </a>
                         <a href="#" onclick="loadAdminSection('organization-members'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organization-members">
                             <i class="fas fa-user-friends text-sm text-gray-400 group-hover:text-blue-400"></i>
                             <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organization Members</span>
@@ -132,10 +136,16 @@
                     <div class="border-b border-gray-200 p-6">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-800" id="section-title">Select user to change</h2>
-                            <button onclick="openAddModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
-                                <i class="fas fa-plus"></i>
-                                <span id="add-button-text">ADD USER</span>
-                            </button>
+                            <div class="flex items-center space-x-3">
+                                <a href="{% url 'admin_create_organization' %}" id="create-org-btn" class="hidden bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>CREATE ORGANIZATION</span>
+                                </a>
+                                <button onclick="openAddModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span id="add-button-text">ADD USER</span>
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- Filters -->
@@ -394,6 +404,16 @@
             document.getElementById('breadcrumb').textContent = sectionNames[section];
             document.getElementById('section-title').textContent = data.title;
             document.getElementById('add-button-text').textContent = data.addButton;
+            
+            // Show/hide Create Organization button based on section
+            const createOrgBtn = document.getElementById('create-org-btn');
+            if (section === 'organizations') {
+                createOrgBtn.classList.remove('hidden');
+                createOrgBtn.classList.add('flex');
+            } else {
+                createOrgBtn.classList.add('hidden');
+                createOrgBtn.classList.remove('flex');
+            }
             
             // Update table headers
             document.getElementById('col1-header').textContent = data.columns[0];

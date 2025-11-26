@@ -16,6 +16,12 @@ class Organization(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
+    tags = ArrayField(
+        models.CharField(max_length=30),
+        blank=True,
+        default=list,
+        help_text="Categories/tags for this organization"
+    )
     
     adviser = models.ForeignKey(
         settings.AUTH_USER_MODEL,

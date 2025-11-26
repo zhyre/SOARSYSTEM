@@ -1,35 +1,87 @@
-{% extends 'base/base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - SOAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
 
-{% block title %}Notifications - SOAR{% endblock %}
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        {% include 'base/sidebar_components.html' with sidebar_type='dashboard' %}
 
-{% block content %}
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-    <!-- Page Header -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                            <i class="fas fa-search text-lg"></i>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden ml-0 md:ml-64">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-bars text-gray-600"></i>
                         </button>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+                            <p class="text-sm text-gray-500">Stay updated with your activities</p>
+                        </div>
                     </div>
-                    <div class="relative">
-                        <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                            <i class="fas fa-ellipsis-v text-lg"></i>
-                        </button>
+
+                    <!-- Right Side: Notification Bell + User Profile -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Notification Bell Dropdown -->
+                        {% include 'base/notification_bell.html' %}
+                        
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
+                            <div class="hidden md:block text-right">
+                                <p class="text-base font-semibold text-gray-800">
+                                    {{ user.first_name|title }} {{ user.last_name|title }}
+                                </p>
+                            </div>
+
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" 
+                                    alt="{{ user.first_name }}" 
+                                    class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" 
+                                    alt="{{ user.first_name }}" 
+                                    class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </header>
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-6 py-8">
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+                <div class="max-w-4xl mx-auto">
         <!-- Filter Tabs -->
         <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
             <button data-tab="all" class="tab-btn px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ease-in-out bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl">
@@ -255,7 +307,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    if (mobileMenuToggle && sidebar && overlay) {
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('hidden');
+        });
+        
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.add('hidden');
+        });
+    }
 });
 </script>
-
-{% endblock %}
+</body>
+</html>
