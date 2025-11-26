@@ -33,6 +33,22 @@ def notifications_view(request):
     return render(request, 'notification/notifications.html', context)
 
 @login_required
+def notification_detail_view(request, notification_id):
+    """Display detailed view of a specific notification."""
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    
+    # Mark as read when viewed
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save()
+    
+    context = {
+        'notification': notification,
+        'hide_header': True,
+    }
+    return render(request, 'notification/notification_detail.html', context)
+
+@login_required
 @require_GET
 def get_notifications_api(request):
     """API endpoint to fetch recent notifications for dropdown."""

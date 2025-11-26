@@ -84,8 +84,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=0, ssl_require=True)
     }
+    # Add connection pooling settings for Supabase
+    DATABASES['default']['OPTIONS'] = {
+        'connect_timeout': 10,
+    }
+    DATABASES['default']['CONN_MAX_AGE'] = 0  # Close connections immediately after request
 else:
     DATABASES = {
         "default": {

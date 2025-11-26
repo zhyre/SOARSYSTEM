@@ -74,9 +74,11 @@
                             <div class="hidden md:block text-right">
                                 <p class="text-sm font-medium text-gray-700">{{ user.last_name }}, {{ user.first_name }}{% if user.middle_name %} {{ user.middle_name }}{% endif %}</p>
                             </div>
-                            <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=2563eb&color=fff" 
-                                 alt="{{ user.last_name }}, {{ user.first_name }}" 
-                                 class="w-10 h-10 rounded-full border-2 border-blue-500 shadow-md">
+                            <a href="{% url 'profile' %}">
+                                <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=2563eb&color=fff" 
+                                     alt="{{ user.last_name }}, {{ user.first_name }}" 
+                                     class="w-10 h-10 rounded-full border-2 border-blue-500 shadow-md cursor-pointer hover:border-blue-600 transition">
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -300,14 +302,18 @@
 
     {{ programs|json_script:"programs-data" }}
     
+    <script id="current-programs-data" type="application/json">
+    [
+        {% if not organization.is_public %}
+        {% for program in organization.allowed_programs.all %}
+        "{{ program.id }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        {% endif %}
+    ]
+    </script>
+    
     <script>
-        const currentAllowedPrograms = [
-            {% if not organization.is_public %}
-            {% for program in organization.allowed_programs.all %}
-            "{{ program.id }}",
-            {% endfor %}
-            {% endif %}
-        ];
+        const currentAllowedPrograms = JSON.parse(document.getElementById('current-programs-data').textContent);
         const programsData = JSON.parse(document.getElementById('programs-data').textContent);
     </script>
 

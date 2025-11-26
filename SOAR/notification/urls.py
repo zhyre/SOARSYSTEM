@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.notifications_view, name='notifications'),
+    path('<int:notification_id>/', views.notification_detail_view, name='notification_detail'),
     path('api/get/', views.get_notifications_api, name='get_notifications_api'),
     path('api/unread-count/', views.get_unread_count_api, name='get_unread_count_api'),
     path('mark-read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),

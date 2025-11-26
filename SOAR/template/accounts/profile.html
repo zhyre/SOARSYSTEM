@@ -59,10 +59,9 @@
                     </div>
                 </div>
                 <div class="user-menu">
-                    <div class="notifications">
-                        <i class="far fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
+                    <!-- Notification Bell -->
+                    {% include 'base/notification_bell.html' %}
+                    
                     <div class="user-profile">
                         {% if user.profile_picture %}
                             <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}">

@@ -171,7 +171,21 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Only advisers, leaders or admins can promote members.'}, status=status.HTTP_403_FORBIDDEN)
 
         try:
+            old_role = member.role
             member.promote(promoter=promoter)
+            
+            # Create notification for the promoted member
+            from SOAR.notification.models import Notification
+            role_display = dict(OrganizationMember.ROLE_CHOICES).get(member.role, member.role)
+            message = f"🎉 Congratulations! You have been promoted to {role_display} in {member.organization.name}."
+            Notification.objects.create(
+                user=member.student,
+                message=message,
+                notification_type=Notification.TYPE_ORGANIZATION,
+                priority=Notification.PRIORITY_HIGH,
+                link=f"/organization/orgpage/{member.organization.id}/"
+            )
+            
             return Response({
                 'status': 'success',
                 'message': f'{member.student.username} has been promoted to {member.role}.',
@@ -204,7 +218,21 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Only advisers, leaders or admins can demote members.'}, status=status.HTTP_403_FORBIDDEN)
 
         try:
+            old_role = member.role
             member.demote(demoter=demoter)
+            
+            # Create notification for the demoted member
+            from SOAR.notification.models import Notification
+            role_display = dict(OrganizationMember.ROLE_CHOICES).get(member.role, member.role)
+            message = f"Your role in {member.organization.name} has been changed to {role_display}."
+            Notification.objects.create(
+                user=member.student,
+                message=message,
+                notification_type=Notification.TYPE_ORGANIZATION,
+                priority=Notification.PRIORITY_HIGH,
+                link=f"/organization/orgpage/{member.organization.id}/"
+            )
+            
             return Response({
                 'status': 'success',
                 'message': f'{member.student.username} has been demoted to {member.role}.',
@@ -230,11 +258,13 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
 
         # Create notification
         approval_date = member.date_joined.strftime('%B %d, %Y')
-        message = f"Your membership request to {member.organization.name} has been approved on {approval_date}."
+        message = f"✅ Your membership request to {member.organization.name} has been approved! Welcome aboard."
         Notification.objects.create(
             user=member.student,
             message=message,
-            notification_type='organization_approval'
+            notification_type=Notification.TYPE_MEMBERSHIP,
+            priority=Notification.PRIORITY_HIGH,
+            link=f"/organization/orgpage/{member.organization.id}/"
         )
 
         send_mail(
@@ -249,9 +279,20 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         """Reject a join request and notify the user by email."""
+        from SOAR.notification.models import Notification
         member = self.get_object()
         if member.is_approved:
             return Response({'error': 'Already approved.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create notification for rejection
+        message = f"Your membership request to {member.organization.name} has been declined."
+        Notification.objects.create(
+            user=member.student,
+            message=message,
+            notification_type=Notification.TYPE_MEMBERSHIP,
+            priority=Notification.PRIORITY_MEDIUM
+        )
+        
         send_mail(
             subject=f"Application to {member.organization.name} Rejected",
             message=f"We regret to inform you that your request to join {member.organization.name} was not approved.",
@@ -263,7 +304,18 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
         return Response({'status': 'success', 'message': 'Member rejected and notified.'})
 
     def destroy(self, request, *args, **kwargs):
+        from SOAR.notification.models import Notification
         instance = self.get_object()
+        
+        # Create notification for removal
+        message = f"⚠️ You have been removed from {instance.organization.name}."
+        Notification.objects.create(
+            user=instance.student,
+            message=message,
+            notification_type=Notification.TYPE_ORGANIZATION,
+            priority=Notification.PRIORITY_HIGH
+        )
+        
         instance.delete()
         return Response({'status': 'removed'})
 

@@ -116,19 +116,20 @@
 
                     <!-- User Profile -->
                     <div class="flex items-center space-x-3">
-                        <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
-                            <i class="far fa-bell text-gray-600 text-xl"></i>
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
+                        <!-- Notification Bell -->
+                        {% include 'base/notification_bell.html' %}
+                        
                         <div class="hidden md:block text-right">
                             <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
                             
                         </div>
-                        {% if user.profile_picture %}
-                            <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
-                        {% else %}
-                            <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer">
-                        {% endif %}
+                        <a href="{% url 'profile' %}">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            {% endif %}
+                        </a>
                     </div>
                 </div>
             </header>
