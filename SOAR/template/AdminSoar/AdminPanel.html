@@ -7,6 +7,7 @@
     <title>Admin Panel - SOAR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% csrf_token %}
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -141,10 +142,54 @@
                                     <i class="fas fa-plus"></i>
                                     <span>CREATE ORGANIZATION</span>
                                 </a>
-                                <button onclick="openAddModal()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                                <button onclick="openAddModal()" id="add-button" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
                                     <i class="fas fa-plus"></i>
                                     <span id="add-button-text">ADD USER</span>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Users Search and Filters -->
+                        <div id="users-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                                    <div class="relative">
+                                        <input type="text" id="users-search-input" placeholder="Search by username, email, name..."
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Status Filter -->
+                                <div class="min-w-32">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                                    <select id="users-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+                                <!-- Program Filter -->
+                                <div class="min-w-48">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Program</label>
+                                    <select id="users-program-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">All Programs</option>
+                                        <!-- Programs will be populated dynamically -->
+                                    </select>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyUsersFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearUsersFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -172,28 +217,35 @@
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col1-header">USERNAME</span>
+                                            <span id="col1-header">USER ID</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col2-header">EMAIL</span>
+                                            <span id="col2-header">USERNAME</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col3-header">FIRST NAME</span>
+                                            <span id="col3-header">EMAIL</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col4-header">LAST NAME</span>
+                                            <span id="col4-header">REGISTRATION DATE</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                                        <div class="flex items-center space-x-1">
+                                            <span id="col5-header">PROGRAM</span>
+                                            <i class="fas fa-sort text-gray-400"></i>
+                                        </div>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACCOUNT STATUS</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
                                 </tr>
                             </thead>
@@ -205,7 +257,12 @@
 
                     <!-- Footer -->
                     <div class="border-t border-gray-200 px-6 py-4">
-                        <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
+                            <div id="users-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -266,7 +323,7 @@
             users: {
                 title: 'Select user to change',
                 addButton: 'ADD USER',
-                columns: ['USERNAME', 'EMAIL', 'FIRST NAME', 'LAST NAME'],
+                columns: ['USER ID', 'USERNAME', 'EMAIL', 'REGISTRATION DATE', 'PROGRAM', 'ACCOUNT STATUS'],
                 formFields: [
                     { name: 'username', label: 'Username', type: 'text', required: true },
                     { name: 'email', label: 'Email', type: 'email', required: true },
@@ -274,11 +331,7 @@
                     { name: 'lastName', label: 'Last Name', type: 'text', required: true },
                     { name: 'password', label: 'Password', type: 'password', required: true }
                 ],
-                data: [
-                    { id: 1, username: 'smnta', email: 'samantha@example.com', firstName: 'Samantha', lastName: 'Zhyre' },
-                    { id: 2, username: 'andi', email: 'andi@example.com', firstName: 'Andi', lastName: 'Cruz' },
-                    { id: 3, username: 'nico', email: 'nico@example.com', firstName: 'Nico', lastName: 'Reyes' }
-                ]
+                data: [] // Will be loaded dynamically
             },
             groups: {
                 title: 'Select group to change',
@@ -384,13 +437,13 @@
         function loadAdminSection(section) {
             currentSection = section;
             const data = sectionData[section];
-            
+
             // Update active nav link
             document.querySelectorAll('.admin-nav-link').forEach(link => {
                 link.classList.remove('active');
             });
             document.querySelector(`[data-section="${section}"]`).classList.add('active');
-            
+
             // Update page title and breadcrumb
             const sectionNames = {
                 'users': 'Accounts › Users',
@@ -404,7 +457,7 @@
             document.getElementById('breadcrumb').textContent = sectionNames[section];
             document.getElementById('section-title').textContent = data.title;
             document.getElementById('add-button-text').textContent = data.addButton;
-            
+
             // Show/hide Create Organization button based on section
             const createOrgBtn = document.getElementById('create-org-btn');
             if (section === 'organizations') {
@@ -414,15 +467,217 @@
                 createOrgBtn.classList.add('hidden');
                 createOrgBtn.classList.remove('flex');
             }
-            
+
+            // Show/hide users filters and pagination
+            const usersFilters = document.getElementById('users-filters');
+            const usersPagination = document.getElementById('users-pagination');
+            const addButton = document.getElementById('add-button');
+            if (section === 'users') {
+                usersFilters.classList.remove('hidden');
+                usersPagination.classList.remove('hidden');
+                addButton.style.display = 'none'; // Hide add button for users section
+            } else {
+                usersFilters.classList.add('hidden');
+                usersPagination.classList.add('hidden');
+                addButton.style.display = 'flex';
+            }
+
             // Update table headers
-            document.getElementById('col1-header').textContent = data.columns[0];
-            document.getElementById('col2-header').textContent = data.columns[1];
-            document.getElementById('col3-header').textContent = data.columns[2];
-            document.getElementById('col4-header').textContent = data.columns[3];
-            
-            // Render table data
-            renderTable();
+            if (section === 'users') {
+                document.getElementById('col1-header').textContent = data.columns[0];
+                document.getElementById('col2-header').textContent = data.columns[1];
+                document.getElementById('col3-header').textContent = data.columns[2];
+                document.getElementById('col4-header').textContent = data.columns[3];
+                document.getElementById('col5-header').textContent = data.columns[4];
+                // Hide the 6th column header since it's not sortable
+            } else {
+                document.getElementById('col1-header').textContent = data.columns[0];
+                document.getElementById('col2-header').textContent = data.columns[1];
+                document.getElementById('col3-header').textContent = data.columns[2];
+                document.getElementById('col4-header').textContent = data.columns[3];
+            }
+
+            // For users section, fetch real data
+            if (section === 'users') {
+                fetchUsersData();
+            } else {
+                // Render table data for static sections
+                renderTable();
+            }
+        }
+
+        // Fetch users data from API
+        function fetchUsersData(search = '', status = '', program = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading users...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (status) params.append('status', status);
+            if (program) params.append('program', program);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/users/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData.users.data = data.users.map(user => ({
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    date_joined: user.date_joined,
+                    course: user.course,
+                    is_active: user.is_active
+                }));
+
+                // Update programs for filter
+                if (data.programs) {
+                    const programFilter = document.getElementById('users-program-filter');
+                    programFilter.innerHTML = '<option value="">All Programs</option>';
+                    data.programs.forEach(program => {
+                        const option = document.createElement('option');
+                        option.value = program;
+                        option.textContent = program;
+                        programFilter.appendChild(option);
+                    });
+                }
+
+                // Render the table
+                renderUsersTable(data.users);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderUsersPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load users. Please try again.</td></tr>';
+            });
+        }
+
+        // Render users table with specific columns
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-users mr-2"></i>No users found</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+
+                const statusBadge = user.is_active
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Active</span>'
+                    : '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>Inactive</span>';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${user.id}">
+                    </td>
+                    <td class="px-6 py-4 text-sm font-mono text-gray-900">${user.id}</td>
+                    <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${user.username}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${user.email}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${user.date_joined}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${user.course}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="editUser('${user.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            updateCounts();
+        }
+
+        // Apply users filters
+        function applyUsersFilters() {
+            const search = document.getElementById('users-search-input').value;
+            const status = document.getElementById('users-status-filter').value;
+            const program = document.getElementById('users-program-filter').value;
+            fetchUsersData(search, status, program, 1);
+        }
+
+        // Clear users filters
+        function clearUsersFilters() {
+            document.getElementById('users-search-input').value = '';
+            document.getElementById('users-status-filter').value = '';
+            document.getElementById('users-program-filter').value = '';
+            fetchUsersData();
+        }
+
+        // Edit user (placeholder function)
+        function editUser(userId) {
+            alert(`Edit user functionality for user ID: ${userId}\n\nThis would open an edit modal with user details.`);
+            // TODO: Implement edit user modal and API call
+        }
+
+        // Delete user (placeholder function)
+        function deleteUser(userId) {
+            if (confirm(`Are you sure you want to delete user with ID: ${userId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete user functionality for user ID: ${userId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete user API call
+            }
+        }
+
+        // Render users pagination
+        function renderUsersPagination(data) {
+            const paginationContainer = document.getElementById('users-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('users-search-input').value;
+            const status = document.getElementById('users-status-filter').value;
+            const program = document.getElementById('users-program-filter').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchUsersData(search, status, program, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchUsersData(search, status, program, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
         }
 
         // Render table
