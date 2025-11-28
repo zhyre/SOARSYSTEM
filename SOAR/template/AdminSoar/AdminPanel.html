@@ -192,7 +192,153 @@
                                 </div>
                             </div>
                         </div>
-                        
+
+                        <!-- Event RSVPs Search and Filters -->
+                        <div id="event-rsvps-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search RSVPs</label>
+                                    <div class="relative">
+                                        <input type="text" id="event-rsvps-search-input" placeholder="Search by event name, student, email..."
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Status Filter -->
+                                <div class="min-w-32">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">RSVP Status</label>
+                                    <select id="event-rsvps-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">All Status</option>
+                                        <option value="going">Going</option>
+                                        <option value="not_going">Not Going</option>
+                                        <option value="interested">Interested</option>
+                                    </select>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyEventRsvpsFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearEventRsvpsFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization Events Search and Filters -->
+                        <div id="organization-events-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Events</label>
+                                    <div class="relative">
+                                        <input type="text" id="organization-events-search-input" placeholder="Search by event name, organization, location..."
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyOrganizationEventsFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearOrganizationEventsFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization Members Search and Filters -->
+                        <div id="organization-members-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Members</label>
+                                    <div class="relative">
+                                        <input type="text" id="organization-members-search-input" placeholder="Search by organization, student, email..."
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Status Filter -->
+                                <div class="min-w-32">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Approval Status</label>
+                                    <select id="organization-members-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">All Status</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="pending">Pending</option>
+                                    </select>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyOrganizationMembersFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearOrganizationMembersFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organizations Search and Filters -->
+                        <div id="organizations-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Organizations</label>
+                                    <div class="relative">
+                                        <input type="text" id="organizations-search-input" placeholder="Search by organization name, description, adviser..."
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyOrganizationsFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearOrganizationsFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Programs Search and Filters -->
+                        <div id="programs-filters" class="mt-4 hidden">
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <!-- Search -->
+                                <div class="flex-1 min-w-64">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Programs</label>
+                                    <div class="relative">
+                                        <input type="text" id="programs-search-input" placeholder="Search by program name or code..."
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="applyProgramsFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                    <button onclick="clearProgramsFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                        <i class="fas fa-times mr-2"></i>Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Filters -->
                         <div class="mt-4 flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
@@ -245,8 +391,11 @@
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACCOUNT STATUS</th>
+                                    <th id="account-status-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACCOUNT STATUS</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                                    <th id="col6-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                                    <th id="col7-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                                    <th id="col8-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="bg-white divide-y divide-gray-200">
@@ -260,6 +409,21 @@
                         <div class="flex items-center justify-between">
                             <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
                             <div id="users-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                            <div id="event-rsvps-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                            <div id="organization-events-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                            <div id="organization-members-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                            <div id="organizations-pagination" class="hidden flex space-x-2">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                            <div id="programs-pagination" class="hidden flex space-x-2">
                                 <!-- Pagination will be inserted here -->
                             </div>
                         </div>
@@ -350,22 +514,19 @@
             'event-rsvps': {
                 title: 'Select event RSVP to change',
                 addButton: 'ADD EVENT RSVP',
-                columns: ['EVENT NAME', 'STUDENT', 'STATUS', 'RSVP DATE'],
+                columns: ['EVENT NAME', 'ORGANIZATION', 'STUDENT', 'STATUS', 'RSVP DATE', 'ACTIONS'],
                 formFields: [
                     { name: 'eventName', label: 'Event Name', type: 'text', required: true },
                     { name: 'student', label: 'Student', type: 'text', required: true },
-                    { name: 'status', label: 'Status', type: 'select', options: ['Attending', 'Not Attending', 'Maybe'], required: true },
+                    { name: 'status', label: 'Status', type: 'select', options: ['going', 'not_going', 'interested'], required: true },
                     { name: 'rsvpDate', label: 'RSVP Date', type: 'date', required: true }
                 ],
-                data: [
-                    { id: 1, eventName: 'Tech Summit 2025', student: 'smnta', status: 'Attending', rsvpDate: 'Nov. 18, 2025' },
-                    { id: 2, eventName: 'Code Workshop', student: 'andi', status: 'Maybe', rsvpDate: 'Nov. 17, 2025' }
-                ]
+                data: [] // Will be loaded dynamically
             },
             'organization-events': {
                 title: 'Select organization event to change',
                 addButton: 'ADD ORGANIZATION EVENT',
-                columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION'],
+                columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION', 'DESCRIPTION', 'ACTIVITY TYPE', 'PARTICIPANTS', 'STATUS'],
                 formFields: [
                     { name: 'eventName', label: 'Event Name', type: 'text', required: true },
                     { name: 'organization', label: 'Organization', type: 'text', required: true },
@@ -373,40 +534,31 @@
                     { name: 'location', label: 'Location', type: 'text', required: true },
                     { name: 'description', label: 'Description', type: 'textarea', required: false }
                 ],
-                data: [
-                    { id: 1, eventName: 'Annual Coding Competition', organization: 'College of Computer Studies', date: 'Dec. 15, 2025', location: 'Main Auditorium' },
-                    { id: 2, eventName: 'Tech Talk Series', organization: 'Technologian Wit', date: 'Dec. 1, 2025', location: 'Room 301' }
-                ]
+                data: [] // Will be loaded dynamically
             },
             'organization-members': {
                 title: 'Select organization member to change',
                 addButton: 'ADD ORGANIZATION MEMBER',
-                columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED'],
+                columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED', 'STATUS'],
                 formFields: [
                     { name: 'organization', label: 'Organization', type: 'text', required: true },
                     { name: 'student', label: 'Student', type: 'text', required: true },
                     { name: 'role', label: 'Role', type: 'select', options: ['Member', 'Officer', 'Leader', 'Adviser'], required: true },
                     { name: 'dateJoined', label: 'Date Joined', type: 'date', required: true }
                 ],
-                data: [
-                    { id: 1, organization: 'Test Organization 1', student: 'smnta', role: 'Adviser', dateJoined: 'Nov. 1, 2025' },
-                    { id: 2, organization: 'College of Computer Studies', student: 'andi', role: 'Officer', dateJoined: 'Oct. 18, 2025' }
-                ]
+                data: [] // Will be loaded dynamically
             },
             organizations: {
                 title: 'Select organization to change',
                 addButton: 'ADD ORGANIZATION',
-                columns: ['ORGANIZATION NAME', 'TYPE', 'MEMBERS', 'CREATED'],
+                columns: ['ORGANIZATION NAME', 'TYPE', 'MEMBERS', 'ADVISER', 'VISIBILITY', 'PROGRAMS', 'CREATED'],
                 formFields: [
                     { name: 'orgName', label: 'Organization Name', type: 'text', required: true },
                     { name: 'type', label: 'Type', type: 'select', options: ['Academic', 'Sports', 'Cultural', 'Special Interest'], required: true },
                     { name: 'description', label: 'Description', type: 'textarea', required: false },
                     { name: 'contactEmail', label: 'Contact Email', type: 'email', required: false }
                 ],
-                data: [
-                    { id: 1, orgName: 'Test Organization 1', type: 'Academic', members: '15', created: 'Oct. 1, 2025' },
-                    { id: 2, orgName: 'College of Computer Studies', type: 'Academic', members: '42', created: 'Sept. 15, 2025' }
-                ]
+                data: [] // Will be loaded dynamically
             },
             programs: {
                 title: 'Select program to change',
@@ -418,10 +570,7 @@
                     { name: 'department', label: 'Department', type: 'text', required: true },
                     { name: 'description', label: 'Description', type: 'textarea', required: false }
                 ],
-                data: [
-                    { id: 1, programName: 'Bachelor of Science in Computer Science', code: 'BSCS', department: 'CCS', students: '150' },
-                    { id: 2, programName: 'Bachelor of Science in Information Technology', code: 'BSIT', department: 'CCS', students: '120' }
-                ]
+                data: [] // Will be loaded dynamically
             }
         };
 
@@ -468,17 +617,89 @@
                 createOrgBtn.classList.remove('flex');
             }
 
-            // Show/hide users filters and pagination
+            // Show/hide filters and pagination
             const usersFilters = document.getElementById('users-filters');
             const usersPagination = document.getElementById('users-pagination');
+            const eventRsvpsFilters = document.getElementById('event-rsvps-filters');
+            const eventRsvpsPagination = document.getElementById('event-rsvps-pagination');
+            const organizationEventsFilters = document.getElementById('organization-events-filters');
+            const organizationEventsPagination = document.getElementById('organization-events-pagination');
+            const organizationMembersFilters = document.getElementById('organization-members-filters');
+            const organizationMembersPagination = document.getElementById('organization-members-pagination');
+            const organizationsFilters = document.getElementById('organizations-filters');
+            const organizationsPagination = document.getElementById('organizations-pagination');
+            const programsFilters = document.getElementById('programs-filters');
+            const programsPagination = document.getElementById('programs-pagination');
+            const accountStatusHeader = document.getElementById('account-status-header');
             const addButton = document.getElementById('add-button');
+
+            // Hide all filters and pagination first
+            usersFilters.classList.add('hidden');
+            usersPagination.classList.add('hidden');
+            eventRsvpsFilters.classList.add('hidden');
+            eventRsvpsPagination.classList.add('hidden');
+            if (organizationEventsFilters) organizationEventsFilters.classList.add('hidden');
+            if (organizationEventsPagination) organizationEventsPagination.classList.add('hidden');
+            if (organizationMembersFilters) organizationMembersFilters.classList.add('hidden');
+            if (organizationMembersPagination) organizationMembersPagination.classList.add('hidden');
+            if (organizationsFilters) organizationsFilters.classList.add('hidden');
+            if (organizationsPagination) organizationsPagination.classList.add('hidden');
+            if (programsFilters) programsFilters.classList.add('hidden');
+            if (programsPagination) programsPagination.classList.add('hidden');
+
             if (section === 'users') {
                 usersFilters.classList.remove('hidden');
                 usersPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'table-cell';
+                    accountStatusHeader.textContent = 'ACCOUNT STATUS';
+                }
                 addButton.style.display = 'none'; // Hide add button for users section
+            } else if (section === 'event-rsvps') {
+                eventRsvpsFilters.classList.remove('hidden');
+                eventRsvpsPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
+                addButton.style.display = 'flex';
+            } else if (section === 'organization-events') {
+                if (organizationEventsFilters) organizationEventsFilters.classList.remove('hidden');
+                if (organizationEventsPagination) organizationEventsPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
+                addButton.style.display = 'flex';
+            } else if (section === 'organization-members') {
+                if (organizationMembersFilters) organizationMembersFilters.classList.remove('hidden');
+                if (organizationMembersPagination) organizationMembersPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
+                addButton.style.display = 'flex';
+            } else if (section === 'organizations') {
+                if (organizationsFilters) organizationsFilters.classList.remove('hidden');
+                if (organizationsPagination) organizationsPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
+                addButton.style.display = 'flex';
+            } else if (section === 'programs') {
+                if (programsFilters) programsFilters.classList.remove('hidden');
+                if (programsPagination) programsPagination.classList.remove('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
+                addButton.style.display = 'flex';
             } else {
-                usersFilters.classList.add('hidden');
-                usersPagination.classList.add('hidden');
+                if (accountStatusHeader) {
+                    accountStatusHeader.style.display = 'none';
+                    accountStatusHeader.textContent = '';
+                }
                 addButton.style.display = 'flex';
             }
 
@@ -489,17 +710,54 @@
                 document.getElementById('col3-header').textContent = data.columns[2];
                 document.getElementById('col4-header').textContent = data.columns[3];
                 document.getElementById('col5-header').textContent = data.columns[4];
-                // Hide the 6th column header since it's not sortable
+                // Show actions column for users
+                document.getElementById('col6-header').style.display = 'table-cell';
+                document.getElementById('col6-header').textContent = data.columns[5];
+            } else if (section === 'event-rsvps' && data.columns.length >= 6) {
+                document.getElementById('col1-header').textContent = data.columns[0];
+                document.getElementById('col2-header').textContent = data.columns[1];
+                document.getElementById('col3-header').textContent = data.columns[2];
+                document.getElementById('col4-header').textContent = data.columns[3];
+                document.getElementById('col5-header').textContent = data.columns[4];
+                document.getElementById('col6-header').textContent = data.columns[5];
+                // Show all columns for event-rsvps
+                document.getElementById('col6-header').style.display = 'table-cell';
+            } else if (section === 'organization-events' && data.columns.length >= 8) {
+                document.getElementById('col1-header').textContent = data.columns[0];
+                document.getElementById('col2-header').textContent = data.columns[1];
+                document.getElementById('col3-header').textContent = data.columns[2];
+                document.getElementById('col4-header').textContent = data.columns[3];
+                document.getElementById('col5-header').textContent = data.columns[4];
+                document.getElementById('col6-header').textContent = data.columns[5];
+                document.getElementById('col7-header').textContent = data.columns[6];
+                document.getElementById('col8-header').textContent = data.columns[7];
+                // Show all columns for organization-events
+                document.getElementById('col6-header').style.display = 'table-cell';
+                document.getElementById('col7-header').style.display = 'table-cell';
+                document.getElementById('col8-header').style.display = 'table-cell';
             } else {
                 document.getElementById('col1-header').textContent = data.columns[0];
                 document.getElementById('col2-header').textContent = data.columns[1];
                 document.getElementById('col3-header').textContent = data.columns[2];
                 document.getElementById('col4-header').textContent = data.columns[3];
+                // Hide additional columns for other sections
+                document.getElementById('col5-header').style.display = 'none';
+                document.getElementById('col6-header').style.display = 'none';
             }
 
-            // For users section, fetch real data
+            // For dynamic sections, fetch real data
             if (section === 'users') {
                 fetchUsersData();
+            } else if (section === 'event-rsvps') {
+                fetchEventRsvpsData();
+            } else if (section === 'organization-events') {
+                fetchOrganizationEventsData();
+            } else if (section === 'organization-members') {
+                fetchOrganizationMembersData();
+            } else if (section === 'organizations') {
+                fetchOrganizationsData();
+            } else if (section === 'programs') {
+                fetchProgramsData();
             } else {
                 // Render table data for static sections
                 renderTable();
@@ -567,6 +825,797 @@
                 console.error('Error fetching users:', error);
                 tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load users. Please try again.</td></tr>';
             });
+        }
+
+        // Fetch event RSVPs data from API
+        function fetchEventRsvpsData(search = '', status = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading event RSVPs...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (status) params.append('status', status);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/event-rsvps/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData['event-rsvps'].data = data.rsvps.map(rsvp => ({
+                    id: rsvp.id,
+                    eventName: rsvp.event_name,
+                    organization: rsvp.organization,
+                    student: rsvp.student,
+                    status: rsvp.status,
+                    statusDisplay: rsvp.status_display,
+                    rsvpDate: rsvp.rsvp_date
+                }));
+
+                // Update statuses for filter
+                if (data.statuses) {
+                    const statusFilter = document.getElementById('event-rsvps-status-filter');
+                    statusFilter.innerHTML = '<option value="">All Status</option>';
+                    data.statuses.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
+                        statusFilter.appendChild(option);
+                    });
+                }
+
+                // Render the table
+                renderEventRsvpsTable(data.rsvps);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderEventRsvpsPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching event RSVPs:', error);
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load event RSVPs. Please try again.</td></tr>';
+            });
+        }
+
+        // Render event RSVPs table
+        function renderEventRsvpsTable(rsvps) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (rsvps.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-calendar-check mr-2"></i>No event RSVPs found</td></tr>';
+                return;
+            }
+
+            rsvps.forEach(rsvp => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+
+                const statusBadge = rsvp.status === 'going'
+                    ? `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>${rsvp.statusDisplay || 'Going'}</span>`
+                    : rsvp.status === 'not_going'
+                    ? `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>${rsvp.statusDisplay || 'Not Going'}</span>`
+                    : `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-question-circle mr-1"></i>${rsvp.statusDisplay || 'Interested'}</span>`;
+
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${rsvp.id}">
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">${rsvp.event_name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${rsvp.organization}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${rsvp.student}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${rsvp.rsvp_date}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="editEventRsvp('${rsvp.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteEventRsvp('${rsvp.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            updateCounts();
+        }
+
+        // Apply event RSVPs filters
+        function applyEventRsvpsFilters() {
+            const search = document.getElementById('event-rsvps-search-input').value;
+            const status = document.getElementById('event-rsvps-status-filter').value;
+            fetchEventRsvpsData(search, status, 1);
+        }
+
+        // Clear event RSVPs filters
+        function clearEventRsvpsFilters() {
+            document.getElementById('event-rsvps-search-input').value = '';
+            document.getElementById('event-rsvps-status-filter').value = '';
+            fetchEventRsvpsData();
+        }
+
+        // Render event RSVPs pagination
+        function renderEventRsvpsPagination(data) {
+            const paginationContainer = document.getElementById('event-rsvps-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('event-rsvps-search-input').value;
+            const status = document.getElementById('event-rsvps-status-filter').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchEventRsvpsData(search, status, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchEventRsvpsData(search, status, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        // Fetch organization events data from API
+        function fetchOrganizationEventsData(search = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading organization events...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/organization-events/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData['organization-events'].data = data.events.map(event => ({
+                    id: event.id,
+                    eventName: event.event_name,
+                    organization: event.organization,
+                    eventDate: event.event_date,
+                    location: event.location,
+                    description: event.description,
+                    activityType: event.activity_type,
+                    participants: event.participants,
+                    status: event.status
+                }));
+
+                // Render the table
+                renderOrganizationEventsTable(data.events);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderOrganizationEventsPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching organization events:', error);
+                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load organization events. Please try again.</td></tr>';
+            });
+        }
+
+        // Render organization events table
+        function renderOrganizationEventsTable(events) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-calendar mr-2"></i>No organization events found</td></tr>';
+                return;
+            }
+
+            events.forEach(event => {
+                const statusBadge = event.status === 'Upcoming'
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"><i class="fas fa-clock mr-1"></i>Upcoming</span>'
+                    : event.status === 'Ongoing'
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-play-circle mr-1"></i>Ongoing</span>'
+                    : event.status === 'Completed'
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"><i class="fas fa-check-circle mr-1"></i>Completed</span>'
+                    : '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"><i class="fas fa-ban mr-1"></i>Cancelled</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${event.id}">
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">${event.event_name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${event.organization}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${event.event_date}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${event.location}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title="${event.description}">${event.description}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${event.activityType}</td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-700">${event.participants}</td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editOrganizationEvent('${event.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteOrganizationEvent('${event.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateCounts();
+        }
+
+        // Apply organization events filters
+        function applyOrganizationEventsFilters() {
+            const search = document.getElementById('organization-events-search-input').value;
+            fetchOrganizationEventsData(search, 1);
+        }
+
+        // Clear organization events filters
+        function clearOrganizationEventsFilters() {
+            document.getElementById('organization-events-search-input').value = '';
+            fetchOrganizationEventsData();
+        }
+
+        // Render organization events pagination
+        function renderOrganizationEventsPagination(data) {
+            const paginationContainer = document.getElementById('organization-events-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('organization-events-search-input').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchOrganizationEventsData(search, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchOrganizationEventsData(search, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        // Fetch organization members data from API
+        function fetchOrganizationMembersData(search = '', status = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-users fa-spin mr-2"></i>Loading organization members...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (status) params.append('status', status);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/organization-members/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData['organization-members'].data = data.members.map(member => ({
+                    id: member.id,
+                    organization: member.organization,
+                    student: member.student,
+                    role: member.role,
+                    dateJoined: member.date_joined,
+                    status: member.is_approved
+                }));
+
+                // Update statuses for filter
+                if (data.statuses) {
+                    const statusFilter = document.getElementById('organization-members-status-filter');
+                    if (statusFilter) {
+                        statusFilter.innerHTML = '<option value="">All Status</option>';
+                        data.statuses.forEach(status => {
+                            const option = document.createElement('option');
+                            option.value = status;
+                            option.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                            statusFilter.appendChild(option);
+                        });
+                    }
+                }
+
+                // Render the table
+                renderOrganizationMembersTable(data.members);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderOrganizationMembersPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching organization members:', error);
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load organization members. Please try again.</td></tr>';
+            });
+        }
+
+        // Render organization members table
+        function renderOrganizationMembersTable(members) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-users mr-2"></i>No organization members found</td></tr>';
+                return;
+            }
+
+            members.forEach(member => {
+                const statusBadge = member.is_approved === 'Approved'
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Approved</span>'
+                    : '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"><i class="fas fa-clock mr-1"></i>Pending</span>';
+
+                const roleBadge = `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${member.role}</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${member.id}">
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">${member.organization}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${member.student}</td>
+                        <td class="px-6 py-4">${roleBadge}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${member.date_joined}</td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editOrganizationMember('${member.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteOrganizationMember('${member.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateCounts();
+        }
+
+        // Apply organization members filters
+        function applyOrganizationMembersFilters() {
+            const search = document.getElementById('organization-members-search-input').value;
+            const status = document.getElementById('organization-members-status-filter').value;
+            fetchOrganizationMembersData(search, status, 1);
+        }
+
+        // Clear organization members filters
+        function clearOrganizationMembersFilters() {
+            document.getElementById('organization-members-search-input').value = '';
+            document.getElementById('organization-members-status-filter').value = '';
+            fetchOrganizationMembersData();
+        }
+
+        // Render organization members pagination
+        function renderOrganizationMembersPagination(data) {
+            const paginationContainer = document.getElementById('organization-members-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('organization-members-search-input').value;
+            const status = document.getElementById('organization-members-status-filter').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchOrganizationMembersData(search, status, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchOrganizationMembersData(search, status, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        // Edit organization event (placeholder function)
+        function editOrganizationEvent(eventId) {
+            alert(`Edit organization event functionality for event ID: ${eventId}\n\nThis would open an edit modal with event details.`);
+            // TODO: Implement edit organization event modal and API call
+        }
+
+        // Delete organization event (placeholder function)
+        function deleteOrganizationEvent(eventId) {
+            if (confirm(`Are you sure you want to delete organization event with ID: ${eventId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete organization event functionality for event ID: ${eventId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete organization event API call
+            }
+        }
+
+        // Edit organization member (placeholder function)
+        function editOrganizationMember(memberId) {
+            alert(`Edit organization member functionality for member ID: ${memberId}\n\nThis would open an edit modal with member details.`);
+            // TODO: Implement edit organization member modal and API call
+        }
+
+        // Delete organization member (placeholder function)
+        function deleteOrganizationMember(memberId) {
+            if (confirm(`Are you sure you want to delete organization member with ID: ${memberId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete organization member functionality for member ID: ${memberId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete organization member API call
+            }
+        }
+
+        // Fetch organizations data from API
+        function fetchOrganizationsData(search = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-building fa-spin mr-2"></i>Loading organizations...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/organizations/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData.organizations.data = data.organizations.map(org => ({
+                    id: org.id,
+                    orgName: org.org_name,
+                    type: org.type,
+                    members: org.members,
+                    adviser: org.adviser,
+                    isPublic: org.is_public,
+                    programs: org.programs,
+                    created: org.created
+                }));
+
+                // Render the table
+                renderOrganizationsTable(data.organizations);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderOrganizationsPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching organizations:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load organizations. Please try again.</td></tr>';
+            });
+        }
+
+        // Render organizations table
+        function renderOrganizationsTable(organizations) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (organizations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-building mr-2"></i>No organizations found</td></tr>';
+                return;
+            }
+
+            organizations.forEach(org => {
+                const typeBadge = `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${org.type}</span>`;
+                const visibilityBadge = org.is_public === 'Public'
+                    ? '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-globe mr-1"></i>Public</span>'
+                    : '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"><i class="fas fa-lock mr-1"></i>Private</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${org.id}">
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">${org.org_name}</td>
+                        <td class="px-6 py-4">${typeBadge}</td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-700">${org.members}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${org.adviser}</td>
+                        <td class="px-6 py-4">${visibilityBadge}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${org.programs}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${org.created}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editOrganization('${org.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteOrganization('${org.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateCounts();
+        }
+
+        // Apply organizations filters
+        function applyOrganizationsFilters() {
+            const search = document.getElementById('organizations-search-input').value;
+            fetchOrganizationsData(search, 1);
+        }
+
+        // Clear organizations filters
+        function clearOrganizationsFilters() {
+            document.getElementById('organizations-search-input').value = '';
+            fetchOrganizationsData();
+        }
+
+        // Render organizations pagination
+        function renderOrganizationsPagination(data) {
+            const paginationContainer = document.getElementById('organizations-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('organizations-search-input').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchOrganizationsData(search, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchOrganizationsData(search, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        // Edit organization (placeholder function)
+        function editOrganization(orgId) {
+            alert(`Edit organization functionality for organization ID: ${orgId}\n\nThis would open an edit modal with organization details.`);
+            // TODO: Implement edit organization modal and API call
+        }
+
+        // Delete organization (placeholder function)
+        function deleteOrganization(orgId) {
+            if (confirm(`Are you sure you want to delete organization with ID: ${orgId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete organization functionality for organization ID: ${orgId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete organization API call
+            }
+        }
+
+        // Fetch programs data from API
+        function fetchProgramsData(search = '', page = 1) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-graduation-cap fa-spin mr-2"></i>Loading programs...</td></tr>';
+
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (page > 1) params.append('page', page);
+
+            fetch(`/admin-panel/programs/?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>${data.error}</td></tr>`;
+                    return;
+                }
+
+                // Update sectionData with fetched data
+                sectionData.programs.data = data.programs.map(program => ({
+                    id: program.id,
+                    programName: program.name,
+                    code: program.abbreviation,
+                    department: 'CCS', // Could be derived from program data
+                    students: program.students
+                }));
+
+                // Render the table
+                renderProgramsTable(data.programs);
+
+                // Update pagination info
+                document.getElementById('total-count').textContent = data.total_count;
+                document.getElementById('item-count').textContent = data.total_count;
+
+                // Render pagination
+                renderProgramsPagination(data);
+            })
+            .catch(error => {
+                console.error('Error fetching programs:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to load programs. Please try again.</td></tr>';
+            });
+        }
+
+        // Render programs table
+        function renderProgramsTable(programs) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (programs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-graduation-cap mr-2"></i>No programs found</td></tr>';
+                return;
+            }
+
+            programs.forEach(program => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${program.id}">
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">${program.name}</td>
+                        <td class="px-6 py-4 text-sm font-mono text-gray-700">${program.abbreviation}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">CCS</td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-700">${program.students}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editProgram('${program.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteProgram('${program.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateCounts();
+        }
+
+        // Apply programs filters
+        function applyProgramsFilters() {
+            const search = document.getElementById('programs-search-input').value;
+            fetchProgramsData(search, 1);
+        }
+
+        // Clear programs filters
+        function clearProgramsFilters() {
+            document.getElementById('programs-search-input').value = '';
+            fetchProgramsData();
+        }
+
+        // Render programs pagination
+        function renderProgramsPagination(data) {
+            const paginationContainer = document.getElementById('programs-pagination');
+            paginationContainer.innerHTML = '';
+
+            if (data.total_pages <= 1) {
+                return;
+            }
+
+            const search = document.getElementById('programs-search-input').value;
+
+            // Previous button
+            if (data.has_previous) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left mr-1"></i>Previous';
+                prevBtn.onclick = () => fetchProgramsData(search, data.current_page - 1);
+                paginationContainer.appendChild(prevBtn);
+            }
+
+            // Page info
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'px-3 py-2 text-sm text-gray-700';
+            pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+            paginationContainer.appendChild(pageInfo);
+
+            // Next button
+            if (data.has_next) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors';
+                nextBtn.innerHTML = 'Next<i class="fas fa-chevron-right ml-1"></i>';
+                nextBtn.onclick = () => fetchProgramsData(search, data.current_page + 1);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        // Edit program (placeholder function)
+        function editProgram(programId) {
+            alert(`Edit program functionality for program ID: ${programId}\n\nThis would open an edit modal with program details.`);
+            // TODO: Implement edit program modal and API call
+        }
+
+        // Delete program (placeholder function)
+        function deleteProgram(programId) {
+            if (confirm(`Are you sure you want to delete program with ID: ${programId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete program functionality for program ID: ${programId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete program API call
+            }
         }
 
         // Render users table with specific columns
@@ -642,6 +1691,20 @@
             }
         }
 
+        // Edit event RSVP (placeholder function)
+        function editEventRsvp(rsvpId) {
+            alert(`Edit event RSVP functionality for RSVP ID: ${rsvpId}\n\nThis would open an edit modal with RSVP details.`);
+            // TODO: Implement edit event RSVP modal and API call
+        }
+
+        // Delete event RSVP (placeholder function)
+        function deleteEventRsvp(rsvpId) {
+            if (confirm(`Are you sure you want to delete event RSVP with ID: ${rsvpId}?\n\nThis action cannot be undone.`)) {
+                alert(`Delete event RSVP functionality for RSVP ID: ${rsvpId}\n\nThis would send a DELETE request to the API.`);
+                // TODO: Implement delete event RSVP API call
+            }
+        }
+
         // Render users pagination
         function renderUsersPagination(data) {
             const paginationContainer = document.getElementById('users-pagination');
@@ -685,32 +1748,54 @@
             const data = sectionData[currentSection];
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-            
+
             data.data.forEach(item => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 transition-colors';
-                
+
                 const values = Object.values(item).slice(1); // Skip id
-                row.innerHTML = `
+                let rowHtml = `
                     <td class="px-6 py-4">
                         <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${item.id}">
-                    </td>
-                    <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${values[0]}</td>
-                    <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
-                    <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
-                    <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
-                    <td class="px-6 py-4">
-                        <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </td>
-                `;
+                    </td>`;
+
+                // Add data columns based on section
+                if (currentSection === 'event-rsvps' && data.columns.length >= 5) {
+                    // For event-rsvps with 5 columns (4 data + actions)
+                    rowHtml += `
+                        <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${values[0]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editEventRsvp(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteEventRsvp(${item.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>`;
+                } else {
+                    // Default for other sections (4 data columns + actions)
+                    rowHtml += `
+                        <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${values[0]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>`;
+                }
+
+                row.innerHTML = rowHtml;
                 tbody.appendChild(row);
             });
-            
+
             updateCounts();
         }
 
