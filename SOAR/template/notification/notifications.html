@@ -8,26 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 50;
-            }
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/notification/notifications.css' %}">
 </head>
 <body class="bg-gray-50">
     <!-- Overlay for mobile -->
@@ -38,22 +19,37 @@
         {% include 'base/sidebar_components.html' with sidebar_type='dashboard' %}
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden ml-0 md:ml-64">
+        <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Bar -->
-            <header class="bg-white shadow-sm z-10">
-                <div class="flex items-center justify-between px-6 py-4">
-                    <div class="flex items-center space-x-4">
-                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+            <header class="bg-white shadow-sm z-10 h-20 pl-0 md:pl-64">
+                <div class="flex items-center justify-between h-full">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="md:hidden p-3 hover:bg-gray-100 rounded-lg flex items-center justify-center h-full">
                             <i class="fas fa-bars text-gray-600"></i>
                         </button>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
-                            <p class="text-sm text-gray-500">Stay updated with your activities</p>
+                        <div class="flex flex-col justify-center items-center ml-1 md:ml-0">
+                            <nav class="flex items-center" aria-label="Breadcrumb">
+                                <ol class="inline-flex items-center space-x-2 md:space-x-4 rtl:space-x-reverse">
+                                    <li class="inline-flex items-center">
+                                        <a href="{% url 'index' %}" class="inline-flex items-center text-base font-semibold text-gray-700 hover:text-blue-600">
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="flex items-center">
+                                            <svg class="rtl:rotate-180 w-4 h-4 text-gray-400 mx-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                                            </svg>
+                                            <a href="{% url 'notifications' %}" class="ms-2 text-base font-semibold text-gray-700 hover:text-blue-600 md:ms-4">Notifications</a>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </nav>
                         </div>
                     </div>
 
                     <!-- Right Side: Notification Bell + User Profile -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 pr-6">
                         <!-- Notification Bell Dropdown -->
                         {% include 'base/notification_bell.html' %}
                         
@@ -82,7 +78,7 @@
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+            <main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6 pl-0 md:pl-64">
                 <div class="max-w-4xl mx-auto">
         <!-- Filter Tabs -->
         <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
@@ -274,95 +270,6 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching functionality
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-
-            // Remove active class from all buttons
-            tabButtons.forEach(btn => {
-                btn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-700', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
-                btn.classList.add('bg-white', 'text-gray-700', 'border-2', 'border-gray-200');
-            });
-
-            // Add active class to clicked button
-            this.classList.remove('bg-white', 'text-gray-700', 'border-2', 'border-gray-200');
-            this.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-blue-700', 'text-white', 'shadow-lg', 'shadow-blue-500/30');
-
-            // Hide all tab contents
-            tabContents.forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Show selected tab content
-            const selectedTab = document.getElementById(tabName + '-notifications');
-            if (selectedTab) {
-                selectedTab.classList.remove('hidden');
-            }
-        });
-    });
-
-    // Mark notification as read when clicked
-    document.addEventListener('click', function(e) {
-        const notificationItem = e.target.closest('.notification-item');
-        if (notificationItem && notificationItem.classList.contains('unread')) {
-            const notificationId = notificationItem.getAttribute('data-notification-id');
-            if (notificationId) {
-                fetch(`/notifications/mark-read/${notificationId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Remove unread indicator
-                        const indicator = notificationItem.querySelector('.absolute.top-6.right-6');
-                        if (indicator) {
-                            indicator.remove();
-                        }
-                        notificationItem.classList.remove('unread');
-
-                        // Update unread count
-                        const unreadBadge = document.querySelector('[data-tab="unread"] span');
-                        if (unreadBadge) {
-                            let count = parseInt(unreadBadge.textContent) || 0;
-                            if (count > 0) {
-                                count--;
-                                unreadBadge.textContent = count;
-                            }
-                        }
-                    }
-                })
-                .catch(error => console.error('Error marking notification as read:', error));
-            }
-        }
-    });
-    
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('overlay');
-    
-    if (mobileMenuToggle && sidebar && overlay) {
-        mobileMenuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('hidden');
-        });
-        
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.add('hidden');
-        });
-    }
-});
-</script>
+<script src="{% static 'js/notification/notifications.js' %}"></script>
 </body>
 </html>
