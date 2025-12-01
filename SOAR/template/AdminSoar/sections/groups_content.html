@@ -1,0 +1,79 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <!-- Action Bar -->
+    <div class="border-b border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-800" id="section-title">Select group to change</h2>
+            <div class="flex items-center space-x-3">
+                <button onclick="openAddModal()" id="add-button" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span id="add-button-text">ADD GROUP</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="mt-4 flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option>---------</option>
+                    <option>Action 1</option>
+                    <option>Action 2</option>
+                </select>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium">Go</button>
+            </div>
+            <span class="text-sm text-gray-500"><span id="selected-count">0</span> of <span id="total-count">0</span> selected</span>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full" id="data-table">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-6 py-3 text-left">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll()" class="rounded border-gray-300">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col1-header">GROUP NAME</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col2-header">PERMISSIONS</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col3-header">MEMBERS</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col4-header">CREATED</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                    <th id="col5-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                    <th id="col6-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                    <th id="col7-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                    <th id="col8-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                </tr>
+            </thead>
+            <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,132 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <!-- Action Bar -->
+    <div class="border-b border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-800" id="section-title">Select user to change</h2>
+            <div class="flex items-center space-x-3">
+                <button onclick="openAddModal()" id="add-button" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2" style="display: none;">
+                    <i class="fas fa-plus"></i>
+                    <span id="add-button-text">ADD USER</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Users Search and Filters -->
+        <div id="users-filters" class="mt-4">
+            <div class="flex flex-wrap gap-4 items-end">
+                <!-- Search -->
+                <div class="flex-1 min-w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                    <div class="relative">
+                        <input type="text" id="users-search-input" placeholder="Search by username, email, name..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="min-w-32">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                    <select id="users-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Program Filter -->
+                <div class="min-w-48">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Program</label>
+                    <select id="users-program-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Programs</option>
+                        <!-- Programs will be populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-2">
+                    <button onclick="applyUsersFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                    <button onclick="clearUsersFilters()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times mr-2"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="mt-4 flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option>---------</option>
+                    <option>Action 1</option>
+                    <option>Action 2</option>
+                </select>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium">Go</button>
+            </div>
+            <span class="text-sm text-gray-500"><span id="selected-count">0</span> of <span id="total-count">0</span> selected</span>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full" id="data-table">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-6 py-3 text-left">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll()" class="rounded border-gray-300">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col1-header">USER ID</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col2-header">USERNAME</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col3-header">EMAIL</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col4-header">REGISTRATION DATE</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                        <div class="flex items-center space-x-1">
+                            <span id="col5-header">PROGRAM</span>
+                            <i class="fas fa-sort text-gray-400"></i>
+                        </div>
+                    </th>
+                    <th id="account-status-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACCOUNT STATUS</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                    <th id="col6-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                    <th id="col7-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                    <th id="col8-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="display: none;"></th>
+                </tr>
+            </thead>
+            <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
+            <div id="users-pagination" class="flex space-x-2">
+                <!-- Pagination will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
