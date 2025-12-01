@@ -1,9 +1,10 @@
-// Data structure for all sections
+// Data structure for all sections - configuration only
 const sectionData = {
     users: {
         title: 'Select user to change',
         addButton: 'ADD USER',
         columns: ['USERNAME', 'EMAIL', 'FIRST NAME', 'LAST NAME'],
+        apiEndpoint: '/admin-panel/api/users/',
         formFields: [
             { name: 'username', label: 'Username', type: 'text', required: true },
             { name: 'email', label: 'Email', type: 'email', required: true },
@@ -11,16 +12,13 @@ const sectionData = {
             { name: 'lastName', label: 'Last Name', type: 'text', required: true },
             { name: 'password', label: 'Password', type: 'password', required: true }
         ],
-        data: [
-            { id: 1, username: 'smnta', email: 'samantha@example.com', firstName: 'Samantha', lastName: 'Zhyre' },
-            { id: 2, username: 'andi', email: 'andi@example.com', firstName: 'Andi', lastName: 'Cruz' },
-            { id: 3, username: 'nico', email: 'nico@example.com', firstName: 'Nico', lastName: 'Reyes' }
-        ]
+        data: []
     },
     groups: {
         title: 'Select group to change',
         addButton: 'ADD GROUP',
         columns: ['GROUP NAME', 'PERMISSIONS', 'MEMBERS', 'CREATED'],
+        apiEndpoint: null, // No API endpoint yet
         formFields: [
             { name: 'groupName', label: 'Group Name', type: 'text', required: true },
             { name: 'permissions', label: 'Permissions', type: 'textarea', required: false },
@@ -35,21 +33,20 @@ const sectionData = {
         title: 'Select event RSVP to change',
         addButton: 'ADD EVENT RSVP',
         columns: ['EVENT NAME', 'STUDENT', 'STATUS', 'RSVP DATE'],
+        apiEndpoint: '/admin-panel/api/rsvps/',
         formFields: [
             { name: 'eventName', label: 'Event Name', type: 'text', required: true },
             { name: 'student', label: 'Student', type: 'text', required: true },
-            { name: 'status', label: 'Status', type: 'select', options: ['Attending', 'Not Attending', 'Maybe'], required: true },
+            { name: 'status', label: 'Status', type: 'select', options: ['Going', 'Not Going', 'Interested'], required: true },
             { name: 'rsvpDate', label: 'RSVP Date', type: 'date', required: true }
         ],
-        data: [
-            { id: 1, eventName: 'Tech Summit 2025', student: 'smnta', status: 'Attending', rsvpDate: 'Nov. 18, 2025' },
-            { id: 2, eventName: 'Code Workshop', student: 'andi', status: 'Maybe', rsvpDate: 'Nov. 17, 2025' }
-        ]
+        data: []
     },
     'organization-events': {
         title: 'Select organization event to change',
         addButton: 'ADD ORGANIZATION EVENT',
         columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION'],
+        apiEndpoint: '/admin-panel/api/events/',
         formFields: [
             { name: 'eventName', label: 'Event Name', type: 'text', required: true },
             { name: 'organization', label: 'Organization', type: 'text', required: true },
@@ -57,60 +54,73 @@ const sectionData = {
             { name: 'location', label: 'Location', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'textarea', required: false }
         ],
-        data: [
-            { id: 1, eventName: 'Annual Coding Competition', organization: 'College of Computer Studies', date: 'Dec. 15, 2025', location: 'Main Auditorium' },
-            { id: 2, eventName: 'Tech Talk Series', organization: 'Technologian Wit', date: 'Dec. 1, 2025', location: 'Room 301' }
-        ]
+        data: []
     },
     'organization-members': {
         title: 'Select organization member to change',
         addButton: 'ADD ORGANIZATION MEMBER',
         columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED'],
+        apiEndpoint: '/admin-panel/api/organization-members/',
         formFields: [
             { name: 'organization', label: 'Organization', type: 'text', required: true },
             { name: 'student', label: 'Student', type: 'text', required: true },
             { name: 'role', label: 'Role', type: 'select', options: ['Member', 'Officer', 'Leader', 'Adviser'], required: true },
             { name: 'dateJoined', label: 'Date Joined', type: 'date', required: true }
         ],
-        data: [
-            { id: 1, organization: 'Test Organization 1', student: 'smnta', role: 'Adviser', dateJoined: 'Nov. 1, 2025' },
-            { id: 2, organization: 'College of Computer Studies', student: 'andi', role: 'Officer', dateJoined: 'Oct. 18, 2025' }
-        ]
+        data: []
     },
     organizations: {
         title: 'Select organization to change',
         addButton: 'ADD ORGANIZATION',
         columns: ['ORGANIZATION NAME', 'TYPE', 'MEMBERS', 'CREATED'],
+        apiEndpoint: '/admin-panel/api/organizations/',
         formFields: [
             { name: 'orgName', label: 'Organization Name', type: 'text', required: true },
             { name: 'type', label: 'Type', type: 'select', options: ['Academic', 'Sports', 'Cultural', 'Special Interest'], required: true },
             { name: 'description', label: 'Description', type: 'textarea', required: false },
             { name: 'contactEmail', label: 'Contact Email', type: 'email', required: false }
         ],
-        data: [
-            { id: 1, orgName: 'Test Organization 1', type: 'Academic', members: '15', created: 'Oct. 1, 2025' },
-            { id: 2, orgName: 'College of Computer Studies', type: 'Academic', members: '42', created: 'Sept. 15, 2025' }
-        ]
+        data: []
     },
     programs: {
         title: 'Select program to change',
         addButton: 'ADD PROGRAM',
         columns: ['PROGRAM NAME', 'CODE', 'DEPARTMENT', 'STUDENTS'],
+        apiEndpoint: '/admin-panel/api/programs/',
         formFields: [
             { name: 'programName', label: 'Program Name', type: 'text', required: true },
             { name: 'code', label: 'Program Code', type: 'text', required: true },
             { name: 'department', label: 'Department', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'textarea', required: false }
         ],
-        data: [
-            { id: 1, programName: 'Bachelor of Science in Computer Science', code: 'BSCS', department: 'CCS', students: '150' },
-            { id: 2, programName: 'Bachelor of Science in Information Technology', code: 'BSIT', department: 'CCS', students: '120' }
-        ]
+        data: []
     }
 };
 
 let currentSection = 'users';
 let deleteItemId = null;
+
+// Fetch data from API
+async function fetchSectionData(section) {
+    const config = sectionData[section];
+    
+    // If no API endpoint, use static data
+    if (!config.apiEndpoint) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(config.apiEndpoint);
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+        const result = await response.json();
+        sectionData[section].data = result.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        showToast('Failed to load data', 'error');
+    }
+}
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -118,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Load section
-function loadAdminSection(section) {
+async function loadAdminSection(section) {
     currentSection = section;
     const data = sectionData[section];
     
@@ -157,6 +167,9 @@ function loadAdminSection(section) {
     document.getElementById('col2-header').textContent = data.columns[1];
     document.getElementById('col3-header').textContent = data.columns[2];
     document.getElementById('col4-header').textContent = data.columns[3];
+    
+    // Fetch data from API
+    await fetchSectionData(section);
     
     // Render table data
     renderTable();

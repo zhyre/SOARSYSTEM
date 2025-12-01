@@ -108,7 +108,7 @@
                                 <input type="text" id="search-input" placeholder="Start typing to filter..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64">
                                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
-                            <span class="text-sm text-gray-600">WELCOME, <strong>SAMANTHA ZHYRE</strong></span>
+                            <span class="text-sm text-gray-600">WELCOME, <strong>{{ request.user.get_full_name|upper|default:request.user.username|upper }}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -245,6 +245,10 @@
         </div>
     </div>
 
+    <script>
+        // CSRF Token for AJAX requests
+        const csrftoken = '{{ csrf_token }}';
+    </script>
     <script src="{% static 'js/AdminSoar/admin-panel.js' %}"></script>
 </body>
 </html>
