@@ -72,11 +72,11 @@ def get_users_data(request):
     for user in users:
         users_data.append({
             'id': str(user.id),
-            'username': user.username,
+            'studentId': user.student_id or 'N/A',
+            #'username': user.username,
             'email': user.email,
             'firstName': user.first_name,
             'lastName': user.last_name,
-            'studentId': user.student_id or 'N/A',
             'course': user.course or 'N/A',
             'yearLevel': user.year_level or 'N/A',
             'dateJoined': user.date_joined.strftime('%b. %d, %Y') if user.date_joined else 'N/A'

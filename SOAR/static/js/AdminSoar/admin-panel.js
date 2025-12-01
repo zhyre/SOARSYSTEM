@@ -3,7 +3,7 @@ const sectionData = {
     users: {
         title: 'Select user to change',
         addButton: 'ADD USER',
-        columns: ['USERNAME', 'EMAIL', 'FIRST NAME', 'LAST NAME'],
+        columns: ['STUDENT ID', 'EMAIL', 'FIRST NAME', 'LAST NAME', 'PROGRAM', 'YEAR LEVEL'],
         apiEndpoint: '/admin-panel/api/users/',
         formFields: [
             { name: 'username', label: 'Username', type: 'text', required: true },
@@ -45,7 +45,7 @@ const sectionData = {
     'organization-events': {
         title: 'Select organization event to change',
         addButton: 'ADD ORGANIZATION EVENT',
-        columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION'],
+        columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION', 'TYPE OF EVENT'],
         apiEndpoint: '/admin-panel/api/events/',
         formFields: [
             { name: 'eventName', label: 'Event Name', type: 'text', required: true },
@@ -167,6 +167,8 @@ async function loadAdminSection(section) {
     document.getElementById('col2-header').textContent = data.columns[1];
     document.getElementById('col3-header').textContent = data.columns[2];
     document.getElementById('col4-header').textContent = data.columns[3];
+    document.getElementById('col5-header').textContent = data.columns[4];
+    document.getElementById('col6-header').textContent = data.columns[5];
     
     // Fetch data from API
     await fetchSectionData(section);
@@ -194,6 +196,9 @@ function renderTable() {
             <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
             <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
             <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">${values[4]}</td>  
+            <td class="px-6 py-4 text-sm text-gray-700">${values[5]}</td>  
+
             <td class="px-6 py-4">
                 <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
                     <i class="fas fa-edit"></i> Edit
