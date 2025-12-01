@@ -136,7 +136,18 @@ def register(request):
         if form.is_valid():
             email = form.cleaned_data.get("email")
             password = form.cleaned_data.get("password1")
-            username = email.split("@")[0]
+            username = form.cleaned_data.get("username")
+            student_id = form.cleaned_data.get("student_id")
+
+            # Check if username already exists
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "A user with this username already exists.")
+                return render(request, "accounts/register.html", {"form": form})
+            
+            # Check if student ID already exists
+            if User.objects.filter(student_id=student_id).exists():
+                messages.error(request, "A user with this student ID already exists.")
+                return render(request, "accounts/register.html", {"form": form})
 
             try:
                 response = supabase.auth.sign_up({
@@ -144,7 +155,12 @@ def register(request):
                     "password": password
                 })
             except Exception as e:
-                messages.error(request, f"Supabase registration failed: {e}")
+                error_message = str(e)
+                # Handle specific Supabase errors
+                if "already registered" in error_message.lower() or "already exists" in error_message.lower():
+                    messages.error(request, "An account with this email already exists.")
+                else:
+                    messages.error(request, f"Registration failed: {error_message}")
                 return render(request, "accounts/register.html", {"form": form})
 
             if getattr(response, "user", None):
@@ -170,13 +186,13 @@ def register(request):
 
                 messages.success(
                     request,
-                    "Account created. Please check your email to confirm your account before logging in."
+                    "Account created successfully! Please check your email to confirm your account before logging in."
                 )
                 return redirect("login")
             else:
-                messages.error(request, "Supabase registration failed: No user returned.")
+                messages.error(request, "Registration failed. Please try again.")
         else:
-            messages.error(request, "Registration failed. Please check the form.")
+            messages.error(request, "Registration failed. Please correct the errors below.")
     else:
         form = StudentRegistrationForm()
 

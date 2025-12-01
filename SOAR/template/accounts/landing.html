@@ -69,14 +69,11 @@
                     <a href="#features" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
                         Features
                     </a>
-                    <a href="#how-it-works" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
-                        How It Works
-                    </a>
                     <a href="#about" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
                         About
                     </a>
-                    <a href="#organizations" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
-                        Organizations
+                    <a href="#contact" class="nav-link text-white/90 hover:text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-300">
+                        Contact
                     </a>
                 </div>
                 
@@ -94,9 +91,8 @@
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-4 pt-2 pb-4 space-y-2 bg-blue-950/98 backdrop-blur-xl border-t border-white/10">
                 <a href="#features" class="block px-4 py-3 rounded-xl text-base font-medium text-white hover:bg-white/10 transition-all duration-300 hover:pl-6">Features</a>
-                <a href="#how-it-works" class="block px-4 py-3 rounded-xl text-base font-medium text-white hover:bg-white/10 transition-all duration-300 hover:pl-6">How It Works</a>
                 <a href="#about" class="block px-4 py-3 rounded-xl text-base font-medium text-white hover:bg-white/10 transition-all duration-300 hover:pl-6">About</a>
-                <a href="#organizations" class="block px-4 py-3 rounded-xl text-base font-medium text-white hover:bg-white/10 transition-all duration-300 hover:pl-6">Organizations</a>
+                <a href="#contact" class="block px-4 py-3 rounded-xl text-base font-medium text-white hover:bg-white/10 transition-all duration-300 hover:pl-6">Contact</a>
                 <div class="pt-4 space-y-3 border-t border-white/20">
                     <a href="{% url 'login' %}" class="block w-full text-center px-4 py-3 text-base font-medium text-white hover:bg-white/10 rounded-xl transition-all duration-300 border border-white/20">Log In</a>
                     <a href="{% url 'register' %}" class="block w-full text-center px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg">Get Started</a>
@@ -413,7 +409,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-16">
+    <footer id="contact" class="bg-gray-900 text-white py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
                 <div class="space-y-4">
@@ -477,7 +473,7 @@
             </div>
             
             <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-gray-400 text-sm">© 2024 SOAR - Cebu Institute of Technology. All rights reserved.</p>
+                <p class="text-gray-400 text-sm">© 2025 SOAR - Cebu Institute of Technology. All rights reserved.</p>
                 <div class="flex gap-6 text-sm">
                     <a href="#" id="terms-link" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Terms of Service</a>
                     <a href="#" id="privacy-link" class="text-gray-400 hover:text-blue-400 transition-colors duration-300">Privacy Policy</a>
@@ -522,7 +518,32 @@
         </div>
     </div>
 
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white w-14 h-14 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-110 opacity-0 pointer-events-none z-40 flex items-center justify-center">
+        <i class="fas fa-arrow-up text-xl"></i>
+    </button>
 
     <script src="{% static 'js/accounts/landing.js' %}"></script>
+    <script>
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'pointer-events-none');
+                backToTopButton.classList.add('opacity-100');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'pointer-events-none');
+                backToTopButton.classList.remove('opacity-100');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
 </html>
