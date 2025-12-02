@@ -19,12 +19,12 @@ const sectionData = {
         apiEndpoint: '/admin-panel/api/users/',
         formFields: [
             { name: 'studentId', label: 'Student ID', type: 'text', required: false },
-            { name: 'email', label: 'Email', type: 'email', required: false },
-            { name: 'firstName', label: 'First Name', type: 'text', required: false },
-            { name: 'lastName', label: 'Last Name', type: 'text', required: false },
-            { name: 'course', label: 'Program / Course', type: 'text', required: false },
+            { name: 'email', label: 'Email', type: 'email', required: true },
+            { name: 'firstName', label: 'First Name', type: 'text', required: true },
+            { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+            { name: 'course', label: 'Program / Course', type: 'select', options: [], required: false },
             { name: 'yearLevel', label: 'Year Level', type: 'number', required: false },
-            { name: 'password', label: 'Password (leave blank to keep)', type: 'password', required: false }
+            { name: 'password', label: 'Password', type: 'password', required: true }
         ],
         data: []
     },
@@ -82,9 +82,9 @@ const sectionData = {
         ],
         apiEndpoint: '/admin-panel/api/events/',
         formFields: [
-            { name: 'eventName', label: 'Event Name', type: 'text', required: false },
-            { name: 'organization', label: 'Organization', type: 'text', required: false, readonly: true },
-            { name: 'date', label: 'Event Date', type: 'datetime-local', required: false },
+            { name: 'eventName', label: 'Event Name', type: 'text', required: true },
+            { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
+            { name: 'date', label: 'Event Date', type: 'datetime-local', required: true },
             { name: 'location', label: 'Location', type: 'text', required: false },
             { name: 'activityType', label: 'Activity Type', type: 'select', options: ['workshop','seminar','meeting','social','other'], required: false },
             { name: 'description', label: 'Description', type: 'textarea', required: false },
@@ -96,17 +96,17 @@ const sectionData = {
         title: 'Select organization member to change',
         addButton: 'ADD ORGANIZATION MEMBER',
         columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED', 'STATUS'],
-         fields: [
-             ['organization'],
-             ['student'],
-             ['role'],
-             ['dateJoined'],
-             ['status']
-         ],
+          fields: [
+              ['organization'],
+              ['student'],
+              ['role'],
+              ['dateJoined'],
+              ['status']
+          ],
         apiEndpoint: '/admin-panel/api/organization-members/',
         formFields: [
-            { name: 'organization', label: 'Organization', type: 'text', required: false, readonly: true },
-            { name: 'student', label: 'Student', type: 'text', required: false, readonly: true },
+            { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
+            { name: 'student', label: 'Student (Email)', type: 'text', required: true },
             { name: 'role', label: 'Role', type: 'select', options: ['member', 'officer', 'leader', 'adviser'], required: false },
             { name: 'isApproved', label: 'Approved', type: 'checkbox', required: false }
         ],
@@ -163,12 +163,12 @@ let deleteItemId = null;
 // Fetch data from API
 async function fetchSectionData(section) {
     const config = sectionData[section];
-    
+
     // If no API endpoint, use static data
     if (!config.apiEndpoint) {
         return;
     }
-    
+
     try {
         const response = await fetch(config.apiEndpoint);
         if (!response.ok) {
@@ -181,6 +181,37 @@ async function fetchSectionData(section) {
         showToast('Failed to load data', 'error');
     }
 }
+
+// Fetch organizations for select options
+async function fetchOrganizations() {
+    try {
+        const response = await fetch('/admin-panel/api/organizations/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch organizations');
+        }
+        const result = await response.json();
+        return result.data.map(org => org.orgName);
+    } catch (error) {
+        console.error('Error fetching organizations:', error);
+        return [];
+    }
+}
+
+// Fetch programs for select options
+async function fetchPrograms() {
+    try {
+        const response = await fetch('/admin-panel/api/programs/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch programs');
+        }
+        const result = await response.json();
+        return result.data.map(prog => prog.code + ' - ' + prog.programName);
+    } catch (error) {
+        console.error('Error fetching programs:', error);
+        return [];
+    }
+}
+
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -320,14 +351,29 @@ function toggleSelectAll() {
 }
 
 // Open add modal
-function openAddModal() {
+async function openAddModal() {
     const data = sectionData[currentSection];
     document.getElementById('modal-title').textContent = 'Add ' + data.title.replace('Select ', '').replace(' to change', '');
-    
+
+    // Fetch options for selects
+    if (currentSection === 'organization-events' || currentSection === 'organization-members') {
+        const orgs = await fetchOrganizations();
+        const orgField = data.formFields.find(f => f.name === 'organization');
+        if (orgField) {
+            orgField.options = orgs;
+        }
+    } else if (currentSection === 'users') {
+        const programs = await fetchPrograms();
+        const courseField = data.formFields.find(f => f.name === 'course');
+        if (courseField) {
+            courseField.options = programs;
+        }
+    }
+
     // Generate form fields
     const formFields = document.getElementById('form-fields');
     formFields.innerHTML = '';
-    
+
     data.formFields.forEach(field => {
         const fieldDiv = document.createElement('div');
         const requiredAttr = field.required ? 'required' : '';
@@ -462,10 +508,54 @@ function closeAddModal() {
         // Clear editing id
         window.editingItemId = null;
     } else {
-        // Add new item
-        const newItem = { id: Date.now(), ...itemData };
-        sectionData[currentSection].data.push(newItem);
-        showToast('Item added successfully!', 'success');
+        // Add new item: send POST to API if endpoint exists
+        const section = currentSection;
+        const config = sectionData[section];
+
+        if (config && config.apiEndpoint) {
+            try {
+                const token = (typeof csrftoken !== 'undefined') ? csrftoken : (window.csrftoken || '');
+                const resp = await fetch(config.apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+
+                if (!resp.ok) {
+                    let msg = 'Failed to add item.';
+                    try {
+                        const j = await resp.json();
+                        if (j.errors) {
+                            // Collect all errors
+                            const errorMsgs = [];
+                            for (const field in j.errors) {
+                                errorMsgs.push(`${field}: ${j.errors[field]}`);
+                            }
+                            msg = errorMsgs.join('; ');
+                        } else {
+                            msg = j.error || j.message || msg;
+                        }
+                    } catch (e) {}
+                    showToast(msg, 'error');
+                } else {
+                    // Refetch data to get updated list
+                    await fetchSectionData(section);
+                    showToast('Item added successfully!', 'success');
+                }
+            } catch (err) {
+                console.error('Add error', err);
+                showToast('Failed to add item', 'error');
+            }
+        } else {
+            // Fallback: local add
+            const newItem = { id: Date.now(), ...itemData };
+            sectionData[section].data.push(newItem);
+            showToast('Item added locally', 'success');
+        }
     }
     
     // Re-render table
