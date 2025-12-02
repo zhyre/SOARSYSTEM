@@ -154,6 +154,15 @@ const sectionData = {
             { name: 'code', label: 'Program Code', type: 'text', required: false }
         ],
         data: []
+    },
+    analytics: {
+        title: 'Analytics Dashboard',
+        addButton: '',
+        columns: [],
+        fields: [],
+        apiEndpoint: null,
+        formFields: [],
+        data: []
     }
 };
 
@@ -221,13 +230,32 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load section
 async function loadAdminSection(section) {
     currentSection = section;
-    const data = sectionData[section];
+    let data = sectionData[section];
+    if (!data) {
+        if (section === 'analytics') {
+            data = {
+                title: 'Analytics Dashboard',
+                addButton: '',
+                columns: [],
+                fields: [],
+                apiEndpoint: null,
+                formFields: [],
+                data: []
+            };
+        } else {
+            console.error('Section data not found for:', section);
+            return;
+        }
+    }
     
-    // Update active nav link
+    // Update active nav link (guard against missing elements)
     document.querySelectorAll('.admin-nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    const navEl = document.querySelector(`[data-section="${section}"]`);
+    if (navEl && navEl.classList) {
+        navEl.classList.add('active');
+    }
     
     // Update page title and breadcrumb
     const sectionNames = {
@@ -237,11 +265,32 @@ async function loadAdminSection(section) {
         'organization-events': 'Event › Organization Events',
         'organization-members': 'Organization › Organization Members',
         'organizations': 'Organization › Organizations',
-        'programs': 'Organization › Programs'
+        'programs': 'Organization › Programs',
+        'analytics': 'Analytics › Dashboard'
     };
-    document.getElementById('breadcrumb').textContent = sectionNames[section];
-    document.getElementById('section-title').textContent = data.title;
-    document.getElementById('add-button-text').textContent = data.addButton;
+    const breadcrumbEl = document.getElementById('breadcrumb');
+    const sectionTitleEl = document.getElementById('section-title');
+    const addButtonTextEl = document.getElementById('add-button-text');
+
+    if (breadcrumbEl) breadcrumbEl.textContent = sectionNames[section] || section;
+
+    // Defensive: ensure `data` is an object before accessing properties
+    if (!data || typeof data !== 'object') {
+        console.warn('loadAdminSection: missing sectionData for', section);
+        // Provide a minimal fallback so UI still renders
+        data = {
+            title: sectionNames[section] || String(section || ''),
+            addButton: '',
+            columns: [],
+            fields: [],
+            apiEndpoint: null,
+            formFields: [],
+            data: []
+        };
+    }
+
+    if (sectionTitleEl) sectionTitleEl.textContent = data.title || '';
+    if (addButtonTextEl) addButtonTextEl.textContent = data.addButton || '';
     
     // Show/hide Create Organization button based on section
     const createOrgBtn = document.getElementById('create-org-btn');
@@ -252,26 +301,55 @@ async function loadAdminSection(section) {
         createOrgBtn.classList.add('hidden');
         createOrgBtn.classList.remove('flex');
     }
-    
-    // Update table headers
-    document.getElementById('col1-header').textContent = data.columns[0];
-    document.getElementById('col2-header').textContent = data.columns[1];
-    document.getElementById('col3-header').textContent = data.columns[2];
-    document.getElementById('col4-header').textContent = data.columns[3];
-    document.getElementById('col5-header').textContent = data.columns[4];
-    document.getElementById('col6-header').textContent = data.columns[5];
-    
-    // Fetch data from API
-    await fetchSectionData(section);
-    
-    // Render table data
-    renderTable();
+
+    const tableDiv = document.querySelector('.bg-white.rounded-lg.shadow-sm.border.border-gray-200');
+    const analyticsDiv = document.getElementById('analytics-content');
+
+    if (section === 'analytics') {
+        if (tableDiv && tableDiv.classList) tableDiv.classList.add('hidden');
+        if (analyticsDiv && analyticsDiv.classList) analyticsDiv.classList.remove('hidden');
+        // Only call loadAnalytics if it's available; catch runtime errors so UI doesn't break
+        if (typeof loadAnalytics === 'function') {
+            try {
+                await loadAnalytics();
+            } catch (err) {
+                console.error('loadAnalytics error:', err);
+                showToast('Failed to load analytics', 'error');
+            }
+        } else {
+            console.warn('loadAnalytics is not defined');
+            showToast('Analytics functionality is unavailable.', 'error');
+        }
+    } else {
+        if (tableDiv && tableDiv.classList) tableDiv.classList.remove('hidden');
+        if (analyticsDiv && analyticsDiv.classList) analyticsDiv.classList.add('hidden');
+
+        // Update table headers
+        document.getElementById('col1-header').textContent = data.columns[0] || '';
+        document.getElementById('col2-header').textContent = data.columns[1] || '';
+        document.getElementById('col3-header').textContent = data.columns[2] || '';
+        document.getElementById('col4-header').textContent = data.columns[3] || '';
+        document.getElementById('col5-header').textContent = data.columns[4] || '';
+        document.getElementById('col6-header').textContent = data.columns[5] || '';
+
+        // Fetch data from API
+        await fetchSectionData(section);
+
+        // Render table data
+        renderTable();
+    }
 }
 
 // Render table
 function renderTable() {
     const data = sectionData[currentSection];
+    if (!data || typeof data !== 'object') {
+        console.warn('renderTable: no data for section', currentSection);
+        return;
+    }
+
     const tbody = document.getElementById('table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     // Helper to resolve field values. Supports array of candidate keys and nested keys using dot notation.
@@ -291,7 +369,7 @@ function renderTable() {
         return (v === undefined || v === null) ? '' : v;
     }
 
-    data.data.forEach(item => {
+    (data.data || []).forEach(item => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
 
@@ -299,7 +377,7 @@ function renderTable() {
         html += `<td class="px-6 py-4"><input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${item.id}"></td>`;
 
         // Determine which fields to show for this section (fall back to object keys minus id)
-        const fields = data.fields || Object.keys(item).filter(k => k !== 'id');
+        const fields = data.fields || Object.keys(item || {}).filter(k => k !== 'id');
 
         // Render up to 6 data columns to match table layout
         for (let i = 0; i < 6; i++) {
@@ -333,12 +411,16 @@ function renderTable() {
 
 // Update counts
 function updateCounts() {
-    const total = sectionData[currentSection].data.length;
-    document.getElementById('total-count').textContent = total;
-    document.getElementById('item-count').textContent = total;
-    
+    const sec = sectionData[currentSection];
+    const total = (sec && sec.data) ? sec.data.length : 0;
+    const totalEl = document.getElementById('total-count');
+    const itemCountEl = document.getElementById('item-count');
+    const selectedCountEl = document.getElementById('selected-count');
+    if (totalEl) totalEl.textContent = total;
+    if (itemCountEl) itemCountEl.textContent = total;
+
     const selected = document.querySelectorAll('.item-checkbox:checked').length;
-    document.getElementById('selected-count').textContent = selected;
+    if (selectedCountEl) selectedCountEl.textContent = selected;
 }
 
 // Toggle select all
@@ -353,18 +435,25 @@ function toggleSelectAll() {
 // Open add modal
 async function openAddModal() {
     const data = sectionData[currentSection];
-    document.getElementById('modal-title').textContent = 'Add ' + data.title.replace('Select ', '').replace(' to change', '');
+    if (!data || typeof data !== 'object') {
+        console.warn('openAddModal: no sectionData for', currentSection);
+        showToast('Cannot open form for unknown section', 'error');
+        return;
+    }
+
+    const modalTitleEl = document.getElementById('modal-title');
+    if (modalTitleEl) modalTitleEl.textContent = 'Add ' + String(data.title || '').replace('Select ', '').replace(' to change', '');
 
     // Fetch options for selects
     if (currentSection === 'organization-events' || currentSection === 'organization-members') {
         const orgs = await fetchOrganizations();
-        const orgField = data.formFields.find(f => f.name === 'organization');
+        const orgField = (data.formFields || []).find(f => f.name === 'organization');
         if (orgField) {
             orgField.options = orgs;
         }
     } else if (currentSection === 'users') {
         const programs = await fetchPrograms();
-        const courseField = data.formFields.find(f => f.name === 'course');
+        const courseField = (data.formFields || []).find(f => f.name === 'course');
         if (courseField) {
             courseField.options = programs;
         }
@@ -372,9 +461,14 @@ async function openAddModal() {
 
     // Generate form fields
     const formFields = document.getElementById('form-fields');
+    if (!formFields) {
+        console.warn('openAddModal: form fields container not found');
+        showToast('Form container missing', 'error');
+        return;
+    }
     formFields.innerHTML = '';
 
-    data.formFields.forEach(field => {
+    (data.formFields || []).forEach(field => {
         const fieldDiv = document.createElement('div');
         const requiredAttr = field.required ? 'required' : '';
         const readonlyAttr = field.readonly ? 'readonly' : '';
@@ -568,62 +662,80 @@ function closeAddModal() {
 // Edit item
 function editItem(id) {
     const data = sectionData[currentSection];
-    const item = data.data.find(item => item.id === id);
-    
-    if (item) {
-        // Update modal title
-        document.getElementById('modal-title').textContent = 'Edit ' + data.title.replace('Select ', '').replace(' to change', '');
-        
-        // Generate form fields with existing data
-        const formFields = document.getElementById('form-fields');
-        formFields.innerHTML = '';
-        
-        data.formFields.forEach(field => {
-            const fieldDiv = document.createElement('div');
-            const value = (item[field.name] !== undefined && item[field.name] !== null) ? item[field.name] : '';
-            // When editing, do not enforce 'required' so fields are optional
-            const requiredAttr = '';
-            const readonlyAttr = field.readonly ? 'readonly' : '';
+    if (!data || typeof data !== 'object') {
+        console.warn('editItem: no sectionData for', currentSection);
+        showToast('Cannot edit item for unknown section', 'error');
+        return;
+    }
 
-            if (field.type === 'textarea') {
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
-                `;
-            } else if (field.type === 'select') {
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
-                        <option value="">Select ${field.label}</option>
-                        ${field.options.map(opt => `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`).join('')}
-                    </select>
-                `;
-            } else if (field.type === 'checkbox') {
-                const checked = value === true || String(value) === 'true' || String(value) === '1' ? 'checked' : '';
-                fieldDiv.innerHTML = `
-                    <label class="inline-flex items-center space-x-2">
-                        <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${checked} ${readonlyAttr}>
-                        <span class="text-sm font-medium text-gray-700">${field.label}</span>
-                    </label>
-                `;
-            } else {
-                // escape value for attribute
-                const safeVal = String(value).replace(/"/g, '&quot;');
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <input type="${field.type}" name="${field.name}" value="${safeVal}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
-                `;
-            }
+    const item = (data.data || []).find(item => item.id === id);
+    if (!item) {
+        console.warn('editItem: item not found', id, 'in', currentSection);
+        showToast('Item not found', 'error');
+        return;
+    }
 
-            formFields.appendChild(fieldDiv);
-        });
-        
-        // Store editing item id
-        window.editingItemId = id;
-        
-        // Show modal
-        document.getElementById('add-modal').classList.remove('hidden');
-        document.getElementById('add-modal').classList.add('flex');
+    // Update modal title
+    const modalTitleEl = document.getElementById('modal-title');
+    if (modalTitleEl) modalTitleEl.textContent = 'Edit ' + String(data.title || '').replace('Select ', '').replace(' to change', '');
+
+    // Generate form fields with existing data
+    const formFields = document.getElementById('form-fields');
+    if (!formFields) {
+        console.warn('editItem: form fields container missing');
+        showToast('Form container not found', 'error');
+        return;
+    }
+    formFields.innerHTML = '';
+
+    (data.formFields || []).forEach(field => {
+        const fieldDiv = document.createElement('div');
+        const value = (item[field.name] !== undefined && item[field.name] !== null) ? item[field.name] : '';
+        // When editing, do not enforce 'required' so fields are optional
+        const requiredAttr = '';
+        const readonlyAttr = field.readonly ? 'readonly' : '';
+
+        if (field.type === 'textarea') {
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
+            `;
+        } else if (field.type === 'select') {
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+                    <option value="">Select ${field.label}</option>
+                    ${ (field.options || []).map(opt => `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            `;
+        } else if (field.type === 'checkbox') {
+            const checked = value === true || String(value) === 'true' || String(value) === '1' ? 'checked' : '';
+            fieldDiv.innerHTML = `
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${checked} ${readonlyAttr}>
+                    <span class="text-sm font-medium text-gray-700">${field.label}</span>
+                </label>
+            `;
+        } else {
+            // escape value for attribute
+            const safeVal = String(value).replace(/"/g, '&quot;');
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <input type="${field.type}" name="${field.name}" value="${safeVal}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+            `;
+        }
+
+        formFields.appendChild(fieldDiv);
+    });
+
+    // Store editing item id
+    window.editingItemId = id;
+
+    // Show modal
+    const addModalEl = document.getElementById('add-modal');
+    if (addModalEl) {
+        addModalEl.classList.remove('hidden');
+        addModalEl.classList.add('flex');
     }
 }
 

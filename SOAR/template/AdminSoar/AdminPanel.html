@@ -9,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/AdminSoar/admin-panel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/AdminSoar/adminAnalytics.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-50">
@@ -103,6 +105,17 @@
                             data-section="programs">
                             <i class="fas fa-graduation-cap text-sm text-gray-400 group-hover:text-blue-400"></i>
                             <span class="font-medium text-gray-300 group-hover:text-white text-sm">Programs</span>
+                        </a>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div class="mb-4">
+                        <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Analytics</h3>
+                        <a href="#" onclick="loadAdminSection('analytics'); return false;"
+                            class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200"
+                            data-section="analytics">
+                            <i class="fas fa-chart-bar text-sm text-gray-400 group-hover:text-blue-400"></i>
+                            <span class="font-medium text-gray-300 group-hover:text-white text-sm">Analytics</span>
                         </a>
                     </div>
                 </nav>
@@ -249,6 +262,11 @@
                         <p class="text-sm text-gray-600"><span id="item-count">0</span> items</p>
                     </div>
                 </div>
+
+                <!-- Analytics Content -->
+                <div id="analytics-content" class="hidden">
+                    {% include 'AdminSoar/adminAnalytics.html' %}
+                </div>
             </main>
         </div>
     </div>
@@ -311,6 +329,7 @@
         const csrftoken = '{{ csrf_token }}';
     </script>
     <script src="{% static 'js/AdminSoar/admin-panel.js' %}"></script>
+    <script src="{% static 'js/AdminSoar/adminAnalytics.js' %}"></script>
 </body>
 
 </html>
