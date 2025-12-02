@@ -9,6 +9,9 @@ from SOAR.organization.models import Organization, OrganizationMember, Program, 
 from SOAR.accounts.models import User
 from SOAR.event.models import OrganizationEvent, EventRSVP
 from django.db.models import Count
+import json
+from django.views.decorators.http import require_http_methods
+from django.utils.dateparse import parse_datetime, parse_date
 
 SUPABASE_URL = config("SUPABASE_URL")
 SUPABASE_KEY = config("SUPABASE_KEY")
@@ -106,6 +109,12 @@ def get_organizations_data(request):
             elif any(tag.lower() in ['special', 'interest'] for tag in org.tags):
                 org_type = 'Special Interest'
         
+        # collect allowed program abbreviations
+        try:
+            programs_list = [p.abbreviation for p in org.allowed_programs.all()]
+        except Exception:
+            programs_list = []
+
         orgs_data.append({
             'id': str(org.id),
             'orgName': org.name,
@@ -113,7 +122,9 @@ def get_organizations_data(request):
             'members': str(org.member_count),
             'created': org.date_created.strftime('%b. %d, %Y') if org.date_created else 'N/A',
             'description': org.description,
-            'isPublic': org.is_public
+            'isPublic': org.is_public,
+            'programs': ', '.join(programs_list) if programs_list else '',
+            'adviser': org.adviser_id or 'N/A'
         })
     
     return JsonResponse({'data': orgs_data})
@@ -135,7 +146,8 @@ def get_organization_members_data(request):
             'organization': member.organization.name,
             'student': member.student.username,
             'role': member.get_role_display(),
-            'dateJoined': member.date_joined.strftime('%b. %d, %Y') if member.date_joined else 'N/A'
+            'dateJoined': member.date_joined.strftime('%b. %d, %Y') if member.date_joined else 'N/A',
+            'status': 'Approved' if member.is_approved else 'Pending'
         })
     
     return JsonResponse({'data': members_data})
@@ -168,13 +180,21 @@ def get_rsvps_data(request):
     if not (request.user.is_superuser or request.user.is_staff):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
-    rsvps = EventRSVP.objects.select_related('event', 'user').order_by('-date_created')
+    # include event's organization to avoid N+1 queries
+    rsvps = EventRSVP.objects.select_related('event__organization', 'user').order_by('-date_created')
     
     rsvps_data = []
     for rsvp in rsvps:
+        org_name = ''
+        try:
+            org_name = rsvp.event.organization.name if (rsvp.event and rsvp.event.organization) else ''
+        except Exception:
+            org_name = ''
+
         rsvps_data.append({
             'id': str(rsvp.id),
             'eventName': rsvp.event.title,
+            'organization': org_name,
             'student': rsvp.user.username,
             'status': rsvp.get_status_display(),
             'rsvpDate': rsvp.date_created.strftime('%b. %d, %Y') if rsvp.date_created else 'N/A'
@@ -204,3 +224,272 @@ def get_programs_data(request):
         })
     
     return JsonResponse({'data': programs_data})
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_user(request, user_id):
+    """API endpoint to delete a user by id."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    # Prevent deleting self via admin UI
+    if request.method == 'DELETE':
+        if str(request.user.id) == str(user_id):
+            return JsonResponse({'error': 'Cannot delete the currently logged-in user.'}, status=400)
+
+        try:
+            user = User.objects.filter(id=user_id).first()
+            if not user:
+                return JsonResponse({'error': 'User not found.'}, status=404)
+
+            user.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # Handle PATCH/PUT -> update user fields
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return JsonResponse({'error': 'User not found.'}, status=404)
+
+        # map frontend fields to model fields
+        if 'studentId' in payload:
+            user.student_id = payload.get('studentId') or None
+        if 'firstName' in payload:
+            user.first_name = payload.get('firstName')
+        if 'lastName' in payload:
+            user.last_name = payload.get('lastName')
+        if 'email' in payload:
+            user.email = payload.get('email')
+        if 'course' in payload:
+            user.course = payload.get('course')
+        if 'yearLevel' in payload:
+            try:
+                user.year_level = int(payload.get('yearLevel')) if payload.get('yearLevel') not in [None, ''] else None
+            except Exception:
+                pass
+        # password update (optional)
+        if 'password' in payload and payload.get('password'):
+            user.set_password(payload.get('password'))
+
+        user.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_rsvp(request, rsvp_id):
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'DELETE':
+        try:
+            rsvp = EventRSVP.objects.filter(id=rsvp_id).first()
+            if not rsvp:
+                return JsonResponse({'error': 'RSVP not found.'}, status=404)
+            rsvp.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # PATCH -> update RSVP
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        rsvp = EventRSVP.objects.filter(id=rsvp_id).first()
+        if not rsvp:
+            return JsonResponse({'error': 'RSVP not found.'}, status=404)
+
+        if 'status' in payload:
+            rsvp.status = payload.get('status')
+        rsvp.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_event(request, event_id):
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'DELETE':
+        try:
+            event = OrganizationEvent.objects.filter(id=event_id).first()
+            if not event:
+                return JsonResponse({'error': 'Event not found.'}, status=404)
+            event.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # PATCH -> update event
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        event = OrganizationEvent.objects.filter(id=event_id).first()
+        if not event:
+            return JsonResponse({'error': 'Event not found.'}, status=404)
+
+        if 'eventName' in payload:
+            event.title = payload.get('eventName')
+        if 'location' in payload:
+            event.location = payload.get('location')
+        if 'description' in payload:
+            event.description = payload.get('description')
+        if 'date' in payload and payload.get('date'):
+            dt = parse_datetime(payload.get('date')) or parse_date(payload.get('date'))
+            if dt:
+                event.event_date = dt
+        if 'activityType' in payload:
+            event.activity_type = payload.get('activityType')
+        if 'cancelled' in payload:
+            event.cancelled = bool(payload.get('cancelled'))
+
+        event.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_org_member(request, member_id):
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'DELETE':
+        try:
+            member = OrganizationMember.objects.filter(id=member_id).first()
+            if not member:
+                return JsonResponse({'error': 'Organization member not found.'}, status=404)
+            member.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # PATCH -> update member (e.g., role)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        member = OrganizationMember.objects.filter(id=member_id).first()
+        if not member:
+            return JsonResponse({'error': 'Organization member not found.'}, status=404)
+
+        if 'role' in payload:
+            member.role = payload.get('role')
+        if 'isApproved' in payload:
+            member.is_approved = bool(payload.get('isApproved'))
+        member.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_organization(request, org_id):
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'DELETE':
+        try:
+            org = Organization.objects.filter(id=org_id).first()
+            if not org:
+                return JsonResponse({'error': 'Organization not found.'}, status=404)
+            org.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # PATCH -> update org
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        org = Organization.objects.filter(id=org_id).first()
+        if not org:
+            return JsonResponse({'error': 'Organization not found.'}, status=404)
+
+        if 'orgName' in payload:
+            org.name = payload.get('orgName')
+        if 'description' in payload:
+            org.description = payload.get('description')
+        if 'isPublic' in payload:
+            org.is_public = bool(payload.get('isPublic'))
+        if 'adviser' in payload and payload.get('adviser'):
+            try:
+                adviser_user = User.objects.get(id=payload.get('adviser'))
+                org.adviser = adviser_user
+            except User.DoesNotExist:
+                pass  # Invalid adviser ID, skip
+        if 'programs' in payload:
+            programs_str = payload.get('programs', '')
+            if programs_str:
+                program_codes = [p.strip() for p in programs_str.split(',') if p.strip()]
+                programs = Program.objects.filter(abbreviation__in=program_codes)
+                org.allowed_programs.set(programs)
+            else:
+                org.allowed_programs.clear()
+        org.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["DELETE", "PATCH", "PUT"])
+def delete_program(request, program_id):
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'DELETE':
+        try:
+            program = Program.objects.filter(id=program_id).first()
+            if not program:
+                return JsonResponse({'error': 'Program not found.'}, status=404)
+            program.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # PATCH -> update program
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    try:
+        program = Program.objects.filter(id=program_id).first()
+        if not program:
+            return JsonResponse({'error': 'Program not found.'}, status=404)
+
+        if 'programName' in payload:
+            program.name = payload.get('programName')
+        if 'code' in payload:
+            program.abbreviation = payload.get('code')
+        program.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

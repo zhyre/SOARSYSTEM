@@ -163,8 +163,38 @@ def register(request):
                     messages.error(request, f"Registration failed: {error_message}")
                 return render(request, "accounts/register.html", {"form": form})
 
-            if getattr(response, "user", None):
-                supa_user_id = response.user.id
+            # Normalize supabase response shapes (dict, object, nested data)
+            user_attr = None
+            try:
+                # object-like response (has .user)
+                if getattr(response, "user", None):
+                    user_attr = response.user
+                # dict-like responses
+                elif isinstance(response, dict):
+                    # common shapes: {'user': {...}} or {'data': {'user': {...}}} or {'data': {...}}
+                    if response.get("user"):
+                        user_attr = response.get("user")
+                    elif isinstance(response.get("data"), dict) and response["data"].get("user"):
+                        user_attr = response["data"].get("user")
+                    elif response.get("data"):
+                        user_attr = response.get("data")
+                else:
+                    # object with .data attribute
+                    data = getattr(response, "data", None)
+                    if data and isinstance(data, dict):
+                        user_attr = data.get("user") or data
+            except Exception:
+                user_attr = None
+
+            if user_attr:
+                # extract id whether dict or object
+                if hasattr(user_attr, "id"):
+                    supa_user_id = user_attr.id
+                elif isinstance(user_attr, dict) and user_attr.get("id"):
+                    supa_user_id = user_attr.get("id")
+                else:
+                    # fallback to string representation
+                    supa_user_id = str(user_attr)
                 cd = form.cleaned_data
                 try:
                     user_obj = User.objects.get(pk=supa_user_id)
@@ -182,7 +212,13 @@ def register(request):
 
                 user_obj.is_active = False
                 user_obj.set_unusable_password()
-                user_obj.save()
+                try:
+                    user_obj.save()
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    messages.error(request, f"Registration failed: Database error saving new user: {e}")
+                    return render(request, "accounts/register.html", {"form": form})
 
                 messages.success(
                     request,
@@ -251,11 +287,23 @@ def login_view(request):
                                 is_active=True,
                             )
                             user_obj.set_unusable_password()
-                            user_obj.save()
+                            try:
+                                user_obj.save()
+                            except Exception as e:
+                                import traceback
+                                traceback.print_exc()
+                                messages.error(request, f"Login failed: Database error creating user record: {e}")
+                                return render(request, "accounts/login.html", {"form": form})
                         else:
                             if not user_obj.is_active:
                                 user_obj.is_active = True
-                                user_obj.save()
+                                try:
+                                    user_obj.save()
+                                except Exception as e:
+                                    import traceback
+                                    traceback.print_exc()
+                                    messages.error(request, f"Login failed: Database error updating user record: {e}")
+                                    return render(request, "accounts/login.html", {"form": form})
 
                         login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
                         messages.success(request, f"Welcome back, {user_obj.username}!")
