@@ -3,13 +3,27 @@ const sectionData = {
     users: {
         title: 'Select user to change',
         addButton: 'ADD USER',
-        columns: ['USERNAME', 'EMAIL', 'FIRST NAME', 'LAST NAME'],
+        // Columns: student id - first name - last name - school email - program
+        // Keep 6th column present (empty) because the table layout expects 6 data columns.
+        columns: ['STUDENT ID', 'FIRST NAME', 'LAST NAME', 'SCHOOL EMAIL', 'PROGRAM', 'YEAR LEVEL'],
+        // Field mapping: try multiple common keys per column to resolve values robustly
+        // Exact backend keys from get_users_data in AdminSoar.views.py
+        fields: [
+            ['studentId'],
+            ['firstName'],
+            ['lastName'],
+            ['email'],
+            ['course'],
+            ['yearLevel']
+        ],
         apiEndpoint: '/admin-panel/api/users/',
         formFields: [
-            { name: 'username', label: 'Username', type: 'text', required: true },
+            { name: 'studentId', label: 'Student ID', type: 'text', required: false },
             { name: 'email', label: 'Email', type: 'email', required: true },
             { name: 'firstName', label: 'First Name', type: 'text', required: true },
             { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+            { name: 'course', label: 'Program / Course', type: 'select', options: [], required: false },
+            { name: 'yearLevel', label: 'Year Level', type: 'number', required: false },
             { name: 'password', label: 'Password', type: 'password', required: true }
         ],
         data: []
@@ -32,53 +46,94 @@ const sectionData = {
     'event-rsvps': {
         title: 'Select event RSVP to change',
         addButton: 'ADD EVENT RSVP',
-        columns: ['EVENT NAME', 'STUDENT', 'STATUS', 'RSVP DATE'],
+        // Columns: event name - org name - student name - rsvp date - status
+        columns: ['EVENT NAME', 'ORG NAME', 'STUDENT NAME', 'RSVP DATE', 'STATUS'],
+        // Exact backend keys from get_rsvps_data in AdminSoar.views.py
+        fields: [
+            ['eventName'],
+            ['organization'],
+            ['student'],
+            ['rsvpDate'],
+            ['status'],
+        ],
         apiEndpoint: '/admin-panel/api/rsvps/',
         formFields: [
-            { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-            { name: 'student', label: 'Student', type: 'text', required: true },
-            { name: 'status', label: 'Status', type: 'select', options: ['Going', 'Not Going', 'Interested'], required: true },
-            { name: 'rsvpDate', label: 'RSVP Date', type: 'date', required: true }
+            { name: 'eventName', label: 'Event Name', type: 'text', required: false, readonly: true },
+            { name: 'organization', label: 'Organization', type: 'text', required: false, readonly: true },
+            { name: 'student', label: 'Student', type: 'text', required: false, readonly: true },
+            { name: 'status', label: 'Status', type: 'select', options: ['going', 'not_going', 'interested'], required: false },
+            { name: 'rsvpDate', label: 'RSVP Date', type: 'date', required: false, readonly: true }
         ],
         data: []
     },
     'organization-events': {
         title: 'Select organization event to change',
         addButton: 'ADD ORGANIZATION EVENT',
-        columns: ['EVENT NAME', 'ORGANIZATION', 'DATE', 'LOCATION'],
+        // Columns: event name - org name - event date - event location
+        columns: ['EVENT NAME', 'ORG NAME', 'EVENT DATE', 'EVENT LOCATION', 'ACTIVITY TYPE', 'STATUS'],
+        // Exact backend keys from get_events_data in AdminSoar.views.py
+        fields: [
+            ['eventName'],
+            ['organization'],
+            ['date'],
+            ['location'],
+            ['activityType'],
+            ['status']
+        ],
         apiEndpoint: '/admin-panel/api/events/',
         formFields: [
             { name: 'eventName', label: 'Event Name', type: 'text', required: true },
-            { name: 'organization', label: 'Organization', type: 'text', required: true },
+            { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
             { name: 'date', label: 'Event Date', type: 'datetime-local', required: true },
-            { name: 'location', label: 'Location', type: 'text', required: true },
-            { name: 'description', label: 'Description', type: 'textarea', required: false }
+            { name: 'location', label: 'Location', type: 'text', required: false },
+            { name: 'activityType', label: 'Activity Type', type: 'select', options: ['workshop','seminar','meeting','social','other'], required: false },
+            { name: 'description', label: 'Description', type: 'textarea', required: false },
+            { name: 'cancelled', label: 'Cancelled', type: 'checkbox', required: false }
         ],
         data: []
     },
     'organization-members': {
         title: 'Select organization member to change',
         addButton: 'ADD ORGANIZATION MEMBER',
-        columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED'],
+        columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED', 'STATUS'],
+          fields: [
+              ['organization'],
+              ['student'],
+              ['role'],
+              ['dateJoined'],
+              ['status']
+          ],
         apiEndpoint: '/admin-panel/api/organization-members/',
         formFields: [
-            { name: 'organization', label: 'Organization', type: 'text', required: true },
-            { name: 'student', label: 'Student', type: 'text', required: true },
-            { name: 'role', label: 'Role', type: 'select', options: ['Member', 'Officer', 'Leader', 'Adviser'], required: true },
-            { name: 'dateJoined', label: 'Date Joined', type: 'date', required: true }
+            { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
+            { name: 'student', label: 'Student (Email)', type: 'text', required: true },
+            { name: 'role', label: 'Role', type: 'select', options: ['member', 'officer', 'leader', 'adviser'], required: false },
+            { name: 'isApproved', label: 'Approved', type: 'checkbox', required: false }
         ],
         data: []
     },
     organizations: {
         title: 'Select organization to change',
         addButton: 'ADD ORGANIZATION',
-        columns: ['ORGANIZATION NAME', 'TYPE', 'MEMBERS', 'CREATED'],
+        // Columns: org name - program affiliated - type - members count - date created
+        columns: ['ORG NAME', 'PROGRAM AFFILIATED', 'TYPE', 'MEMBERS COUNT', 'DATE CREATED', 'ADVISER'],
+        // Exact backend keys from get_organizations_data in AdminSoar.views.py
+        // Note: backend does not provide a "program affiliated" field yet.
+        fields: [
+            ['orgName'],
+            ['programs'],
+            ['type'],
+            ['members'],
+            ['created'],
+            ['adviser']
+        ],
         apiEndpoint: '/admin-panel/api/organizations/',
         formFields: [
-            { name: 'orgName', label: 'Organization Name', type: 'text', required: true },
-            { name: 'type', label: 'Type', type: 'select', options: ['Academic', 'Sports', 'Cultural', 'Special Interest'], required: true },
+            { name: 'orgName', label: 'Organization Name', type: 'text', required: false },
             { name: 'description', label: 'Description', type: 'textarea', required: false },
-            { name: 'contactEmail', label: 'Contact Email', type: 'email', required: false }
+            { name: 'isPublic', label: 'Public', type: 'checkbox', required: false },
+            { name: 'programs', label: 'Programs (comma-separated)', type: 'text', required: false },
+            { name: 'adviser', label: 'Adviser (user id)', type: 'text', required: false }
         ],
         data: []
     },
@@ -86,13 +141,27 @@ const sectionData = {
         title: 'Select program to change',
         addButton: 'ADD PROGRAM',
         columns: ['PROGRAM NAME', 'CODE', 'DEPARTMENT', 'STUDENTS'],
+        // Exact backend keys from get_programs_data in AdminSoar.views.py
+        fields: [
+            ['programName'],
+            ['code'],
+            ['department'],
+            ['students'],
+        ],
         apiEndpoint: '/admin-panel/api/programs/',
         formFields: [
-            { name: 'programName', label: 'Program Name', type: 'text', required: true },
-            { name: 'code', label: 'Program Code', type: 'text', required: true },
-            { name: 'department', label: 'Department', type: 'text', required: true },
-            { name: 'description', label: 'Description', type: 'textarea', required: false }
+            { name: 'programName', label: 'Program Name', type: 'text', required: false },
+            { name: 'code', label: 'Program Code', type: 'text', required: false }
         ],
+        data: []
+    },
+    analytics: {
+        title: 'Analytics Dashboard',
+        addButton: '',
+        columns: [],
+        fields: [],
+        apiEndpoint: null,
+        formFields: [],
         data: []
     }
 };
@@ -103,12 +172,12 @@ let deleteItemId = null;
 // Fetch data from API
 async function fetchSectionData(section) {
     const config = sectionData[section];
-    
+
     // If no API endpoint, use static data
     if (!config.apiEndpoint) {
         return;
     }
-    
+
     try {
         const response = await fetch(config.apiEndpoint);
         if (!response.ok) {
@@ -122,6 +191,37 @@ async function fetchSectionData(section) {
     }
 }
 
+// Fetch organizations for select options
+async function fetchOrganizations() {
+    try {
+        const response = await fetch('/admin-panel/api/organizations/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch organizations');
+        }
+        const result = await response.json();
+        return result.data.map(org => org.orgName);
+    } catch (error) {
+        console.error('Error fetching organizations:', error);
+        return [];
+    }
+}
+
+// Fetch programs for select options
+async function fetchPrograms() {
+    try {
+        const response = await fetch('/admin-panel/api/programs/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch programs');
+        }
+        const result = await response.json();
+        return result.data.map(prog => prog.code + ' - ' + prog.programName);
+    } catch (error) {
+        console.error('Error fetching programs:', error);
+        return [];
+    }
+}
+
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     loadAdminSection('users');
@@ -130,13 +230,32 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load section
 async function loadAdminSection(section) {
     currentSection = section;
-    const data = sectionData[section];
+    let data = sectionData[section];
+    if (!data) {
+        if (section === 'analytics') {
+            data = {
+                title: 'Analytics Dashboard',
+                addButton: '',
+                columns: [],
+                fields: [],
+                apiEndpoint: null,
+                formFields: [],
+                data: []
+            };
+        } else {
+            console.error('Section data not found for:', section);
+            return;
+        }
+    }
     
-    // Update active nav link
+    // Update active nav link (guard against missing elements)
     document.querySelectorAll('.admin-nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    const navEl = document.querySelector(`[data-section="${section}"]`);
+    if (navEl && navEl.classList) {
+        navEl.classList.add('active');
+    }
     
     // Update page title and breadcrumb
     const sectionNames = {
@@ -146,11 +265,32 @@ async function loadAdminSection(section) {
         'organization-events': 'Event › Organization Events',
         'organization-members': 'Organization › Organization Members',
         'organizations': 'Organization › Organizations',
-        'programs': 'Organization › Programs'
+        'programs': 'Organization › Programs',
+        'analytics': 'Analytics › Dashboard'
     };
-    document.getElementById('breadcrumb').textContent = sectionNames[section];
-    document.getElementById('section-title').textContent = data.title;
-    document.getElementById('add-button-text').textContent = data.addButton;
+    const breadcrumbEl = document.getElementById('breadcrumb');
+    const sectionTitleEl = document.getElementById('section-title');
+    const addButtonTextEl = document.getElementById('add-button-text');
+
+    if (breadcrumbEl) breadcrumbEl.textContent = sectionNames[section] || section;
+
+    // Defensive: ensure `data` is an object before accessing properties
+    if (!data || typeof data !== 'object') {
+        console.warn('loadAdminSection: missing sectionData for', section);
+        // Provide a minimal fallback so UI still renders
+        data = {
+            title: sectionNames[section] || String(section || ''),
+            addButton: '',
+            columns: [],
+            fields: [],
+            apiEndpoint: null,
+            formFields: [],
+            data: []
+        };
+    }
+
+    if (sectionTitleEl) sectionTitleEl.textContent = data.title || '';
+    if (addButtonTextEl) addButtonTextEl.textContent = data.addButton || '';
     
     // Show/hide Create Organization button based on section
     const createOrgBtn = document.getElementById('create-org-btn');
@@ -161,62 +301,126 @@ async function loadAdminSection(section) {
         createOrgBtn.classList.add('hidden');
         createOrgBtn.classList.remove('flex');
     }
-    
-    // Update table headers
-    document.getElementById('col1-header').textContent = data.columns[0];
-    document.getElementById('col2-header').textContent = data.columns[1];
-    document.getElementById('col3-header').textContent = data.columns[2];
-    document.getElementById('col4-header').textContent = data.columns[3];
-    
-    // Fetch data from API
-    await fetchSectionData(section);
-    
-    // Render table data
-    renderTable();
+
+    const tableDiv = document.querySelector('.bg-white.rounded-lg.shadow-sm.border.border-gray-200');
+    const analyticsDiv = document.getElementById('analytics-content');
+
+    if (section === 'analytics') {
+        if (tableDiv && tableDiv.classList) tableDiv.classList.add('hidden');
+        if (analyticsDiv && analyticsDiv.classList) analyticsDiv.classList.remove('hidden');
+        // Only call loadAnalytics if it's available; catch runtime errors so UI doesn't break
+        if (typeof loadAnalytics === 'function') {
+            try {
+                await loadAnalytics();
+            } catch (err) {
+                console.error('loadAnalytics error:', err);
+                showToast('Failed to load analytics', 'error');
+            }
+        } else {
+            console.warn('loadAnalytics is not defined');
+            showToast('Analytics functionality is unavailable.', 'error');
+        }
+    } else {
+        if (tableDiv && tableDiv.classList) tableDiv.classList.remove('hidden');
+        if (analyticsDiv && analyticsDiv.classList) analyticsDiv.classList.add('hidden');
+
+        // Update table headers
+        document.getElementById('col1-header').textContent = data.columns[0] || '';
+        document.getElementById('col2-header').textContent = data.columns[1] || '';
+        document.getElementById('col3-header').textContent = data.columns[2] || '';
+        document.getElementById('col4-header').textContent = data.columns[3] || '';
+        document.getElementById('col5-header').textContent = data.columns[4] || '';
+        document.getElementById('col6-header').textContent = data.columns[5] || '';
+
+        // Fetch data from API
+        await fetchSectionData(section);
+
+        // Render table data
+        renderTable();
+    }
 }
 
 // Render table
 function renderTable() {
     const data = sectionData[currentSection];
+    if (!data || typeof data !== 'object') {
+        console.warn('renderTable: no data for section', currentSection);
+        return;
+    }
+
     const tbody = document.getElementById('table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
-    
-    data.data.forEach(item => {
+
+    // Helper to resolve field values. Supports array of candidate keys and nested keys using dot notation.
+    function resolveFieldValue(item, field) {
+        if (!field) return '';
+        const getVal = (obj, key) => key.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : undefined, obj);
+
+        if (Array.isArray(field)) {
+            for (const k of field) {
+                const v = getVal(item, k);
+                if (v !== undefined && v !== null && v !== '') return v;
+            }
+            return '';
+        }
+
+        const v = getVal(item, field);
+        return (v === undefined || v === null) ? '' : v;
+    }
+
+    (data.data || []).forEach(item => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
-        
-        const values = Object.values(item).slice(1); // Skip id
-        row.innerHTML = `
+
+        let html = '';
+        html += `<td class="px-6 py-4"><input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${item.id}"></td>`;
+
+        // Determine which fields to show for this section (fall back to object keys minus id)
+        const fields = data.fields || Object.keys(item || {}).filter(k => k !== 'id');
+
+        // Render up to 6 data columns to match table layout
+        for (let i = 0; i < 6; i++) {
+            const fieldKey = fields[i];
+            const value = fieldKey ? resolveFieldValue(item, fieldKey) : '';
+
+            if (i === 0) {
+                html += `<td class="px-6 py-4 text-sm ${value ? 'text-blue-600 hover:text-blue-800 font-medium cursor-pointer' : 'text-gray-700'}">${value}</td>`;
+            } else {
+                html += `<td class="px-6 py-4 text-sm text-gray-700">${value}</td>`;
+            }
+        }
+
+        html += `
             <td class="px-6 py-4">
-                <input type="checkbox" class="item-checkbox rounded border-gray-300" data-id="${item.id}">
-            </td>
-            <td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">${values[0]}</td>
-            <td class="px-6 py-4 text-sm text-gray-700">${values[1]}</td>
-            <td class="px-6 py-4 text-sm text-gray-700">${values[2]}</td>
-            <td class="px-6 py-4 text-sm text-gray-700">${values[3]}</td>
-            <td class="px-6 py-4">
-                <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
+                <button onclick="editItem('${item.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                <button onclick="deleteItem('${item.id}')" class="text-red-600 hover:text-red-800 font-medium text-sm">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </td>
         `;
+
+        row.innerHTML = html;
         tbody.appendChild(row);
     });
-    
+
     updateCounts();
 }
 
 // Update counts
 function updateCounts() {
-    const total = sectionData[currentSection].data.length;
-    document.getElementById('total-count').textContent = total;
-    document.getElementById('item-count').textContent = total;
-    
+    const sec = sectionData[currentSection];
+    const total = (sec && sec.data) ? sec.data.length : 0;
+    const totalEl = document.getElementById('total-count');
+    const itemCountEl = document.getElementById('item-count');
+    const selectedCountEl = document.getElementById('selected-count');
+    if (totalEl) totalEl.textContent = total;
+    if (itemCountEl) itemCountEl.textContent = total;
+
     const selected = document.querySelectorAll('.item-checkbox:checked').length;
-    document.getElementById('selected-count').textContent = selected;
+    if (selectedCountEl) selectedCountEl.textContent = selected;
 }
 
 // Toggle select all
@@ -229,37 +433,73 @@ function toggleSelectAll() {
 }
 
 // Open add modal
-function openAddModal() {
+async function openAddModal() {
     const data = sectionData[currentSection];
-    document.getElementById('modal-title').textContent = 'Add ' + data.title.replace('Select ', '').replace(' to change', '');
-    
+    if (!data || typeof data !== 'object') {
+        console.warn('openAddModal: no sectionData for', currentSection);
+        showToast('Cannot open form for unknown section', 'error');
+        return;
+    }
+
+    const modalTitleEl = document.getElementById('modal-title');
+    if (modalTitleEl) modalTitleEl.textContent = 'Add ' + String(data.title || '').replace('Select ', '').replace(' to change', '');
+
+    // Fetch options for selects
+    if (currentSection === 'organization-events' || currentSection === 'organization-members') {
+        const orgs = await fetchOrganizations();
+        const orgField = (data.formFields || []).find(f => f.name === 'organization');
+        if (orgField) {
+            orgField.options = orgs;
+        }
+    } else if (currentSection === 'users') {
+        const programs = await fetchPrograms();
+        const courseField = (data.formFields || []).find(f => f.name === 'course');
+        if (courseField) {
+            courseField.options = programs;
+        }
+    }
+
     // Generate form fields
     const formFields = document.getElementById('form-fields');
+    if (!formFields) {
+        console.warn('openAddModal: form fields container not found');
+        showToast('Form container missing', 'error');
+        return;
+    }
     formFields.innerHTML = '';
-    
-    data.formFields.forEach(field => {
+
+    (data.formFields || []).forEach(field => {
         const fieldDiv = document.createElement('div');
-        
+        const requiredAttr = field.required ? 'required' : '';
+        const readonlyAttr = field.readonly ? 'readonly' : '';
+
         if (field.type === 'textarea') {
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${field.required ? 'required' : ''}></textarea>
+                <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}></textarea>
             `;
         } else if (field.type === 'select') {
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
                     <option value="">Select ${field.label}</option>
                     ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                 </select>
             `;
+        } else if (field.type === 'checkbox') {
+            fieldDiv.innerHTML = `
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${readonlyAttr}>
+                    <span class="text-sm font-medium text-gray-700">${field.label}</span>
+                </label>
+            `;
         } else {
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <input type="${field.type}" name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
+                <input type="${field.type}" name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
             `;
         }
-        
+
         formFields.appendChild(fieldDiv);
     });
     
@@ -275,7 +515,7 @@ function closeAddModal() {
 }
 
 // Handle form submit
-function handleSubmit(event) {
+    async function handleSubmit(event) {
     event.preventDefault();
     
     const formData = new FormData(event.target);
@@ -284,26 +524,132 @@ function handleSubmit(event) {
     for (let [key, value] of formData.entries()) {
         itemData[key] = value;
     }
+    // Ensure checkbox values are captured (FormData omits unchecked boxes)
+    // Read checkbox fields from the form directly so we can send true/false
+    const currentFormFields = sectionData[currentSection].formFields || [];
+    for (const f of currentFormFields) {
+        if (f.type === 'checkbox') {
+            const el = event.target.querySelector(`[name="${f.name}"]`);
+            if (el) {
+                itemData[f.name] = !!el.checked;
+            }
+        }
+    }
     
     // Check if editing existing item
     if (window.editingItemId) {
-        // Update existing item
-        const index = sectionData[currentSection].data.findIndex(item => item.id === window.editingItemId);
-        if (index > -1) {
-            // Update the item with new data, preserving id
-            sectionData[currentSection].data[index] = { 
-                ...sectionData[currentSection].data[index], 
-                ...itemData 
-            };
-            showToast('Item updated successfully!', 'success');
+        // Update existing item: attempt server PATCH if endpoint exists
+        const section = currentSection;
+        const config = sectionData[section];
+        const id = window.editingItemId;
+
+        if (config && config.apiEndpoint) {
+            const base = config.apiEndpoint;
+            const url = base.endsWith('/') ? `${base}${id}/` : `${base}/${id}/`;
+            try {
+                // Only send fields that changed (partial update)
+                const original = (sectionData[section].data || []).find(it => it.id === id) || {};
+                const payload = {};
+                for (const k of Object.keys(itemData)) {
+                    const origVal = (original[k] === undefined || original[k] === null) ? '' : String(original[k]);
+                    const newVal = (itemData[k] === undefined || itemData[k] === null) ? '' : String(itemData[k]);
+                    if (origVal !== newVal) {
+                        // For checkbox-like boolean values or empty strings, still include as change
+                        payload[k] = itemData[k];
+                    }
+                }
+
+                if (Object.keys(payload).length === 0) {
+                    showToast('No changes to save.', 'error');
+                } else {
+                    const token = (typeof csrftoken !== 'undefined') ? csrftoken : (window.csrftoken || '');
+                    const resp = await fetch(url, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': token,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!resp.ok) {
+                        let msg = 'Failed to update item.';
+                        try { const j = await resp.json(); msg = j.error || j.message || msg; } catch (e) {}
+                        showToast(msg, 'error');
+                    } else {
+                        // Refetch data to get updated values (e.g., recalculated counts)
+                        await fetchSectionData(section);
+                        showToast('Item updated successfully!', 'success');
+                    }
+                }
+            } catch (err) {
+                console.error('Update error', err);
+                showToast('Failed to update item', 'error');
+            }
+        } else {
+            // No API endpoint: just update locally
+            const index = sectionData[currentSection].data.findIndex(item => item.id === window.editingItemId);
+            if (index > -1) {
+                sectionData[currentSection].data[index] = {
+                    ...sectionData[currentSection].data[index],
+                    ...itemData
+                };
+                showToast('Item updated locally', 'success');
+            }
         }
+
         // Clear editing id
         window.editingItemId = null;
     } else {
-        // Add new item
-        const newItem = { id: Date.now(), ...itemData };
-        sectionData[currentSection].data.push(newItem);
-        showToast('Item added successfully!', 'success');
+        // Add new item: send POST to API if endpoint exists
+        const section = currentSection;
+        const config = sectionData[section];
+
+        if (config && config.apiEndpoint) {
+            try {
+                const token = (typeof csrftoken !== 'undefined') ? csrftoken : (window.csrftoken || '');
+                const resp = await fetch(config.apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+
+                if (!resp.ok) {
+                    let msg = 'Failed to add item.';
+                    try {
+                        const j = await resp.json();
+                        if (j.errors) {
+                            // Collect all errors
+                            const errorMsgs = [];
+                            for (const field in j.errors) {
+                                errorMsgs.push(`${field}: ${j.errors[field]}`);
+                            }
+                            msg = errorMsgs.join('; ');
+                        } else {
+                            msg = j.error || j.message || msg;
+                        }
+                    } catch (e) {}
+                    showToast(msg, 'error');
+                } else {
+                    // Refetch data to get updated list
+                    await fetchSectionData(section);
+                    showToast('Item added successfully!', 'success');
+                }
+            } catch (err) {
+                console.error('Add error', err);
+                showToast('Failed to add item', 'error');
+            }
+        } else {
+            // Fallback: local add
+            const newItem = { id: Date.now(), ...itemData };
+            sectionData[section].data.push(newItem);
+            showToast('Item added locally', 'success');
+        }
     }
     
     // Re-render table
@@ -316,54 +662,86 @@ function handleSubmit(event) {
 // Edit item
 function editItem(id) {
     const data = sectionData[currentSection];
-    const item = data.data.find(item => item.id === id);
-    
-    if (item) {
-        // Update modal title
-        document.getElementById('modal-title').textContent = 'Edit ' + data.title.replace('Select ', '').replace(' to change', '');
-        
-        // Generate form fields with existing data
-        const formFields = document.getElementById('form-fields');
-        formFields.innerHTML = '';
-        
-        data.formFields.forEach(field => {
-            const fieldDiv = document.createElement('div');
-            const value = item[field.name] || '';
-            
-            if (field.type === 'textarea') {
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${field.required ? 'required' : ''}>${value}</textarea>
-                `;
-            } else if (field.type === 'select') {
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
-                        <option value="">Select ${field.label}</option>
-                        ${field.options.map(opt => `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`).join('')}
-                    </select>
-                `;
-            } else {
-                fieldDiv.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                    <input type="${field.type}" name="${field.name}" value="${value}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${field.required ? 'required' : ''}>
-                `;
-            }
-            
-            formFields.appendChild(fieldDiv);
-        });
-        
-        // Store editing item id
-        window.editingItemId = id;
-        
-        // Show modal
-        document.getElementById('add-modal').classList.remove('hidden');
-        document.getElementById('add-modal').classList.add('flex');
+    if (!data || typeof data !== 'object') {
+        console.warn('editItem: no sectionData for', currentSection);
+        showToast('Cannot edit item for unknown section', 'error');
+        return;
+    }
+
+    const item = (data.data || []).find(item => item.id === id);
+    if (!item) {
+        console.warn('editItem: item not found', id, 'in', currentSection);
+        showToast('Item not found', 'error');
+        return;
+    }
+
+    // Update modal title
+    const modalTitleEl = document.getElementById('modal-title');
+    if (modalTitleEl) modalTitleEl.textContent = 'Edit ' + String(data.title || '').replace('Select ', '').replace(' to change', '');
+
+    // Generate form fields with existing data
+    const formFields = document.getElementById('form-fields');
+    if (!formFields) {
+        console.warn('editItem: form fields container missing');
+        showToast('Form container not found', 'error');
+        return;
+    }
+    formFields.innerHTML = '';
+
+    (data.formFields || []).forEach(field => {
+        const fieldDiv = document.createElement('div');
+        const value = (item[field.name] !== undefined && item[field.name] !== null) ? item[field.name] : '';
+        // When editing, do not enforce 'required' so fields are optional
+        const requiredAttr = '';
+        const readonlyAttr = field.readonly ? 'readonly' : '';
+
+        if (field.type === 'textarea') {
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
+            `;
+        } else if (field.type === 'select') {
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+                    <option value="">Select ${field.label}</option>
+                    ${ (field.options || []).map(opt => `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            `;
+        } else if (field.type === 'checkbox') {
+            const checked = value === true || String(value) === 'true' || String(value) === '1' ? 'checked' : '';
+            fieldDiv.innerHTML = `
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${checked} ${readonlyAttr}>
+                    <span class="text-sm font-medium text-gray-700">${field.label}</span>
+                </label>
+            `;
+        } else {
+            // escape value for attribute
+            const safeVal = String(value).replace(/"/g, '&quot;');
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <input type="${field.type}" name="${field.name}" value="${safeVal}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+            `;
+        }
+
+        formFields.appendChild(fieldDiv);
+    });
+
+    // Store editing item id
+    window.editingItemId = id;
+
+    // Show modal
+    const addModalEl = document.getElementById('add-modal');
+    if (addModalEl) {
+        addModalEl.classList.remove('hidden');
+        addModalEl.classList.add('flex');
     }
 }
 
 // Delete item
 function deleteItem(id) {
+    console.log('deleteItem called with id=', id);
     deleteItemId = id;
     document.getElementById('delete-modal').classList.remove('hidden');
     document.getElementById('delete-modal').classList.add('flex');
@@ -377,15 +755,66 @@ function closeDeleteModal() {
 }
 
 // Confirm delete
-function confirmDelete() {
-    if (deleteItemId) {
-        const index = sectionData[currentSection].data.findIndex(item => item.id === deleteItemId);
+async function confirmDelete() {
+    console.log('confirmDelete starting for id=', deleteItemId, 'section=', currentSection);
+    if (!deleteItemId) {
+        console.warn('confirmDelete called but deleteItemId is empty');
+        closeDeleteModal();
+        return;
+    }
+
+    const section = currentSection;
+    const config = sectionData[section];
+
+    // If the section has an API endpoint, attempt server-side delete
+    if (config && config.apiEndpoint) {
+        // Construct delete URL: apiEndpoint + id + '/'
+        const base = config.apiEndpoint;
+        const deleteUrl = base.endsWith('/') ? `${base}${deleteItemId}/` : `${base}/${deleteItemId}/`;
+
+        try {
+            console.log('sending DELETE to', deleteUrl);
+            const token = (typeof csrftoken !== 'undefined') ? csrftoken : (window.csrftoken || '');
+            const resp = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': token,
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('delete response status', resp.status);
+
+            if (!resp.ok) {
+                let msg = 'Failed to delete item.';
+                try {
+                    const j = await resp.json();
+                    msg = j.error || j.message || msg;
+                } catch (e) {}
+                showToast(msg, 'error');
+                closeDeleteModal();
+                return;
+            }
+
+            // On success, remove from local data and re-render
+            const index = sectionData[section].data.findIndex(item => item.id === deleteItemId);
+            if (index > -1) sectionData[section].data.splice(index, 1);
+            renderTable();
+            showToast('Deleted successfully!', 'success');
+        } catch (err) {
+            console.error('Delete error', err);
+            showToast('Failed to delete', 'error');
+        }
+    } else {
+        // Fallback: local-only delete
+        const index = sectionData[section].data.findIndex(item => item.id === deleteItemId);
         if (index > -1) {
-            sectionData[currentSection].data.splice(index, 1);
+            sectionData[section].data.splice(index, 1);
             renderTable();
             showToast('Item deleted successfully!', 'success');
         }
     }
+
     closeDeleteModal();
 }
 
