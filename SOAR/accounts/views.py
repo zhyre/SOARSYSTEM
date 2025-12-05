@@ -138,8 +138,7 @@ def register(request):
             password = form.cleaned_data.get("password1")
             username = form.cleaned_data.get("username")
             student_id = form.cleaned_data.get("student_id")
-
-            # Check if username already exists
+          # Check if username already exists
             if User.objects.filter(username=username).exists():
                 messages.error(request, "A user with this username already exists.")
                 return render(request, "accounts/register.html", {"form": form})
@@ -198,6 +197,16 @@ def register(request):
                 cd = form.cleaned_data
                 try:
                     user_obj = User.objects.get(pk=supa_user_id)
+                    # Updating existing user
+                    if User.objects.filter(username=username).exclude(pk=user_obj.pk).exists():
+                        messages.error(request, "A user with this username already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
+                    if User.objects.filter(email=email).exclude(pk=user_obj.pk).exists():
+                        messages.error(request, "A user with this email already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
+                    if User.objects.filter(student_id=student_id).exclude(pk=user_obj.pk).exists():
+                        messages.error(request, "A user with this student ID already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
                     user_obj.username = cd.get("username") or user_obj.username
                     user_obj.email = email
                     user_obj.first_name = cd.get("first_name") or user_obj.first_name
@@ -206,6 +215,16 @@ def register(request):
                     user_obj.course = cd.get("course") or user_obj.course
                     user_obj.year_level = cd.get("year_level") or user_obj.year_level
                 except User.DoesNotExist:
+                    # Creating new user
+                    if User.objects.filter(username=username).exists():
+                        messages.error(request, "A user with this username already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
+                    if User.objects.filter(email=email).exists():
+                        messages.error(request, "A user with this email already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
+                    if User.objects.filter(student_id=student_id).exists():
+                        messages.error(request, "A user with this student ID already exists.")
+                        return render(request, "accounts/register.html", {"form": form})
                     user_obj = form.save(commit=False)
                     user_obj.id = supa_user_id
                     user_obj.email = email
