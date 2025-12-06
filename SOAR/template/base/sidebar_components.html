@@ -37,7 +37,12 @@
                     <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform sidebar-text" id="accounts-chevron"></i>
                 </button>
                 <div class="nav-content pl-4 space-y-1" id="accounts-content">
-                    <a href="#" onclick="loadAdminSection('users'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="users">
+                    <a href="#" onclick="loadAdminSection('analytics'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="analytics">
+                    <i class="fas fa-chart-line text-blue-600 w-5 h-5"></i>
+                    <span class="font-medium">Analytics</span>
+                </a>
+
+                <a href="#" onclick="loadAdminSection('users'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="users">
                         <i class="fas fa-user text-sm text-gray-500 group-hover:text-blue-600"></i>
                         <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Users</span>
                     </a>
