@@ -133,21 +133,6 @@ a {
     gap: 1rem;
 }
 
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-}
-
-.menu-toggle:hover {
-    background-color: var(--border-color);
-}
 
 .user-menu {
     display: flex;
@@ -826,7 +811,6 @@ dashboard-content h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
 }
 
 /* --- Buttons --- */

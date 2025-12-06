@@ -1,10 +1,3 @@
-// Mobile menu toggle
-const mobileMenuButton = document.getElementById('mobile-menu-button');
-const mobileMenu = document.getElementById('mobile-menu');
-
-mobileMenuButton.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-});
 
 // Feature card mouse tracking for spotlight effect
 document.querySelectorAll('.feature-card').forEach(card => {
