@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'css/accounts/members_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -632,25 +633,9 @@
         {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
 
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Mobile menu toggle button (only visible on mobile) -->
-            <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-[#0f172a] rounded-lg text-white">
-                <i class="fas fa-bars"></i>
-            </button>
-
+            
             <main class="flex-1 overflow-y-auto p-4 md:p-8 pt-16 md:pt-8">
-                <div class="content-card">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="page-header">
-                            <h1>Members Management</h1>
-                            <p>Manage your organization members and their roles</p>
-                        </div>
-                        <div class="search-filter-bar">
-                            <div class="search-box relative w-full">
-                                <input type="text" placeholder="Search members..." id="member-search" autocomplete="off" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% include 'base/header_component.html' with page_title="Members Management" page_subtitle="Manage your organization members and their roles" %}
 
                 {% if "adviser" in user_role or "leader" in user_role %}
                 <div class="content-card flex items-center justify-between">
@@ -797,6 +782,12 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Success Message Toast -->
+    <div id="success-message" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-green-500 text-white rounded-xl shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none">
+        <i class="fas fa-check-circle text-xl"></i>
+        <span class="font-medium"></span>
     </div>
 
     <script>
@@ -1133,7 +1124,7 @@
                 overlay.classList.add('hidden');
             });
             if (sidebarClose) sidebarClose.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
+                
             });
 
             const mobileActionsBtn = document.getElementById('mobileActionsBtn');

@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -147,116 +148,69 @@
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen bg-gray-50">
     {% csrf_token %}
-
-    <!-- Overlay for mobile -->
-    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
-
     <div class="flex">
         <!-- Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
-
         <!-- Main content wrapper -->
         <div class="main-content flex-1 flex flex-col overflow-hidden">
-            
             <!-- HEADER -->
-            <header class="bg-white shadow-sm z-10">
-                <div class="flex items-center justify-between px-6 py-4">
-                    
-                    <!-- Left: Page Title -->
-                    <div class="flex items-center space-x-4">
-                        <button id="mobileMenuToggle" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
-                            <i class="fas fa-bars text-gray-600"></i>
-                        </button>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Organization Feed</h1>
-                            <p class="text-sm text-gray-500">Stay updated with the latest activities</p>
-                        </div>
-                    </div>
-
-                    <!-- Right: User Info and Mobile Dropdown -->
-                    <div class="flex items-center space-x-5">
-                        
-                        <!-- Mobile dropdown -->
-                        <div class="sm:hidden relative">
-                            <button id="mobileActionsBtn" class="p-2 hover:bg-gray-100 rounded-lg">
-                                <i class="fas fa-ellipsis-v text-gray-600"></i>
-                            </button>
-                            <div id="mobileActionsMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                                <a href="{% url 'organization_profile' organization.id %}" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-100">
-                                    <i class="fas fa-building text-blue-600"></i><span>Organization Profile</span>
-                                </a>
-                                <a href="{% url 'membermanagement' organization.id %}" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-100">
-                                    <i class="fas fa-users-cog text-green-600"></i><span>Member Management</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- User profile -->
-                        <div class="flex items-center space-x-4 pl-4 border-l border-gray-200">
-                            <div class="hidden md:block text-right">
-                                <p class="text-base font-semibold text-gray-800">
-                                    {{ user.first_name|title }} {{ user.last_name|title }}
-                                </p>
-                                <p class="text-sm text-gray-500">
-                                    {{ user_role|default:"Student"|title }}
-                                </p>
-                            </div>
-
-                            <a href="{% url 'profile' %}">
-                                {% if user.profile_picture %}
-                                    <img src="{{ user.profile_picture.url }}" 
-                                        alt="{{ user.first_name }}" 
-                                        class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm cursor-pointer hover:border-blue-600 transition">
-                                {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" 
-                                        alt="{{ user.first_name }}" 
-                                        class="w-12 h-12 rounded-full border-2 border-blue-500 object-cover shadow-sm cursor-pointer hover:border-blue-600 transition">
-                                {% endif %}
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-            </header>
+            {% include 'base/header_component.html' with page_title="Organization Feed" page_subtitle="Stay updated with the latest activities" %}
 
             <!-- Organization Header with Photo -->
-            <div class="bg-white shadow-sm w-full">
-                <div class="w-full px-6 py-6 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-6">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full relative overflow-hidden">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0">
+                    <div class="absolute inset-0 bg-black/10"></div>
+                    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                </div>
+                
+                <div class="relative z-10 w-full px-4 sm:px-6 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6">
                     
                     <!-- Organization Photo -->
                     <div class="relative group">
-                        <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white p-2">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white p-1">
                             <img src="{{ organization.profile_picture.url|default:'/static/images/default_org.png' }}" 
-                                alt="SOAR Logo" 
+                                alt="{{ organization.name }}" 
                                 class="w-full h-full object-contain">
                         </div>
-                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button class="p-2 bg-white bg-opacity-80 rounded-full text-blue-600 hover:bg-white">
-                                <i class="fas fa-camera"></i>
+                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <button class="p-2 sm:p-3 bg-white bg-opacity-90 rounded-full text-blue-600 hover:bg-white transition-all">
+                                <i class="fas fa-camera text-sm sm:text-lg"></i>
                             </button>
+                        </div>
+                        <!-- Status Indicator -->
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                            <i class="fas fa-check text-white text-xs"></i>
                         </div>
                     </div>
 
                     <!-- Organization Info -->
-                    <div class="text-left">
-                        <h1 class="text-3xl font-bold text-gray-900">{{ organization.name|default:"Organization Name" }}</h1>
-                        <p class="mt-2 text-gray-600 max-w-3xl">{{ organization.description|default:"Organization description goes here" }}</p>
-                        <div class="mt-3 flex flex-wrap gap-4">
-                            <span class="inline-flex items-center text-sm text-gray-500">
-                                <i class="fas fa-users mr-1.5"></i>
-                                <span>{{ organization.members.count }} Members</span>
-                            </span>
-                            <span class="inline-flex items-center text-sm text-gray-500">
-                                <i class="fas fa-calendar-alt mr-1.5"></i>
-                                <span>Created {{ organization.date_created|date:"F Y" }}</span>
-                            </span>
+                    <div class="text-left text-white flex-1 text-center md:text-left">
+                        <div class="flex flex-col md:flex-row md:items-center md:gap-4 mb-3">
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">{{ organization.name|default:"Organization Name" }}</h1>
+                            <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 mt-2 md:mt-0">
+                                <span class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
+                                    <i class="fas fa-star mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
+                                    {{ organization.members.count }} Members
+                                </span>
+                                <span class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
+                                    <i class="fas fa-calendar-alt mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
+                                    Since {{ organization.date_created|date:"Y" }}
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-blue-100 text-base sm:text-lg max-w-3xl mb-4">{{ organization.description|default:"Organization description goes here" }}</p>
+                        
+                        <div class="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
                             {% if user.is_authenticated and user_role %}
-                                <button id="leaveOrgBtn" class="ml-2 px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition" onclick="leaveOrganization('{{ organization.id }}')">
+                                <button id="leaveOrgBtn" class="px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition border border-white/30 text-sm sm:text-base" onclick="leaveOrganization('{{ organization.id }}')">
                                     <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
                                 </button>
                             {% endif %}
+                            <button class="px-3 sm:px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium text-sm sm:text-base">
+                                <i class="fas fa-share-alt mr-2"></i> Share
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -264,45 +218,46 @@
 
             <!-- MAIN CONTENT -->
             <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-                {% if user_role in "adviser,leader" %}
-                    <div class="flex justify-end mb-6">
-                        <button id="openEventModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
-                            <i class="fas fa-calendar-plus"></i><span>Create Event</span>
-                        </button>
-                    </div>
-                {% endif %}
-
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
-                    <div class="flex items-center space-x-2">
-                        <button class="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
-                            <i class="fas fa-sync-alt mr-1"></i> Newest
-                        </button>
-                        <button class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
-                            <i class="fas fa-sliders-h"></i>
-                        </button>
-                        
-                    </div>
-                </div>
-
-                <!-- Activity Feed -->
-                <div class="space-y-6">
-                    {% if activities %}
-                        {% for event in activities %}
-                            {% include 'event/eventcard_upload.html' with event=event organization=organization user_role=user_role %}
-                        {% endfor %}
-                    {% else %}
-                        <!-- Empty State -->
-                        <div class="text-center py-16">
-                            <div class="float-animation inline-block mb-4">
-                                <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
-                            <p class="text-gray-500">Create one to get started!</p>
+                <div class="max-w-5xl mx-auto">
+                    {% if user_role in "adviser,leader" %}
+                        <div class="flex justify-end mb-6">
+                            <button id="openEventModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
+                                <i class="fas fa-calendar-plus"></i><span>Create Event</span>
+                            </button>
                         </div>
                     {% endif %}
-                </div>
 
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                                <i class="fas fa-sync-alt mr-1"></i> Newest
+                            </button>
+                            <button class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
+                                <i class="fas fa-sliders-h"></i>
+                            </button>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Activity Feed -->
+                    <div class="space-y-6">
+                        {% if activities %}
+                            {% for event in activities %}
+                                {% include 'event/eventcard_upload.html' with event=event organization=organization user_role=user_role %}
+                            {% endfor %}
+                        {% else %}
+                            <!-- Empty State -->
+                            <div class="text-center py-16">
+                                <div class="float-animation inline-block mb-4">
+                                    <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
+                                <p class="text-gray-500">Create one to get started!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </main>
 
             <!-- FOOTER -->
@@ -460,6 +415,7 @@
             }
         });
 
+        
         // Leave Organization functionality
         function leaveOrganization(orgId) {
             if (confirm('Are you sure you want to leave this organization? This action cannot be undone.')) {

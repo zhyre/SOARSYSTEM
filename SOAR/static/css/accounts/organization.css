@@ -1093,22 +1093,6 @@ html, body {
     gap: 1rem;
 }
 
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.menu-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
 .breadcrumb {
     display: flex;
     align-items: center;

@@ -1,149 +1,197 @@
 {% load static %}
-<!-- Admin Sidebar -->
+<!-- Modern White Sidebar with Advanced Features -->
 {% if sidebar_type == 'admin' %}
-<aside id="admin-sidebar" class="bg-[#0F172A] text-white w-64 min-h-screen border-r border-[#1e293b] flex-shrink-0 overflow-y-auto">
+<aside id="admin-sidebar" class="modern-sidebar bg-white text-gray-800 w-64 min-h-screen border-r border-gray-200 flex-shrink-0 overflow-y-auto shadow-xl">
     <div class="p-6">
         <!-- Logo Section -->
-        <div class="flex items-center justify-between mb-8 pb-4 border-b border-[#1e293b]">
+        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-12 w-auto">
-                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0F172A]"></div>
+                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-10 w-auto" style="filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; -webkit-filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; opacity: 1 !important;">
+                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                 </div>
-                <div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">SOAR</span>
-                    <p class="text-xs text-gray-400">Administration</p>
+                <div class="sidebar-text">
+                    <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">SOAR</span>
+                    <p class="text-xs text-gray-500">Administration</p>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="space-y-1">
+        <!-- Search Bar -->
+        <div class="mb-6 sidebar-search">
+            <div class="relative">
+                <input type="text" id="sidebar-search" placeholder="Search menu..." class="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Navigation with Dropdowns -->
+        <nav class="space-y-2 sidebar-nav">
             <!-- Accounts Section -->
-            <div class="mb-4">
-                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Accounts</h3>
-                <a href="#" onclick="loadAdminSection('users'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="users">
-                    <i class="fas fa-users text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Users</span>
-                </a>
+            <div class="nav-section">
+                <button class="nav-header flex items-center w-full px-4 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleNavSection('accounts')">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-users text-sm text-gray-600"></i>
+                        <span class="text-xs font-semibold text-gray-500 uppercase sidebar-text">Accounts</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform sidebar-text" id="accounts-chevron"></i>
+                </button>
+                <div class="nav-content pl-4 space-y-1" id="accounts-content">
+                    <a href="#" onclick="loadAdminSection('users'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="users">
+                        <i class="fas fa-user text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Users</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Authentication Section -->
-            <div class="mb-4">
-                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Authentication</h3>
-                <a href="#" onclick="loadAdminSection('groups'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="groups">
-                    <i class="fas fa-user-shield text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Groups</span>
-                </a>
+            <div class="nav-section">
+                <button class="nav-header flex items-center w-full px-4 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleNavSection('auth')">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-alt text-sm text-gray-600"></i>
+                        <span class="text-xs font-semibold text-gray-500 uppercase sidebar-text">Authentication</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform sidebar-text" id="auth-chevron"></i>
+                </button>
+                <div class="nav-content pl-4 space-y-1" id="auth-content">
+                    <a href="#" onclick="loadAdminSection('groups'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="groups">
+                        <i class="fas fa-user-shield text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Groups</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Event Section -->
-            <div class="mb-4">
-                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Event</h3>
-                <a href="#" onclick="loadAdminSection('event-rsvps'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="event-rsvps">
-                    <i class="fas fa-check-circle text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Event RSVPs</span>
-                </a>
-                <a href="#" onclick="loadAdminSection('organization-events'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organization-events">
-                    <i class="fas fa-calendar-alt text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organization Events</span>
-                </a>
+            <div class="nav-section">
+                <button class="nav-header flex items-center w-full px-4 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleNavSection('events')">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-calendar text-sm text-gray-600"></i>
+                        <span class="text-xs font-semibold text-gray-500 uppercase sidebar-text">Event</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform sidebar-text" id="events-chevron"></i>
+                </button>
+                <div class="nav-content pl-4 space-y-1" id="events-content">
+                    <a href="#" onclick="loadAdminSection('event-rsvps'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="event-rsvps">
+                        <i class="fas fa-check-circle text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Event RSVPs</span>
+                    </a>
+                    <a href="#" onclick="loadAdminSection('organization-events'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="organization-events">
+                        <i class="fas fa-calendar-alt text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Organization Events</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Organization Section -->
-            <div class="mb-4">
-                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 px-4">Organization</h3>
-                <a href="#" onclick="loadAdminSection('organization-members'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organization-members">
-                    <i class="fas fa-user-friends text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organization Members</span>
-                </a>
-                <a href="#" onclick="loadAdminSection('organizations'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="organizations">
-                    <i class="fas fa-building text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Organizations</span>
-                </a>
-                <a href="#" onclick="loadAdminSection('programs'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-[#1e293b] transition-all duration-200" data-section="programs">
-                    <i class="fas fa-graduation-cap text-sm text-gray-400 group-hover:text-blue-400"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-white text-sm">Programs</span>
-                </a>
+            <div class="nav-section">
+                <button class="nav-header flex items-center w-full px-4 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleNavSection('org')">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-building text-sm text-gray-600"></i>
+                        <span class="text-xs font-semibold text-gray-500 uppercase sidebar-text">Organization</span>
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform sidebar-text" id="org-chevron"></i>
+                </button>
+                <div class="nav-content pl-4 space-y-1" id="org-content">
+                    <a href="#" onclick="loadAdminSection('organization-members'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="organization-members">
+                        <i class="fas fa-user-friends text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Organization Members</span>
+                    </a>
+                    <a href="#" onclick="loadAdminSection('organizations'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="organizations">
+                        <i class="fas fa-building text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Organizations</span>
+                    </a>
+                    <a href="#" onclick="loadAdminSection('programs'); return false;" class="admin-nav-link group flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 ripple" data-section="programs">
+                        <i class="fas fa-graduation-cap text-sm text-gray-500 group-hover:text-blue-600"></i>
+                        <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">Programs</span>
+                    </a>
+                </div>
             </div>
         </nav>
 
         <!-- View Site -->
-        <div class="mt-8 pt-6 border-t border-[#1e293b]">
-            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200">
-                <i class="fas fa-external-link-alt text-sm text-gray-400 group-hover:text-blue-400"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white text-sm">View Site</span>
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200">
+                <i class="fas fa-external-link-alt text-sm text-gray-500 group-hover:text-blue-600"></i>
+                <span class="font-medium text-gray-700 group-hover:text-blue-600 text-sm sidebar-text">View Site</span>
             </a>
         </div>
     </div>
 </aside>
 
-<!-- Main Dashboard Sidebar (Tailwind) -->
+<!-- Main Dashboard Sidebar (Modern White) -->
 {% elif sidebar_type == 'dashboard' %}
-<aside id="sidebar" class="sidebar bg-[#0F172A] text-white w-64 flex-shrink-0 overflow-y-auto border-r border-[#1e293b]">
+<aside id="sidebar" class="modern-sidebar bg-white text-gray-800 w-64 flex-shrink-0 overflow-y-auto border-r border-gray-200 shadow-xl">
     <div class="p-6">
         <!-- Logo Section -->
-        <div class="flex items-center justify-between mb-8 pb-4 border-b border-[#1e293b]">
+        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-12 w-auto">
-                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0F172A]"></div>
+                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-10 w-auto" style="filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; -webkit-filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; opacity: 1 !important;">
+                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                 </div>
-                <div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">SOAR</span>
-                    <p class="text-xs text-gray-400">Student Portal</p>
+                <div class="sidebar-text">
+                    <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">SOAR</span>
+                    <p class="text-xs text-gray-500">Student Portal</p>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="space-y-1">
-            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'index' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'index' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'index' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Home</span>
+        <!-- Search Bar -->
+        <div class="mb-6 sidebar-search">
+            <div class="relative">
+                <input type="text" id="sidebar-search" placeholder="Search menu..." class="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Navigation with Modern Styling -->
+        <nav class="space-y-2 sidebar-nav">
+            <a href="{% url 'index' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'index' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'index' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'index' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Home</span>
                 {% if request.resolver_match.url_name == 'index' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'organizations_page' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organizations_page' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-users text-lg {% if request.resolver_match.url_name == 'organizations_page' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'organizations_page' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Organizations</span>
+            <a href="{% url 'organizations_page' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organizations_page' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-users text-lg {% if request.resolver_match.url_name == 'organizations_page' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'organizations_page' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Organizations</span>
                 {% if request.resolver_match.url_name == 'organizations_page' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
 
-            <a href="{% url 'global_event_page' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'global_event_page' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'global_event_page' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'global_event_page' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Events</span>
+            <a href="{% url 'global_event_page' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'global_event_page' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'global_event_page' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'global_event_page' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Events</span>
                 {% if request.resolver_match.url_name == 'global_event_page' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'profile' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-user-circle text-lg {% if request.resolver_match.url_name == 'profile' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'profile' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">My Profile</span>
+            <a href="{% url 'profile' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-user-circle text-lg {% if request.resolver_match.url_name == 'profile' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'profile' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">My Profile</span>
                 {% if request.resolver_match.url_name == 'profile' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <!-- NOTIFICATIONS LINK -->
-            <a href="{% url 'notifications' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Notifications</span>
-                <!-- Badge Count - Replace 5 with {{ unread_count }} for dynamic count -->
+            <!-- NOTIFICATIONS LINK with Badge -->
+            <a href="{% url 'notifications' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Notifications</span>
+                <!-- Badge Count -->
                 <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
                 {% if request.resolver_match.url_name == 'notifications' %}
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
         </nav>
 
         <!-- Logout Section -->
-        <div class="mt-8 pt-6 border-t border-[#1e293b]">
+        <div class="mt-8 pt-6 border-t border-gray-200">
             <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="group w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-900/20 transition-all duration-200 ease-in-out">
@@ -155,34 +203,42 @@
     </div>
 </aside>
 
-<!-- Organization Sidebar -->
+<!-- Organization Sidebar (Modern White) -->
 {% elif sidebar_type == 'organization' %}
-<aside id="sidebar" class="sidebar bg-[#0f172a] text-white w-64 flex-shrink-0 overflow-y-auto border-r border-[#1e293b]">
+<aside id="sidebar" class="modern-sidebar bg-white text-gray-800 w-64 flex-shrink-0 overflow-y-auto border-r border-gray-200 shadow-xl">
     <div class="p-6">
         <!-- Logo Section -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#1e293b]">
+        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-12 w-12">
-                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0F172A]"></div>
+                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-10 w-auto" style="filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; -webkit-filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; opacity: 1 !important;">
+                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                 </div>
-                <div>
-                    <span class="text-lg font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">SOAR</span>
-                    <p class="text-xs text-gray-400">Organizations</p>
+                <div class="sidebar-text">
+                    <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">SOAR</span>
+                    <p class="text-xs text-gray-500">Organizations</p>
                 </div>
             </div>
         </div>
 
+        <!-- Search Bar -->
+        <div class="mb-6 sidebar-search">
+            <div class="relative">
+                <input type="text" id="sidebar-search" placeholder="Search menu..." class="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
         <!-- Organization Info Card -->
-        <div class="mb-6 pb-6 border-b border-[#1e293b]">
-            <div class="bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-4 rounded-xl border border-[#1e293b] hover:border-blue-500/30 transition-all">
+        <div class="mb-6 pb-6 border-b border-gray-200">
+            <div class="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-all shadow-sm">
                 <div class="flex items-center space-x-3 mb-3">
                     <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                         <i class="fas fa-users text-white text-lg"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-sm text-white truncate">{{ organization.name|default:"Organization" }}</h3>
-                        <div class="flex items-center space-x-1 text-xs text-blue-300">
+                        <h3 class="font-semibold text-sm text-gray-800 truncate sidebar-text">{{ organization.name|default:"Organization" }}</h3>
+                        <div class="flex items-center space-x-1 text-xs text-blue-600">
                             <i class="fas fa-user-friends"></i>
                             <span>{{ organization.members.count }} member{{ organization.members.count|pluralize }}</span>
                         </div>
@@ -192,113 +248,121 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="space-y-1">
-            <a href="{% url 'orgpage' organization.id %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'orgpage' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'orgpage' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'orgpage' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Feed</span>
+        <nav class="space-y-2 sidebar-nav">
+            <a href="{% url 'orgpage' organization.id %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'orgpage' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'orgpage' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'orgpage' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Feed</span>
                 {% if request.resolver_match.url_name == 'orgpage' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'calendar' organization.id %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'calendar' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'calendar' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'calendar' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Events</span>
+            <a href="{% url 'calendar' organization.id %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'calendar' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-calendar-alt text-lg {% if request.resolver_match.url_name == 'calendar' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'calendar' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Events</span>
                 {% if request.resolver_match.url_name == 'calendar' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'membermanagement' organization.id %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'membermanagement' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-user-friends text-lg {% if request.resolver_match.url_name == 'membermanagement' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'membermanagement' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Members</span>
+            <a href="{% url 'membermanagement' organization.id %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'membermanagement' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-user-friends text-lg {% if request.resolver_match.url_name == 'membermanagement' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'membermanagement' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Members</span>
                 {% if request.resolver_match.url_name == 'membermanagement' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'organization_profile' organization.id  %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-id-card text-lg {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Org Profile</span>
+            <a href="{% url 'organization_profile' organization.id  %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-id-card text-lg {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Org Profile</span>
                 {% if request.resolver_match.url_name == 'organization_profile' or request.resolver_match.url_name == 'organization_editprofile' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
         </nav>
 
         <!-- Back to Dashboard -->
-        <div class="mt-8 pt-6 border-t border-[#1e293b]">
-            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-[#1e293b] transition-all duration-200">
-                <i class="fas fa-arrow-left text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white">Back to Dashboard</span>
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200">
+                <i class="fas fa-arrow-left text-lg text-gray-500 group-hover:text-blue-600 transition-colors"></i>
+                <span class="font-medium text-gray-700 group-hover:text-blue-600 sidebar-text">Back to Dashboard</span>
             </a>
         </div>
     </div>
 </aside>
 
-<!-- Default Sidebar (Matching Dashboard) -->
+<!-- Default Sidebar (Modern White) -->
 {% else %}
-<aside id="sidebar" class="sidebar bg-[#0F172A] text-white w-64 flex-shrink-0 overflow-y-auto border-r border-[#1e293b]">
+<aside id="sidebar" class="modern-sidebar bg-white text-gray-800 w-64 flex-shrink-0 overflow-y-auto border-r border-gray-200 shadow-xl">
     <div class="p-6">
         <!-- Logo Section -->
-        <div class="flex items-center justify-between mb-8 pb-4 border-b border-[#1e293b]">
+        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-12 w-auto">
-                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0F172A]"></div>
+                    <img src="{% static 'images/soar-logo.png' %}" alt="SOAR Logo" class="h-10 w-auto" style="filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; -webkit-filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7488%) hue-rotate(247deg) brightness(101%) contrast(101%) !important; opacity: 1 !important;">
+                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                 </div>
-                <div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">SOAR</span>
-                    <p class="text-xs text-gray-400">Student Portal</p>
+                <div class="sidebar-text">
+                    <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">SOAR</span>
+                    <p class="text-xs text-gray-500">Student Portal</p>
                 </div>
             </div>
         </div>
 
+        <!-- Search Bar -->
+        <div class="mb-6 sidebar-search">
+            <div class="relative">
+                <input type="text" id="sidebar-search" placeholder="Search menu..." class="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
         <!-- Navigation -->
-        <nav class="space-y-1">
-            <a href="{% url 'index' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'index' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'index' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'index' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Home</span>
+        <nav class="space-y-2 sidebar-nav">
+            <a href="{% url 'index' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'index' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-home text-lg {% if request.resolver_match.url_name == 'index' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'index' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Home</span>
                 {% if request.resolver_match.url_name == 'index' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'organizations_page' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organizations_page' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-users text-lg {% if request.resolver_match.url_name == 'organizations_page' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'organizations_page' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Organizations</span>
+            <a href="{% url 'organizations_page' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'organizations_page' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-users text-lg {% if request.resolver_match.url_name == 'organizations_page' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'organizations_page' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Organizations</span>
                 {% if request.resolver_match.url_name == 'organizations_page' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <a href="{% url 'profile' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-user-circle text-lg {% if request.resolver_match.url_name == 'profile' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'profile' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">My Profile</span>
+            <a href="{% url 'profile' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'profile' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-user-circle text-lg {% if request.resolver_match.url_name == 'profile' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'profile' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">My Profile</span>
                 {% if request.resolver_match.url_name == 'profile' %}
-                <div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
             
-            <!-- NOTIFICATIONS LINK -->
-            <a href="{% url 'notifications' %}" class="group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-900/50{% else %}hover:bg-[#1e293b]{% endif %} transition-all duration-200 ease-in-out">
-                <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-400 group-hover:text-blue-400{% endif %} transition-colors"></i>
-                <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-white{% else %}text-gray-300 group-hover:text-white{% endif %}">Notifications</span>
-                <!-- Badge Count - Replace 5 with {{ unread_count }} for dynamic count -->
+            <!-- NOTIFICATIONS LINK with Badge -->
+            <a href="{% url 'notifications' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
+                <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
+                <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Notifications</span>
+                <!-- Badge Count -->
                 <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
                 {% if request.resolver_match.url_name == 'notifications' %}
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div class="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
         </nav>
 
         <!-- Logout Section -->
-        <div class="mt-8 pt-6 border-t border-[#1e293b]">
+        <div class="mt-8 pt-6 border-t border-gray-200">
             <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="group w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-900/20 transition-all duration-200 ease-in-out">
-                    <i class="fas fa-sign-out-alt text-lg text-gray-400 group-hover:text-red-400 transition-colors"></i>
-                    <span class="font-medium text-gray-300 group-hover:text-red-400">Logout</span>
+                <button type="submit" class="group w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all duration-200">
+                    <i class="fas fa-sign-out-alt text-lg text-gray-500 group-hover:text-red-600 transition-colors"></i>
+                    <span class="font-medium text-gray-700 group-hover:text-red-600 sidebar-text">Logout</span>
                 </button>
             </form>
         </div>
@@ -402,121 +466,638 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Enhanced Sidebar Styling */
-#sidebar {
-    background-color: #0f172a !important;
-    background-image: none !important;
-}
+/* Modern White Sidebar Styling */
+    .modern-sidebar {
+        background-color: white !important;
+        background-image: none !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
 
-/* Navigation Links */
-#sidebar .nav-link,
-#sidebar a {
-    position: relative;
-    overflow: hidden;
-}
+    /* Ripple Effect */
+    .ripple {
+        position: relative;
+        overflow: hidden;
+    }
 
-/* Active Link Indicator */
-#sidebar a.active::before,
-#sidebar a[class*="bg-gradient"]::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 60%;
-    background: linear-gradient(to bottom, #60a5fa, #3b82f6);
-    border-radius: 0 4px 4px 0;
-}
+    .ripple::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
 
-/* Smooth transitions */
-#sidebar a {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    .ripple:active::before {
+        width: 300px;
+        height: 300px;
+    }
 
-/* Mobile Menu Toggle */
-#mobileMenuToggle {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 28px;
-    height: 20px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    position: relative;
-    z-index: 10;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    /* Navigation Links Enhanced */
+    .modern-sidebar .nav-item,
+    .modern-sidebar .admin-nav-link {
+        position: relative;
+        overflow: hidden;
+    }
 
-#mobileMenuToggle span {
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: white;
-    border-radius: 2px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
-}
+    /* Active Link Indicator */
+    .modern-sidebar .nav-item[class*="bg-blue-50"]::before,
+    .modern-sidebar .admin-nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 60%;
+        background: linear-gradient(to bottom, #3b82f6, #2563eb);
+        border-radius: 0 4px 4px 0;
+    }
 
-#mobileMenuToggle:hover {
-    transform: translateY(-1px);
-}
+    /* Smooth transitions */
+    .modern-sidebar .nav-item,
+    .modern-sidebar .admin-nav-link {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-#mobileMenuToggle:active {
-    transform: scale(0.95);
-}
+    /* Search Bar Styling */
+    .sidebar-search input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
 
-#mobileMenuToggle.active span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
-}
-
-#mobileMenuToggle.active span:nth-child(2) {
-    opacity: 0;
-    transform: scale(0);
-}
-
-#mobileMenuToggle.active span:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #mobileMenuToggle {
+    /* Mobile Menu Toggle Modern */
+    #sidebar-toggle {
         display: flex;
-        margin-left: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        position: relative;
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px;
+    }
+
+    #sidebar-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        transform: scale(1.05);
+    }
+
+    #sidebar-toggle:active {
+        transform: scale(0.95);
+    }
+
+    #sidebar-toggle.active i {
+        transform: rotate(180deg);
+    }
+
+    #sidebar-toggle i {
+        transition: transform 0.3s ease;
+    }
+
+    /* Mobile Overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        display: none;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .modern-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 50;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .modern-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+        
+        .modern-sidebar.collapsed {
+            width: 64px !important;
+        }
+    }
+
+    /* Scrollbar Styling for Modern Sidebar */
+    .modern-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modern-sidebar::-webkit-scrollbar-track {
+        background: #f9fafb;
+    }
+
+    .modern-sidebar::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
+    }
+
+    .modern-sidebar::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+
+    /* Animation for active indicator dot */
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.2); }
+    }
+
+    .modern-sidebar .nav-item[class*="bg-blue-50"] .ml-auto,
+    .modern-sidebar .admin-nav-link.active .ml-auto {
+        animation: pulse-dot 2s infinite;
+    }
+
+    /* Notification Badge Animation */
+    @keyframes badge-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    #sidebar-notification-badge:not(.hidden) {
+        animation: badge-pulse 2s infinite;
+    }
+
+    /* Keyboard Navigation Focus */
+    .modern-sidebar .nav-item:focus,
+    .modern-sidebar .admin-nav-link:focus,
+    .modern-sidebar #sidebar-toggle:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    /* Icon Container Fixes */
+    .modern-sidebar .nav-item i,
+    .modern-sidebar .admin-nav-link i {
+        flex-shrink: 0;
+        width: 1.25rem; /* Fixed width for icons */
+        height: 1.25rem; /* Fixed height for icons */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* Ensure proper spacing for icons */
+    .modern-sidebar .nav-item,
+    .modern-sidebar .admin-nav-link {
+        min-height: 3rem; /* Ensure consistent height */
+        align-items: center;
+    }
+
+    /* Fix collapsed sidebar icon positioning */
+    .modern-sidebar.collapsed .nav-item i,
+    .modern-sidebar.collapsed .admin-nav-link i {
+        margin: 0 auto;
+    }
+
+    /* Hover Effects Enhanced */
+    .modern-sidebar .nav-item:hover,
+    .modern-sidebar .admin-nav-link:hover {
+        transform: translateX(2px);
+    }
+
+    .modern-sidebar .nav-item:hover::after,
+    .modern-sidebar .admin-nav-link:hover::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+        pointer-events: none;
+    }
+</style>
+
+<!-- Advanced Sidebar JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sidebar functionality
+    
+    initSearch();
+    initKeyboardNavigation();
+    initRippleEffects();
+    initNavSections();
+    initMobileResponsive();
+    initNotificationBadge();
+    initStatePersistence();
+    initAutoActiveTracking();
+});
+
+// Sidebar Toggle Functionality
+function initSidebar() {
+    const sidebar = document.querySelector('.modern-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    if (!sidebar || !toggleBtn) return;
+    
+    // Load saved state
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState === 'true') {
+        sidebar.classList.add('collapsed');
+        toggleBtn.classList.add('active');
+    }
+    
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        toggleBtn.classList.toggle('active');
+        
+        // Save state
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('sidebar-collapsed', isCollapsed);
+        
+        // Add ripple effect
+        createRipple(toggleBtn, event);
+    });
+}
+
+// Search Functionality
+function initSearch() {
+    const searchInput = document.getElementById('sidebar-search');
+    const navItems = document.querySelectorAll('.sidebar-nav-item, .admin-nav-link');
+    
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        navItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            const parentSection = item.closest('.nav-section');
+            
+            if (text.includes(searchTerm)) {
+                item.style.display = 'flex';
+                
+                // Expand parent section if item matches
+                if (parentSection) {
+                    const sectionId = parentSection.querySelector('.nav-header')?.getAttribute('onclick')?.match(/toggleNavSection\('([^']+)'\)/)?.[1];
+                    if (sectionId) {
+                        expandNavSection(sectionId);
+                    }
+                }
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Show "no results" message if needed
+        const visibleItems = Array.from(navItems).filter(item => item.style.display !== 'none');
+        const noResultsMsg = document.getElementById('search-no-results');
+        
+        if (visibleItems.length === 0 && searchTerm) {
+            if (!noResultsMsg) {
+                const msg = document.createElement('div');
+                msg.id = 'search-no-results';
+                msg.className = 'text-center text-gray-500 text-sm py-4';
+                msg.textContent = 'No menu items found';
+                searchInput.parentElement.appendChild(msg);
+            }
+        } else if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    });
+    
+    // Clear search on Escape key
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.blur();
+        }
+    });
+}
+
+// Keyboard Navigation
+function initKeyboardNavigation() {
+    const sidebar = document.querySelector('.modern-sidebar');
+    const navItems = sidebar.querySelectorAll('.nav-item, .admin-nav-link, #sidebar-toggle');
+    
+    sidebar.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') return; // Let default tab behavior work
+        
+        let currentIndex = -1;
+        const focusedElement = document.activeElement;
+        
+        navItems.forEach((item, index) => {
+            if (item === focusedElement || item.contains(focusedElement)) {
+                currentIndex = index;
+            }
+        });
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentIndex < navItems.length - 1) {
+                    navItems[currentIndex + 1].focus();
+                } else {
+                    navItems[0].focus();
+                }
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    navItems[currentIndex - 1].focus();
+                } else {
+                    navItems[navItems.length - 1].focus();
+                }
+                break;
+                
+            case 'Enter':
+            case ' ':
+                if (focusedElement.classList.contains('nav-header')) {
+                    e.preventDefault();
+                    focusedElement.click();
+                }
+                break;
+        }
+    });
+    
+    // Make navigation items focusable
+    navItems.forEach(item => {
+        if (!item.hasAttribute('tabindex')) {
+            item.setAttribute('tabindex', '0');
+        }
+    });
+}
+
+// Ripple Effects
+function initRippleEffects() {
+    const rippleElements = document.querySelectorAll('.ripple');
+    
+    rippleElements.forEach(element => {
+        element.addEventListener('click', function(e) {
+            createRipple(this, e);
+        });
+    });
+}
+
+function createRipple(element, event) {
+    const ripple = document.createElement('span');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    ripple.classList.add('ripple-effect');
+    
+    element.appendChild(ripple);
+    
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+// Admin Navigation Sections
+function initNavSections() {
+    // Load saved section states
+    const savedStates = localStorage.getItem('nav-sections-states');
+    if (savedStates) {
+        const states = JSON.parse(savedStates);
+        Object.keys(states).forEach(sectionId => {
+            if (!states[sectionId]) {
+                collapseNavSection(sectionId);
+            }
+        });
     }
 }
 
-/* Scrollbar Styling */
-#sidebar::-webkit-scrollbar {
-    width: 6px;
+function toggleNavSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const chevron = document.getElementById(sectionId + '-chevron');
+    
+    if (!content || !chevron) return;
+    
+    const isExpanded = content.style.display !== 'none';
+    
+    if (isExpanded) {
+        collapseNavSection(sectionId);
+    } else {
+        expandNavSection(sectionId);
+    }
+    
+    // Save state
+    saveNavSectionStates();
 }
 
-#sidebar::-webkit-scrollbar-track {
-    background: #0f172a;
+function expandNavSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const chevron = document.getElementById(sectionId + '-chevron');
+    
+    if (content && chevron) {
+        content.style.display = 'block';
+        chevron.style.transform = 'rotate(180deg)';
+        
+        // Animate height
+        content.style.maxHeight = '0px';
+        content.style.overflow = 'hidden';
+        content.style.transition = 'max-height 0.3s ease';
+        
+        setTimeout(() => {
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }, 10);
+        
+        setTimeout(() => {
+            content.style.maxHeight = 'none';
+            content.style.overflow = 'visible';
+        }, 300);
+    }
 }
 
-#sidebar::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 3px;
+function collapseNavSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const chevron = document.getElementById(sectionId + '-chevron');
+    
+    if (content && chevron) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.style.overflow = 'hidden';
+        content.style.transition = 'max-height 0.3s ease';
+        
+        setTimeout(() => {
+            content.style.maxHeight = '0px';
+        }, 10);
+        
+        setTimeout(() => {
+            content.style.display = 'none';
+            content.style.maxHeight = 'none';
+            content.style.overflow = 'visible';
+        }, 300);
+        
+        chevron.style.transform = 'rotate(0deg)';
+    }
 }
 
-#sidebar::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+function saveNavSectionStates() {
+    const sections = document.querySelectorAll('.nav-section');
+    const states = {};
+    
+    sections.forEach(section => {
+        const header = section.querySelector('.nav-header');
+        const onclick = header?.getAttribute('onclick');
+        const match = onclick?.match(/toggleNavSection\('([^']+)'\)/);
+        
+        if (match) {
+            const sectionId = match[1];
+            const content = document.getElementById(sectionId + '-content');
+            states[sectionId] = content && content.style.display !== 'none';
+        }
+    });
+    
+    localStorage.setItem('nav-sections-states', JSON.stringify(states));
 }
 
-/* Animation for active indicator dot */
-@keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.2); }
+// Mobile Responsive
+function initMobileResponsive() {
+    const sidebar = document.querySelector('.modern-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    // Create overlay if it doesn't exist
+    if (!overlay) {
+        const overlayDiv = document.createElement('div');
+        overlayDiv.className = 'sidebar-overlay';
+        document.body.appendChild(overlayDiv);
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('mobile-open');
+            document.querySelector('.sidebar-overlay')?.classList.remove('active');
+        }
+    });
+    
+    // Handle overlay click
+    document.querySelector('.sidebar-overlay')?.addEventListener('click', function() {
+        sidebar.classList.remove('mobile-open');
+        this.classList.remove('active');
+    });
 }
 
-#sidebar a[class*="bg-gradient"] .ml-auto {
-    animation: pulse-dot 2s infinite;
+// Mobile menu toggle for external calls
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.modern-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+    }
 }
-</style>
+
+// Notification Badge
+function initNotificationBadge() {
+    const badge = document.getElementById('sidebar-notification-badge');
+    
+    if (badge) {
+        // Simulate notification count (replace with actual data)
+        updateNotificationBadge(3);
+    }
+}
+
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('sidebar-notification-badge');
+    
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+}
+
+// State Persistence
+function initStatePersistence() {
+    // Save scroll position
+    const sidebar = document.querySelector('.modern-sidebar');
+    if (sidebar) {
+        sidebar.addEventListener('scroll', function() {
+            localStorage.setItem('sidebar-scroll-position', this.scrollTop);
+        });
+        
+        // Restore scroll position
+        const savedScroll = localStorage.getItem('sidebar-scroll-position');
+        if (savedScroll) {
+            sidebar.scrollTop = parseInt(savedScroll);
+        }
+    }
+}
+
+// Auto-Active State Tracking
+function initAutoActiveTracking() {
+    const currentPath = window.location.pathname;
+    const navItems = document.querySelectorAll('.nav-item, .admin-nav-link');
+    
+    navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (href && (href === currentPath || currentPath.startsWith(href))) {
+            // Add active state styling
+            if (!item.classList.contains('bg-blue-50')) {
+                item.classList.add('bg-blue-50', 'text-blue-600');
+                const icon = item.querySelector('i');
+                const span = item.querySelector('span');
+                if (icon) icon.classList.add('text-blue-600');
+                if (span) span.classList.add('text-blue-600');
+            }
+        }
+    });
+}
+
+// Admin section loader (placeholder function)
+function loadAdminSection(section) {
+    console.log('Loading admin section:', section);
+    // This would typically load content via AJAX or navigate to the section
+    showToast(`Loading ${section}...`, 'info');
+}
+
+// Add ripple effect styles dynamically
+const rippleStyles = document.createElement('style');
+rippleStyles.textContent = `
+    .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, 0.3);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(rippleStyles);
+</script>
 
 <!-- Notification Badge Update Script -->
 <script src="{% static 'js/notification_badge.js' %}"></script>

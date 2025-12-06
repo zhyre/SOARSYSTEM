@@ -8,20 +8,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        .calendar-day {
-            min-height: 100px;
-            transition: all 0.2s ease;
+        /* Fixed calendar grid sizing */
+        #calendarGrid {
+            aspect-ratio: 7/5;
+            min-height: 700px;
+            max-height: 700px;
+            width: 100%;
+            overflow: hidden;
         }
 
-        .calendar-day:hover {
-            background-color: #f1f5f9;
-            transform: translateY(-2px);
+        /* Ensure consistent weekday header height */
+        .grid-cols-7 > div {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Calendar day fixed dimensions */
+        .calendar-day {
+            min-height: 100px;
+            max-height: 100px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Responsive calendar sizing */
+        @media (min-width: 1024px) {
+            #calendarGrid {
+                min-height: 700px;
+                max-height: 700px;
+            }
+            .calendar-day {
+                min-height: 100px;
+                max-height: 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #calendarGrid {
+                min-height: 500px;
+                max-height: 500px;
+            }
+            .calendar-day {
+                min-height: 70px;
+                max-height: 70px;
+            }
+        }
+
+        .calendar-header-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .event-dot {
@@ -53,10 +99,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .calendar-header-shadow {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>

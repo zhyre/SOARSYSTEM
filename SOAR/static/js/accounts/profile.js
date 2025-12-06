@@ -19,17 +19,8 @@ function initializeProfileApp() {
 
 // Sidebar functionality
 function initializeSidebar() {
-    const menuToggle = document.querySelector('.menu-toggle');
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.overlay');
-    
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.classList.toggle('sidebar-active');
-        });
-    }
     
     if (overlay) {
         overlay.addEventListener('click', function() {
