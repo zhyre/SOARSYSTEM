@@ -163,6 +163,16 @@ class UserProfileForm(forms.ModelForm):
         ]
         widgets = {
             'profile_picture': forms.FileInput(),
+            'email': forms.EmailInput(attrs={
+                'style': 'min-width: 300px;',
+                'class': 'w-full'
+            }),
+            'first_name': forms.TextInput(attrs={
+                'style': 'text-transform: capitalize;',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'style': 'text-transform: capitalize;',
+            }),
         }
 
     def __init__(self, *args, **kwargs):
