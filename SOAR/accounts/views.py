@@ -5,9 +5,20 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import StudentRegistrationForm, CustomLoginForm, UserProfileForm
 from .models import User
-from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
+
+# Lazy-load Supabase to prevent Windows crashes
+def get_supabase_client():
+    try:
+        from supabase import create_client
+        SUPABASE_URL = config('SUPABASE_URL', default="")
+        SUPABASE_KEY = config('SUPABASE_KEY', default="")
+        if SUPABASE_URL and SUPABASE_KEY:
+            return create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Supabase initialization failed: {e}")
+    return None
 from SOAR.organization.models import Organization, OrganizationMember, ROLE_MEMBER, Program
 from SOAR.event.models import OrganizationEvent, EventRSVP
 from django.db.models import Q
@@ -121,14 +132,7 @@ def members_management(request):
     return render(request, "accounts/members_management.html")
 
 SUPABASE_URL = config("SUPABASE_URL", default=None)
-SUPABASE_KEY = config("SUPABASE_KEY", default=None)
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ImproperlyConfigured(
-        "Supabase credentials are not configured. Set SUPABASE_URL and SUPABASE_KEY in your environment/.env."
-    )
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Remove duplicate initialization - using get_supabase_client() instead
 
 def register(request):
     if request.method == "POST":
@@ -149,6 +153,11 @@ def register(request):
                 return render(request, "accounts/register.html", {"form": form})
 
             try:
+                supabase = get_supabase_client()
+                if not supabase:
+                    messages.error(request, "Supabase service is not available.")
+                    return render(request, "accounts/register.html", {"form": form})
+                
                 response = supabase.auth.sign_up({
                     "email": email,
                     "password": password
@@ -287,6 +296,11 @@ def login_view(request):
             email = username if username and '@' in username else f"{username}@cit.edu"
 
             try:
+                supabase = get_supabase_client()
+                if not supabase:
+                    messages.error(request, "Authentication service is not available.")
+                    return render(request, "accounts/login.html", {"form": form})
+                
                 response = supabase.auth.sign_in_with_password({
                     "email": email,
                     "password": password
@@ -348,7 +362,9 @@ def login_view(request):
 def logout_view(request):
     # Sign out from Supabase first
     try:
-        supabase.auth.sign_out()
+        supabase = get_supabase_client()
+        if supabase:
+            supabase.auth.sign_out()
     except Exception as e:
         # Log the error but continue with Django logout
         print(f"Supabase logout error: {e}")

@@ -107,29 +107,70 @@
     <!-- Sidebar -->
     {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
     
+    <script>
+        // Force highlight the Events link in sidebar on calendar page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove active state from all nav items
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+                item.classList.remove('bg-blue-50', 'text-blue-600', 'shadow-sm');
+                item.classList.add('hover:bg-gray-50', 'text-gray-700');
+                const icon = item.querySelector('i');
+                const span = item.querySelector('span');
+                const dot = item.querySelector('.ml-auto');
+                if (icon) {
+                    icon.classList.remove('text-blue-600');
+                    icon.classList.add('text-gray-500');
+                }
+                if (span) {
+                    span.classList.remove('text-blue-600');
+                    span.classList.add('text-gray-700');
+                }
+                if (dot) dot.remove();
+            });
+            
+            // Find and activate the Events link
+            const eventsLink = document.querySelector('a[href*="/calendar/"]');
+            if (eventsLink) {
+                eventsLink.classList.remove('hover:bg-gray-50', 'text-gray-700');
+                eventsLink.classList.add('bg-blue-50', 'text-blue-600', 'shadow-sm');
+                const icon = eventsLink.querySelector('i');
+                const span = eventsLink.querySelector('span');
+                if (icon) {
+                    icon.classList.remove('text-gray-500');
+                    icon.classList.add('text-blue-600');
+                }
+                if (span) {
+                    span.classList.remove('text-gray-700');
+                    span.classList.add('text-blue-600');
+                }
+                // Add active dot
+                if (!eventsLink.querySelector('.ml-auto')) {
+                    const dot = document.createElement('div');
+                    dot.className = 'ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full';
+                    eventsLink.appendChild(dot);
+                }
+            }
+        });
+    </script>
+    
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Header -->
         <header class="bg-white border-b border-gray-200 calendar-header-shadow sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <button onclick="history.back()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                            <i class="fas fa-arrow-left text-gray-600"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Organization Calendar</h1>
+                        <p class="text-sm text-gray-500">Track all your events and activities</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="goToToday()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium">
+                            <i class="fas fa-calendar-day mr-2"></i>Today
                         </button>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Organization Calendar</h1>
-                            <p class="text-sm text-gray-500">Track all your events and activities</p>
-                        </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="goToToday()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium">
-                        <i class="fas fa-calendar-day mr-2"></i>Today
-                    </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
     <!-- Calendar Container -->
     <main class="max-w-7xl mx-auto px-6 py-8">

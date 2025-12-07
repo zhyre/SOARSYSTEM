@@ -16,12 +16,18 @@ from .serializers import OrganizationSerializer, OrganizationMemberSerializer, P
 from .permissions import IsOrgOfficerOrAdviser
 from django.core.mail import send_mail
 from decouple import config
-from supabase import create_client
 
-# Initialize Supabase client
-SUPABASE_URL = config("SUPABASE_URL")
-SUPABASE_KEY = config("SUPABASE_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Lazy-load Supabase to prevent Windows crashes
+def get_supabase_client():
+    try:
+        from supabase import create_client
+        SUPABASE_URL = config("SUPABASE_URL", default="")
+        SUPABASE_KEY = config("SUPABASE_KEY", default="")
+        if SUPABASE_URL and SUPABASE_KEY:
+            return create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Supabase initialization failed: {e}")
+    return None
 
 
 def organization_detail(request, org_id):
@@ -511,8 +517,8 @@ def organization_editprofile(request, org_id):
         'organization': organization,
         'programs': programs,
         'users': users,
-        'SUPABASE_URL': SUPABASE_URL,
-        'SUPABASE_KEY': SUPABASE_KEY,
+        'SUPABASE_URL': config("SUPABASE_URL", default=""),
+        'SUPABASE_KEY': config("SUPABASE_KEY", default=""),
         'current_allowed_programs': [str(p.id) for p in organization.allowed_programs.all()],
         'can_edit': True,  # Since we already checked permission
     })

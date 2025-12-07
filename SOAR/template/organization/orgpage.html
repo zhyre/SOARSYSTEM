@@ -54,41 +54,40 @@
         }
 
         /* Sidebar */
-        .sidebar {
+        .modern-sidebar {
             width: 260px;
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
-            transition: transform 0.3s ease, width 0.3s ease;
+            transition: transform 0.3s ease;
             z-index: 50;
             overflow-y: auto;
         }
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar.collapsed .sidebar-text,
-        .sidebar.collapsed .logo-text {
+        
+        /* Mobile overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
             display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
         }
 
         /* Mobile sidebar */
-        @media (min-width: 768px) {
-            .sidebar {
-                transform: translateX(0);
-            }
-        }
-        
         @media (max-width: 767px) {
-            .sidebar {
+            .modern-sidebar {
                 transform: translateX(-100%);
             }
-            .sidebar.active {
+            .modern-sidebar.mobile-open {
                 transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
             }
         }
 
@@ -104,9 +103,16 @@
         /* Activity Card Styles */
         .main-content {
             margin-left: 260px;
-            width: calc(100% - 260px);
+            min-height: 100vh;
             transition: margin 0.3s ease, width 0.3s ease;
         }
+        
+        @media (max-width: 767px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
         .activity-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -149,6 +155,10 @@
     </style>
 </head>
     {% csrf_token %}
+    
+    <!-- Mobile Overlay -->
+    <div id="overlay" class="sidebar-overlay"></div>
+    
     <div class="flex">
         <!-- Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
@@ -158,14 +168,14 @@
             {% include 'base/header_component.html' with page_title="Organization Feed" page_subtitle="Stay updated with the latest activities" %}
 
             <!-- Organization Header with Photo -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full relative overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
                 <!-- Background Pattern -->
                 <div class="absolute inset-0">
                     <div class="absolute inset-0 bg-black/10"></div>
                     <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
                 </div>
                 
-                <div class="relative z-10 w-full px-4 sm:px-6 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6">
+                <div class="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6 max-w-7xl mx-auto">
                     
                     <!-- Organization Photo -->
                     <div class="relative group">
@@ -208,17 +218,14 @@
                                     <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
                                 </button>
                             {% endif %}
-                            <button class="px-3 sm:px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium text-sm sm:text-base">
-                                <i class="fas fa-share-alt mr-2"></i> Share
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- MAIN CONTENT -->
-            <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-                <div class="max-w-5xl mx-auto">
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-gray-50">
+                <div class="max-w-6xl mx-auto w-full">
                     {% if user_role in "adviser,leader" %}
                         <div class="flex justify-end mb-6">
                             <button id="openEventModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
@@ -227,17 +234,8 @@
                         </div>
                     {% endif %}
 
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="mb-6">
                         <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
-                        <div class="flex items-center space-x-2">
-                            <button class="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
-                                <i class="fas fa-sync-alt mr-1"></i> Newest
-                            </button>
-                            <button class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
-                                <i class="fas fa-sliders-h"></i>
-                            </button>
-                            
-                        </div>
                     </div>
 
                     <!-- Activity Feed -->
@@ -400,17 +398,45 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
-            if (mobileMenuToggle) {
+            if (mobileMenuToggle && sidebar && overlay) {
                 mobileMenuToggle.addEventListener('click', () => {
                     sidebar.classList.toggle('mobile-open');
-                    overlay.classList.toggle('hidden');
+                    overlay.classList.toggle('active');
+                });
+                
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
                 });
             }
 
-            if (overlay) {
-                overlay.addEventListener('click', () => {
-                    sidebar.classList.remove('mobile-open');
-                    overlay.classList.add('hidden');
+            // Image upload preview
+            const eventImage = document.getElementById('eventImage');
+            const imageFileName = document.getElementById('imageFileName');
+            const imagePreview = document.getElementById('imagePreview');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const removeImage = document.getElementById('removeImage');
+
+            if (eventImage) {
+                eventImage.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        imageFileName.textContent = file.name;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            imagePreviewContainer.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            if (removeImage) {
+                removeImage.addEventListener('click', function() {
+                    eventImage.value = '';
+                    imageFileName.textContent = 'No file chosen';
+                    imagePreviewContainer.classList.add('hidden');
                 });
             }
         });

@@ -1,10 +1,16 @@
 from django.shortcuts import render
-
-from supabase import create_client
 from django.conf import settings
 import uuid
 
-supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+# Lazy-load Supabase to prevent Windows crashes
+def get_supabase_client():
+    try:
+        from supabase import create_client
+        if hasattr(settings, 'SUPABASE_URL') and hasattr(settings, 'SUPABASE_KEY'):
+            return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    except Exception as e:
+        print(f"Supabase initialization failed: {e}")
+    return None
 
 from django.utils.text import slugify
 from SOAR.notification.models import Notification
