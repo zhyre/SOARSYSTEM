@@ -1,22 +1,23 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
-from supabase import create_client
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 
-SUPABASE_URL = config("SUPABASE_URL", default=None)
-SUPABASE_KEY = config("SUPABASE_KEY", default=None)
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ImproperlyConfigured(
-        "Supabase credentials are not configured. Set SUPABASE_URL and SUPABASE_KEY in your environment/.env."
-    )
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Lazy-load Supabase to prevent Windows crashes
+def get_supabase_client():
+    try:
+        from supabase import create_client
+        SUPABASE_URL = config("SUPABASE_URL", default="")
+        SUPABASE_KEY = config("SUPABASE_KEY", default="")
+        if SUPABASE_URL and SUPABASE_KEY:
+            return create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Supabase initialization failed: {e}")
+    return None
 
 class SupabaseStorage:
     def __init__(self, bucket_name='user_profile'):
@@ -32,6 +33,11 @@ class SupabaseStorage:
 
     def save(self, name, content, max_length=None):
         """Save file to Supabase storage."""
+        supabase = get_supabase_client()
+        if not supabase:
+            print("Supabase not available, skipping upload")
+            return name
+            
         file_path = self._get_file_path(name)
         print(f"=== SUPABASE STORAGE SAVE ===")
         print(f"Bucket: {self.bucket_name}")
@@ -73,21 +79,30 @@ class SupabaseStorage:
 
     def url(self, name):
         """Get the public URL for the file."""
+        supabase = get_supabase_client()
+        if not supabase:
+            return f"/media/{name}"  # Fallback to local media URL
         try:
             response = supabase.storage.from_(self.bucket_name).get_public_url(name)
             return response
         except Exception as e:
-            raise Exception(f"Failed to get URL: {str(e)}")
+            return f"/media/{name}"  # Fallback on error
 
     def delete(self, name):
         """Delete file from Supabase storage."""
+        supabase = get_supabase_client()
+        if not supabase:
+            return
         try:
             supabase.storage.from_(self.bucket_name).remove([name])
         except Exception as e:
-            raise Exception(f"Failed to delete file: {str(e)}")
+            print(f"Failed to delete file: {str(e)}")
 
     def exists(self, name):
         """Check if file exists in Supabase storage."""
+        supabase = get_supabase_client()
+        if not supabase:
+            return False
         try:
             # Try to get file info
             supabase.storage.from_(self.bucket_name).list(path=os.path.dirname(name))
@@ -97,20 +112,25 @@ class SupabaseStorage:
 
     def open(self, name, mode='rb'):
         """Open file from Supabase storage."""
+        supabase = get_supabase_client()
+        from io import BytesIO
+        if not supabase:
+            return BytesIO(b'')
         try:
             # Get the file content
             response = supabase.storage.from_(self.bucket_name).download(name)
-            from io import BytesIO
             return BytesIO(response)
         except Exception as e:
             # For validation purposes, if file doesn't exist, return empty BytesIO
             # This prevents validation errors for non-existent files
-            from io import BytesIO
             return BytesIO(b'')
 
 
     def size(self, name):
         """Return file size in bytes."""
+        supabase = get_supabase_client()
+        if not supabase:
+            return 0
         try:
             files = supabase.storage.from_(self.bucket_name).list(path=os.path.dirname(name))
             for f in files:
