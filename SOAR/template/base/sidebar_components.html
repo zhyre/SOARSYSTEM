@@ -1,4 +1,7 @@
 {% load static %}
+<!-- Hidden data element for unread notification count -->
+<div id="unread-count-data" data-count="{% if unread_notifications %}{{ unread_notifications.count }}{% else %}0{% endif %}" style="display: none;"></div>
+
 <!-- Modern White Sidebar with Advanced Features -->
 {% if sidebar_type == 'admin' %}
 <aside id="admin-sidebar" class="modern-sidebar bg-white text-gray-800 w-64 min-h-screen border-r border-gray-200 flex-shrink-0 overflow-y-auto shadow-xl">
@@ -983,8 +986,16 @@ function initNotificationBadge() {
     const badge = document.getElementById('sidebar-notification-badge');
     
     if (badge) {
-        // Simulate notification count (replace with actual data)
-        updateNotificationBadge(3);
+        // Fetch unread count from API
+        fetch('/notifications/api/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                updateNotificationBadge(data.unread_count || 0);
+            })
+            .catch(error => {
+                console.error('Error fetching unread count:', error);
+                updateNotificationBadge(0);
+            });
     }
 }
 

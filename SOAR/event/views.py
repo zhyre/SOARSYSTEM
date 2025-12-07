@@ -57,16 +57,17 @@ from django.utils import timezone
 
 @login_required
 def global_event_page(request):
-    """Global events page showing all upcoming events with membership-based UI."""
+    """Global events page showing events only from organizations the user is a member of."""
     # Get organizations the user has joined
     user_organization_ids = set(OrganizationMember.objects.filter(
         student=request.user,
         is_approved=True
     ).values_list('organization', flat=True))
 
-    # Get all upcoming events for the list view
+    # Get upcoming events ONLY from organizations the user has joined
     all_events = list(OrganizationEvent.objects.filter(
-        event_date__gte=timezone.now()
+        event_date__gte=timezone.now(),
+        organization_id__in=user_organization_ids
     ).order_by('event_date').prefetch_related('organization__allowed_programs'))
 
     # Create event data dictionary
@@ -74,6 +75,7 @@ def global_event_page(request):
     for event in all_events:
         going_count = EventRSVP.objects.filter(event=event, status='going').count()
         interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        not_going_count = EventRSVP.objects.filter(event=event, status='not_going').count()
         is_user_member = event.organization.id in user_organization_ids
 
         user_rsvp_status = None
@@ -94,6 +96,7 @@ def global_event_page(request):
             'event': event,
             'going_count': going_count,
             'interested_count': interested_count,
+            'not_going_count': not_going_count,
             'user_rsvp_status': user_rsvp_status,
             'is_user_member': is_user_member,
             'rsvp_users': rsvp_users
@@ -102,6 +105,7 @@ def global_event_page(request):
         # Set attributes on event object for template compatibility
         event.going_count = going_count
         event.interested_count = interested_count
+        event.not_going_count = not_going_count
         event.user_rsvp_status = user_rsvp_status
         event.is_user_member = is_user_member
         event.rsvp_users = rsvp_users
@@ -123,6 +127,7 @@ def global_event_page(request):
             'type': event.activity_type,
             'going_count': event_data['going_count'],
             'interested_count': event_data['interested_count'],
+            'not_going_count': event_data['not_going_count'],
             'user_rsvp_status': event_data['user_rsvp_status'],
             'location': event.location,
             'max_participants': event.max_participants
@@ -142,6 +147,7 @@ def global_event_page(request):
             'type': event.activity_type,
             'going_count': event_data['going_count'],
             'interested_count': event_data['interested_count'],
+            'not_going_count': event_data['not_going_count'],
             'user_rsvp_status': event_data['user_rsvp_status'],
             'is_user_member': event_data['is_user_member'],
             'location': event.location,
@@ -272,6 +278,12 @@ def event_detail(request, event_id):
         is_approved=True
     ).exists()
     
+    # Restrict access to members only
+    if not is_member:
+        from django.contrib import messages
+        messages.error(request, "You must be a member of this organization to view this event.")
+        return redirect('global_events')
+    
     # Get user's RSVP status
     user_rsvp = None
     if request.user.is_authenticated:
@@ -306,6 +318,19 @@ def rsvp_event(request, event_id):
     """Handle RSVP for an event"""
     try:
         event = get_object_or_404(OrganizationEvent, id=event_id)
+        
+        # Check if user is a member of the organization
+        is_member = OrganizationMember.objects.filter(
+            organization=event.organization,
+            student=request.user,
+            is_approved=True
+        ).exists()
+        
+        if not is_member:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'You must be a member of this organization to RSVP'}, status=403)
+            return redirect('global_events')
+        
         status = request.POST.get('status')
 
         if status not in ['going', 'not_going', 'interested']:
@@ -339,6 +364,7 @@ def rsvp_event(request, event_id):
         # Get updated counts
         going_count = event.rsvps.filter(status='going').count()
         interested_count = event.rsvps.filter(status='interested').count()
+        not_going_count = event.rsvps.filter(status='not_going').count()
 
         # Get updated attendee list for avatars
         rsvp_users = event.rsvps.filter(status='going').select_related('user').order_by('date_created')[:5]
@@ -359,6 +385,7 @@ def rsvp_event(request, event_id):
                 'status': status,
                 'going_count': going_count,
                 'interested_count': interested_count,
+                'not_going_count': not_going_count,
                 'attendees': attendees
             })
 

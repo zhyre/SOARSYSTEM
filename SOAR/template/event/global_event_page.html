@@ -373,17 +373,20 @@
                     <div id="modalRSVPSection" class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Will you attend?</h3>
                         <div class="rsvp-buttons flex justify-between items-center gap-3 w-full" id="modalRSVPButtons">
-                            <button onclick="rsvpFromModal('going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-green-600">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Going</span>
+                            <button onclick="rsvpFromModal('going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 transition-all duration-200 inline-flex flex-col items-center justify-center gap-1 font-medium text-gray-700 hover:text-green-600">
+                                <i class="fas fa-check-circle text-lg"></i>
+                                <span class="text-sm">Going</span>
+                                <span class="text-xs text-gray-500" id="going-count">0 people</span>
                             </button>
-                            <button onclick="rsvpFromModal('interested')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-yellow-50 hover:border-yellow-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-yellow-600">
-                                <i class="fas fa-star"></i>
-                                <span>Interested</span>
+                            <button onclick="rsvpFromModal('interested')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-yellow-50 hover:border-yellow-300 transition-all duration-200 inline-flex flex-col items-center justify-center gap-1 font-medium text-gray-700 hover:text-yellow-600">
+                                <i class="fas fa-star text-lg"></i>
+                                <span class="text-sm">Interested</span>
+                                <span class="text-xs text-gray-500" id="interested-count">0 people</span>
                             </button>
-                            <button onclick="rsvpFromModal('not_going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700 hover:text-red-600">
-                                <i class="fas fa-times-circle"></i>
-                                <span>Not Going</span>
+                            <button onclick="rsvpFromModal('not_going')" class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-200 inline-flex flex-col items-center justify-center gap-1 font-medium text-gray-700 hover:text-red-600">
+                                <i class="fas fa-times-circle text-lg"></i>
+                                <span class="text-sm">Not Going</span>
+                                <span class="text-xs text-gray-500" id="not-going-count">0 people</span>
                             </button>
                         </div>
                     </div>
@@ -918,6 +921,11 @@
             </svg>
             ${eventData.interested_count} Interested
         `;
+        
+        // Update RSVP button counts
+        document.getElementById('going-count').textContent = `${eventData.going_count} people`;
+        document.getElementById('interested-count').textContent = `${eventData.interested_count} people`;
+        document.getElementById('not-going-count').textContent = `${eventData.not_going_count} people`;
 
         // Handle membership-based UI
         const rsvpSection = document.getElementById('modalRSVPSection');
