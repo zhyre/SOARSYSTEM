@@ -212,6 +212,7 @@
     function updateUnreadCount(count) {
         const badge = document.getElementById('notification-badge');
         const dropdownCount = document.getElementById('dropdown-unread-count');
+        const sidebarBadge = document.getElementById('sidebar-notification-badge');
         
         if (count > 0) {
             badge.textContent = count > 99 ? '99+' : count;
@@ -219,10 +220,19 @@
             if (dropdownCount) {
                 dropdownCount.textContent = `${count} unread`;
             }
+            // Update sidebar badge
+            if (sidebarBadge) {
+                sidebarBadge.textContent = count > 99 ? '99+' : count;
+                sidebarBadge.classList.remove('hidden');
+            }
         } else {
             badge.classList.add('hidden');
             if (dropdownCount) {
                 dropdownCount.textContent = 'All caught up!';
+            }
+            // Hide sidebar badge
+            if (sidebarBadge) {
+                sidebarBadge.classList.add('hidden');
             }
         }
     }

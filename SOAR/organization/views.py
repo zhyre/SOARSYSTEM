@@ -351,6 +351,7 @@ def orgpage(request, org_id):
     for event in activities:
         event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
         event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        event.not_going_count = EventRSVP.objects.filter(event=event, status='not_going').count()
         try:
             user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
             event.user_rsvp_status = user_rsvp.status

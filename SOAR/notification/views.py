@@ -12,13 +12,14 @@ def notifications_view(request):
     notifications = Notification.objects.filter(user=request.user)
     unread_count = notifications.filter(is_read=False).count()
 
-    # Group notifications by type for tabs
-    all_notifications = notifications
+    # Group notifications by type for tabs (only unread)
+    all_notifications = notifications.order_by('-date_created')
     unread_notifications = notifications.filter(is_read=False)
-    system_notifications = notifications.filter(notification_type=Notification.TYPE_SYSTEM)
-    event_notifications = notifications.filter(notification_type=Notification.TYPE_EVENT)
+    system_notifications = notifications.filter(notification_type=Notification.TYPE_SYSTEM, is_read=False)
+    event_notifications = notifications.filter(notification_type=Notification.TYPE_EVENT, is_read=False)
     organization_notifications = notifications.filter(
-        notification_type__in=[Notification.TYPE_MEMBERSHIP, Notification.TYPE_ORGANIZATION]
+        notification_type__in=[Notification.TYPE_MEMBERSHIP, Notification.TYPE_ORGANIZATION],
+        is_read=False
     )
 
     context = {
@@ -42,10 +43,36 @@ def notification_detail_view(request, notification_id):
         notification.is_read = True
         notification.save()
     
+    # Prepare event data if this is an event notification
+    event_data = None
+    if notification.notification_type == 'event':
+        try:
+            # Try to extract event ID from the link (format: /event/123/)
+            import re
+            match = re.search(r'/event/(\d+)/', notification.link or '')
+            if match:
+                event_id = match.group(1)
+                from event.models import Event, EventRSVP
+                event = Event.objects.get(id=event_id)
+                going_count = EventRSVP.objects.filter(event=event, status='going').count()
+                interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+                not_going_count = EventRSVP.objects.filter(event=event, status='not_going').count()
+                
+                event_data = {
+                    'event_id': event_id,
+                    'going_count': going_count,
+                    'interested_count': interested_count,
+                    'not_going_count': not_going_count,
+                }
+        except Exception as e:
+            print(f"Error fetching event data: {e}")
+    
     context = {
         'notification': notification,
         'hide_header': True,
+        'event_data': event_data,
     }
+    
     return render(request, 'notification/notification_detail.html', context)
 
 @login_required
@@ -112,6 +139,22 @@ def mark_all_notifications_read(request):
     return JsonResponse({
         'status': 'success',
         'unread_count': 0
+    })
+
+@login_required
+@require_POST
+def delete_notification(request, notification_id):
+    """Delete a specific notification."""
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.delete()
+    
+    # Return updated unread count
+    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+    
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Notification deleted successfully',
+        'unread_count': unread_count
     })
 
 def get_time_ago(date_time):
