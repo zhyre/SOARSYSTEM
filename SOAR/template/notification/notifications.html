@@ -48,6 +48,16 @@
             <!-- Content Area -->
             <main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6 pl-0 md:pl-64">
                 <div class="max-w-4xl mx-auto">
+        <!-- CSRF token for fetch calls -->
+        <form id="csrf-token-form" class="hidden">{% csrf_token %}</form>
+
+        <!-- Error banner for fetch failures -->
+        <div id="notification-error" class="hidden mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <div class="flex items-start space-x-2">
+                <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                <span id="notification-error-text">Something went wrong. Please try again.</span>
+            </div>
+        </div>
         <!-- Filter Tabs -->
         <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
             <button data-tab="all" class="tab-btn px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ease-in-out bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl">

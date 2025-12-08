@@ -1,4 +1,4 @@
-z{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -73,45 +73,6 @@ z{% load static %}
             animation: slideIn 0.4s ease-out forwards;
         }
 
-        /* Sidebar */
-        .modern-sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            transition: transform 0.3s ease;
-            z-index: 50;
-            overflow-y: auto;
-        }
-
-        /* Mobile overlay */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-            display: none;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-        }
-
-        /* Mobile sidebar */
-        @media (max-width: 767px) {
-            .modern-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .modern-sidebar.mobile-open {
-                transform: translateX(0);
-            }
-        }
-
         /* Logo animation */
         @keyframes rocketFloat {
 
@@ -133,8 +94,6 @@ z{% load static %}
         .main-content {
             margin-left: 0;
             width: 100%;
-            margin-left: 260px;
-            min-height: 100vh;
             transition: margin 0.3s ease, width 0.3s ease;
         }
 
@@ -143,41 +102,27 @@ z{% load static %}
             width: auto !important;
             margin-left: 0;
             flex: 1 !important;
+        }
 
-            @media (max-width: 767px) {
-                .main-content {
-                    margin-left: 0;
-                }
+        /* Empty state animation */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
             }
 
-            .activity-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            50% {
+                transform: translateY(-10px);
             }
+        }
 
-            /* Empty state animation */
-            @keyframes float {
-
-                0%,
-                100% {
-                    transform: translateY(0);
-                }
-
-                50% {
-                    transform: translateY(-10px);
-                }
-            }
-
-            .float-animation {
-                animation: float 3s ease-in-out infinite;
-            }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
     </style>
 </head>
 {% csrf_token %}
-
-<!-- Mobile Overlay -->
-<div id="overlay" class="sidebar-overlay"></div>
-
 <div class="flex">
     <!-- Sidebar -->
     {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
@@ -197,8 +142,7 @@ z{% load static %}
                     {% include 'base/notification_bell.html' %}
 
                     <div class="hidden md:block text-right">
-                        <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{
-                            user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}
+                        <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}
                         </p>
 
                     </div>
@@ -217,7 +161,7 @@ z{% load static %}
         </header>
 
         <!-- Organization Header with Photo -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0">
                 <div class="absolute inset-0 bg-black/10"></div>
@@ -227,7 +171,7 @@ z{% load static %}
             </div>
 
             <div
-                class="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6 max-w-7xl mx-auto">
+                class="relative z-10 w-full px-4 sm:px-6 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6">
 
                 <!-- Organization Photo -->
                 <div class="relative group">
@@ -253,8 +197,7 @@ z{% load static %}
                 <!-- Organization Info -->
                 <div class="text-left text-white flex-1 text-center md:text-left">
                     <div class="flex flex-col md:flex-row md:items-center md:gap-4 mb-3">
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">{{
-                            organization.name|default:"Organization Name" }}</h1>
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">{{ organization.name|default:"Organization Name" }}</h1>
                         <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 mt-2 md:mt-0">
                             <span
                                 class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
@@ -268,8 +211,7 @@ z{% load static %}
                             </span>
                         </div>
                     </div>
-                    <p class="text-blue-100 text-base sm:text-lg mb-4">{{ organization.description|default:"Organization
-                        description goes here" }}</p>
+                    <p class="text-blue-100 text-base sm:text-lg mb-4">{{ organization.description|default:"Organization description goes here"|linebreaksbr }}</p>
 
                     <div class="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
                         {% if user.is_authenticated and user_role %}
@@ -279,6 +221,10 @@ z{% load static %}
                             <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
                         </button>
                         {% endif %}
+                        <button
+                            class="px-3 sm:px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium text-sm sm:text-base">
+                            <i class="fas fa-share-alt mr-2"></i> Share
+                        </button>
                     </div>
                 </div>
             </div>
@@ -296,16 +242,25 @@ z{% load static %}
                 </div>
                 {% endif %}
 
-                <div class="mb-6">
+                <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
+                    <div class="flex items-center space-x-2">
+                        <button
+                            class="px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                            <i class="fas fa-sync-alt mr-1"></i> Newest
+                        </button>
+                        <button class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+
+                    </div>
                 </div>
 
                 <!-- Activity Feed -->
                 <div class="space-y-6">
                     {% if activities %}
                     {% for event in activities %}
-                    {% include 'event/eventcard_upload.html' with event=event organization=organization
-                    user_role=user_role %}
+                    {% include 'event/eventcard_upload.html' with event=event organization=organization user_role=user_role %}
                     {% endfor %}
                     {% else %}
                     <!-- Empty State -->

@@ -1,5 +1,174 @@
 {% load static %}
-<article class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02]" data-status="{{ event.status }}">
+<style>
+    /* Enhanced Event Card Effects */
+    .activity-card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .activity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.03) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+    }
+
+    .activity-card:hover::before {
+        opacity: 1;
+    }
+
+    .activity-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow:
+            0 20px 40px -10px rgba(59, 130, 246, 0.15),
+            0 10px 20px -5px rgba(59, 130, 246, 0.1),
+            0 0 0 1px rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* Shimmer Effect */
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .activity-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+                transparent,
+                rgba(59, 130, 246, 0.1),
+                transparent);
+        transition: left 0.7s;
+        pointer-events: none;
+    }
+
+    .activity-card:hover::after {
+        left: 100%;
+    }
+
+    /* Fade In Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    /* RSVP Button Enhancement */
+    .rsvp-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .rsvp-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .rsvp-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Icon Float Animation */
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-3px);
+        }
+    }
+
+    .activity-card .w-10.h-10 {
+        animation: float 4s ease-in-out infinite;
+    }
+
+    /* Glow Effect */
+    @keyframes glow {
+
+        0%,
+        100% {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+        }
+    }
+
+    .activity-card:hover .w-10.h-10 {
+        animation: glow 3s ease-in-out infinite;
+    }
+
+    /* Enhanced Image Hover */
+    .activity-card img.transition-transform {
+        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Button Hover Effects */
+    .rsvp-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Status Badge Enhancement */
+    .activity-card .absolute.top-4.left-4 span {
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .activity-card:hover .absolute.top-4.left-4 span {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<article
+    class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-fade-in"
+    data-status="{{ event.status }}">
 
     {% csrf_token %}
     <!-- Event Content -->
@@ -9,17 +178,20 @@
             <div class="flex items-center gap-3 flex-1 min-w-0">
                 <div class="relative flex-shrink-0">
                     {% if event.created_by.profile_picture %}
-                        <img src="{{ event.created_by.profile_picture.url }}"
-                             alt="{{ event.created_by.get_full_name|default:event.created_by.username }}"
-                             class="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover">
+                    <img src="{{ event.created_by.profile_picture.url }}"
+                        alt="{{ event.created_by.get_full_name|default:event.created_by.username }}"
+                        class="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover">
                     {% else %}
-                        <div class="w-12 h-12 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
-                            <span class="text-sm font-bold text-white">
-                                {{ event.created_by.first_name|slice:":1"|default:event.created_by.username|slice:":1"|upper }}
-                            </span>
-                        </div>
+                    <div
+                        class="w-12 h-12 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
+                        <span class="text-sm font-bold text-white">
+                            {{ event.created_by.first_name|slice:":1"|default:event.created_by.username|slice:":1"|upper }}
+                        </span>
+                    </div>
                     {% endif %}
-                    <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+                    <div
+                        class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
+                    </div>
                 </div>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-gray-900 truncate">{{ event.created_by.get_full_name|default:event.created_by.username }}</p>
@@ -28,22 +200,29 @@
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
                 <span class="text-xs text-gray-500">Posted {{ event.date_created|timesince|default:"1 day" }} ago</span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                            clip-rule="evenodd" />
                     </svg>
                     {{ event.activity_type|default:"General" }}
                 </span>
                 <div class="relative">
-                    <button id="eventOptionsBtn-{{ event.id }}" class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
+                    <button id="eventOptionsBtn-{{ event.id }}"
+                        class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition">
                         <i class="fas fa-sliders-h"></i>
                     </button>
-                    <div id="eventOptionsMenu-{{ event.id }}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                        <button onclick="editEvent('{{ event.id }}')" class="w-full text-left flex items-center space-x-2 px-4 py-2 hover:bg-gray-100 text-gray-700">
+                    <div id="eventOptionsMenu-{{ event.id }}"
+                        class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                        <button onclick="editEvent('{{ event.id }}')"
+                            class="w-full text-left flex items-center space-x-2 px-4 py-2 hover:bg-gray-100 text-gray-700">
                             <i class="fas fa-edit text-blue-600"></i>
                             <span>Edit Event</span>
                         </button>
-                        <button onclick="deleteEvent('{{ event.id }}')" class="w-full text-left flex items-center space-x-2 px-4 py-2 hover:bg-red-50 text-red-600">
+                        <button onclick="deleteEvent('{{ event.id }}')"
+                            class="w-full text-left flex items-center space-x-2 px-4 py-2 hover:bg-red-50 text-red-600">
                             <i class="fas fa-trash-alt text-red-600"></i>
                             <span>Delete Event</span>
                         </button>
@@ -55,31 +234,36 @@
         <!-- Event Image with Enhanced Overlay -->
         <div class="relative h-64 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden rounded-xl">
             <img src="{{ event.attachments_url|default:'https://source.unsplash.com/random/800x600/?event,conference,meeting' }}"
-                  alt="{{ event.title|default:'Event Title' }}"
-                  class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  loading="lazy">
+                alt="{{ event.title|default:'Event Title' }}"
+                class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                loading="lazy">
 
             <!-- Gradient Overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
             <!-- Status Badge -->
             <div class="absolute top-4 left-4">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg {% if event.status == 'Upcoming' %}bg-blue-100 text-blue-800{% elif event.status == 'Ongoing' %}bg-green-100 text-green-800{% elif event.status == 'Completed' %}bg-gray-100 text-gray-800{% elif event.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg {% if event.status == 'Upcoming' %}bg-blue-100 text-blue-800{% elif event.status == 'Ongoing' %}bg-green-100 text-green-800{% elif event.status == 'Completed' %}bg-gray-100 text-gray-800{% elif event.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
                     {% if event.status == 'Upcoming' %}
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     {% elif event.status == 'Ongoing' %}
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m-8 4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m-8 4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2" />
                     </svg>
                     {% elif event.status == 'Completed' %}
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     {% elif event.status == 'Cancelled' %}
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     {% endif %}
                     {{ event.status }}
@@ -96,22 +280,24 @@
                     <!-- Attendee Avatars -->
                     <div class="flex items-center -space-x-2 flex-shrink-0" id="attendee-avatars-{{ event.id }}">
                         {% for rsvp in event.rsvp_users %}
-                            {% if rsvp.user.profile_picture %}
-                                <img src="{{ rsvp.user.profile_picture.url }}"
-                                     alt="{{ rsvp.user.get_full_name|default:rsvp.user.username }}"
-                                     class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover">
-                            {% else %}
-                                <div class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
-                                    <span class="text-xs font-bold text-white">
-                                        {{ rsvp.user.first_name|slice:":1"|default:rsvp.user.username|slice:":1"|upper }}
-                                    </span>
-                                </div>
-                            {% endif %}
+                        {% if rsvp.user.profile_picture %}
+                        <img src="{{ rsvp.user.profile_picture.url }}"
+                            alt="{{ rsvp.user.get_full_name|default:rsvp.user.username }}"
+                            class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover">
+                        {% else %}
+                        <div
+                            class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
+                            <span class="text-xs font-bold text-white">
+                                {{ rsvp.user.first_name|slice:":1"|default:rsvp.user.username|slice:":1"|upper }}
+                            </span>
+                        </div>
+                        {% endif %}
                         {% endfor %}
                         {% if event.going_count > 5 %}
-                            <div class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-gray-400 to-gray-600 shadow-md flex items-center justify-center">
-                                <span class="text-xs font-bold text-white">+{{ event.going_count|add:"-5" }}</span>
-                            </div>
+                        <div
+                            class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-gray-400 to-gray-600 shadow-md flex items-center justify-center">
+                            <span class="text-xs font-bold text-white">+{{ event.going_count|add:"-5" }}</span>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -120,10 +306,12 @@
 
         <!-- Event Description -->
         <div class="relative mb-6">
-            <p id="desc-{{ event.id }}" class="text-gray-700 text-base leading-relaxed mb-2 line-clamp-3 font-medium"> <br>
+            <p id="desc-{{ event.id }}" class="text-gray-700 text-base leading-relaxed mb-2 line-clamp-3 font-medium">
+                <br>
                 {{ event.description|default:"Join us for an exciting event filled with learning and networking opportunities. Don't miss out on this amazing experience!" }}
             </p>
-            <button onclick="toggleDescription('{{ event.id }}')" id="btn-{{ event.id }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200">
+            <button onclick="toggleDescription('{{ event.id }}')" id="btn-{{ event.id }}"
+                class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200">
                 See more
             </button>
         </div>
@@ -132,9 +320,11 @@
         <div class="space-y-4 mb-7">
             <!-- Date & Time -->
             <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
+                <div
+                    class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -145,14 +335,18 @@
 
             <!-- Location -->
             <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center text-purple-600 shadow-sm">
+                <div
+                    class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center text-purple-600 shadow-sm">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ event.location|default:"Virtual Event" }}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ event.location|default:"Virtual Event" }}
+                    </p>
                     <p class="text-xs text-gray-500 mt-0.5">Click to see map</p>
                 </div>
             </div>
@@ -160,242 +354,428 @@
 
 
 
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 text-green-700" id="going-count-{{ event.id }}">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                    </svg>
-                    {{ event.going_count|default:0 }}
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-50 text-amber-700" id="interested-count-{{ event.id }}">
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    {{ event.interested_count|default:0 }}
-                </span>
-            </div>
+        <div class="flex items-center gap-2">
+            <span
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 text-green-700"
+                id="going-count-{{ event.id }}">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                {{ event.going_count|default:0 }}
+            </span>
+            <span
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-50 text-amber-700"
+                id="interested-count-{{ event.id }}">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                {{ event.interested_count|default:0 }}
+            </span>
+        </div>
 
 
         <!-- Stats and Social Actions -->
         <div class="flex items-center justify-between pt-6 border-t border-gray-100">
             <!-- Event RSVP Buttons -->
-        {% if event.max_participants and event.going_count >= event.max_participants %}
+            {% if event.max_participants and event.going_count >= event.max_participants %}
             <div class="text-center py-4 px-4 bg-red-50 border border-red-200 rounded-lg">
                 <p class="text-red-700 font-medium">Maximum participants reached ({{ event.max_participants }})</p>
             </div>
-        {% else %}
+            {% else %}
             <div class="rsvp-buttons flex justify-between items-center gap-3 w-full" data-event-id="{{ event.id }}">
-                <button
-                    onclick="rsvpEvent('going', '{{ event.id }}')"
+                <button onclick="rsvpEvent('going', '{{ event.id }}')"
                     class="rsvp-btn flex-1 px-4 py-2 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium {% if event.user_rsvp_status == 'going' %}bg-green-500 border-green-500 text-white shadow-md{% else %}text-gray-700 hover:text-green-600{% endif %}"
                     id="rsvp-going-{{ event.id }}">
                     <i class="fas fa-check-circle"></i>
                     <span>Going</span>
                 </button>
-                <button
-                    onclick="rsvpEvent('interested', '{{ event.id }}')"
+                <button onclick="rsvpEvent('interested', '{{ event.id }}')"
                     class="rsvp-btn flex-1 px-4 py-2 border border-gray-300 rounded-full hover:bg-yellow-50 hover:border-yellow-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium {% if event.user_rsvp_status == 'interested' %}bg-yellow-500 border-yellow-500 text-white shadow-md{% else %}text-gray-700 hover:text-yellow-600{% endif %}"
                     id="rsvp-interested-{{ event.id }}">
                     <i class="fas fa-star"></i>
                     <span>Interested</span>
                 </button>
-                <button
-                    onclick="rsvpEvent('not_going', '{{ event.id }}')"
+                <button onclick="rsvpEvent('not_going', '{{ event.id }}')"
                     class="rsvp-btn flex-1 px-4 py-2 border border-gray-300 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium {% if event.user_rsvp_status == 'not_going' %}bg-red-500 border-red-500 text-white shadow-md{% else %}text-gray-700 hover:text-red-600{% endif %}"
                     id="rsvp-not-going-{{ event.id }}">
                     <i class="fas fa-times-circle"></i>
                     <span>Not Going</span>
                 </button>
             </div>
-        {% endif %}
+            {% endif %}
         </div>
     </div>
 </article>
 
 <script>
-function toggleDescription(eventId) {
-    const desc = document.getElementById('desc-' + eventId);
-    const btn = document.getElementById('btn-' + eventId);
+    function toggleDescription(eventId) {
+        const desc = document.getElementById('desc-' + eventId);
+        const btn = document.getElementById('btn-' + eventId);
 
-    if (desc.classList.contains('line-clamp-3')) {
-        desc.classList.remove('line-clamp-3');
-        btn.textContent = 'See less';
-        btn.setAttribute('aria-expanded', 'true');
-    } else {
-        desc.classList.add('line-clamp-3');
-        btn.textContent = 'See more';
-        btn.setAttribute('aria-expanded', 'false');
-    }
-}
-
-function rsvpEvent(status, eventId) {
-    // Check if max participants reached (only for 'going' status)
-    if (status === 'going') {
-        const goingCountElement = document.getElementById(`going-count-${eventId}`);
-        if (goingCountElement) {
-            const currentCount = parseInt(goingCountElement.textContent.trim()) || 0;
-            // Note: We can't easily check max_participants from frontend, so we'll let the backend handle it
-            // But we can show a warning if the count seems high
+        if (desc.classList.contains('line-clamp-3')) {
+            desc.classList.remove('line-clamp-3');
+            btn.textContent = 'See less';
+            btn.setAttribute('aria-expanded', 'true');
+        } else {
+            desc.classList.add('line-clamp-3');
+            btn.textContent = 'See more';
+            btn.setAttribute('aria-expanded', 'false');
         }
     }
 
-    // Get CSRF token
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    // Create form data
-    const formData = new FormData();
-    formData.append('status', status);
-    formData.append('csrfmiddlewaretoken', csrfToken);
-
-    // Make AJAX request
-    fetch(`/event/rsvp/${eventId}/`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+    function rsvpEvent(status, eventId) {
+        // Check if max participants reached (only for 'going' status)
+        if (status === 'going') {
+            const goingCountElement = document.getElementById(`going-count-${eventId}`);
+            if (goingCountElement) {
+                const currentCount = parseInt(goingCountElement.textContent.trim()) || 0;
+                // Note: We can't easily check max_participants from frontend, so we'll let the backend handle it
+                // But we can show a warning if the count seems high
+            }
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update button styles
-            updateRSVPButtons(eventId, status);
 
-            // Update counts
-            document.getElementById(`going-count-${eventId}`).innerHTML = `
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('status', status);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        // Make AJAX request
+        fetch(`/event/rsvp/${eventId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button styles
+                    updateRSVPButtons(eventId, status);
+
+                    // Update counts
+                    document.getElementById(`going-count-${eventId}`).innerHTML = `
                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
                 ${data.going_count}
             `;
-            document.getElementById(`interested-count-${eventId}`).innerHTML = `
+                    document.getElementById(`interested-count-${eventId}`).innerHTML = `
                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 ${data.interested_count}
             `;
 
-            // Update attendee avatars
-            updateAttendeeAvatars(eventId, data.attendees, data.going_count);
-        } else {
-            console.error('RSVP failed:', data.error);
-            if (data.error && data.error.includes('maximum participants')) {
-                alert('Maximum participants reached. Cannot RSVP as going.');
-            } else {
-                alert('Failed to update RSVP status. Please try again.');
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-    });
-}
+                    // Update attendee avatars
+                    updateAttendeeAvatars(eventId, data.attendees, data.going_count);
+                } else {
+                    console.error('RSVP failed:', data.error);
+                    if (data.error && data.error.includes('maximum participants')) {
+                        alert('Maximum participants reached. Cannot RSVP as going.');
+                    } else {
+                        alert('Failed to update RSVP status. Please try again.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    }
 
-function updateRSVPButtons(eventId, activeStatus) {
-    const buttons = ['going', 'interested', 'not_going'];
+    function updateRSVPButtons(eventId, activeStatus) {
+        const buttons = ['going', 'interested', 'not_going'];
 
-    buttons.forEach(status => {
-        const button = document.getElementById(`rsvp-${status.replace('_', '-')}-${eventId}`);
-        if (button) {
-            // Remove all active state classes
-            button.classList.remove('bg-green-500', 'border-green-500', 'text-white', 'shadow-md');
-            button.classList.remove('bg-yellow-500', 'border-yellow-500', 'text-white', 'shadow-md');
-            button.classList.remove('bg-red-500', 'border-red-500', 'text-white', 'shadow-md');
+        buttons.forEach(status => {
+            const button = document.getElementById(`rsvp-${status.replace('_', '-')}-${eventId}`);
+            if (button) {
+                // Remove all active state classes
+                button.classList.remove('bg-green-500', 'border-green-500', 'text-white', 'shadow-md');
+                button.classList.remove('bg-yellow-500', 'border-yellow-500', 'text-white', 'shadow-md');
+                button.classList.remove('bg-red-500', 'border-red-500', 'text-white', 'shadow-md');
 
-            // Reset to default state
-            button.classList.add('text-gray-700', 'border-gray-300');
-            button.classList.remove('text-white');
+                // Reset to default state
+                button.classList.add('text-gray-700', 'border-gray-300');
+                button.classList.remove('text-white');
 
-            // Add active class if this is the selected status
-            if (status === activeStatus) {
-                button.classList.remove('text-gray-700', 'border-gray-300');
-                button.classList.add('text-white', 'shadow-md');
-                if (status === 'going') {
-                    button.classList.add('bg-green-500', 'border-green-500');
-                } else if (status === 'interested') {
-                    button.classList.add('bg-yellow-500', 'border-yellow-500');
-                } else if (status === 'not_going') {
-                    button.classList.add('bg-red-500', 'border-red-500');
+                // Add active class if this is the selected status
+                if (status === activeStatus) {
+                    button.classList.remove('text-gray-700', 'border-gray-300');
+                    button.classList.add('text-white', 'shadow-md');
+                    if (status === 'going') {
+                        button.classList.add('bg-green-500', 'border-green-500');
+                    } else if (status === 'interested') {
+                        button.classList.add('bg-yellow-500', 'border-yellow-500');
+                    } else if (status === 'not_going') {
+                        button.classList.add('bg-red-500', 'border-red-500');
+                    }
                 }
             }
-        }
-    });
-}
+        });
+    }
 
-function updateAttendeeAvatars(eventId, attendees, totalGoing) {
-    const container = document.getElementById(`attendee-avatars-${eventId}`);
-    if (!container) return;
+    function updateAttendeeAvatars(eventId, attendees, totalGoing) {
+        const container = document.getElementById(`attendee-avatars-${eventId}`);
+        if (!container) return;
 
-    let html = '';
+        let html = '';
 
-    // Add attendee avatars (max 5)
-    attendees.forEach(attendee => {
-        if (attendee.avatar_url) {
-            html += `
+        // Add attendee avatars (max 5)
+        attendees.forEach(attendee => {
+            if (attendee.avatar_url) {
+                html += `
                 <img src="${attendee.avatar_url}"
                      alt="${attendee.name}"
                      class="w-9 h-9 rounded-full border-2 border-white shadow-md object-cover">
             `;
-        } else {
-            html += `
+            } else {
+                html += `
                 <div class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
                     <span class="text-xs font-bold text-white">${attendee.initials}</span>
                 </div>
             `;
-        }
-    });
+            }
+        });
 
-    // Add overflow indicator if more than 5 attendees
-    if (totalGoing > 5) {
-        html += `
+        // Add overflow indicator if more than 5 attendees
+        if (totalGoing > 5) {
+            html += `
             <div class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-gray-400 to-gray-600 shadow-md flex items-center justify-center">
                 <span class="text-xs font-bold text-white">+${totalGoing - 5}</span>
             </div>
         `;
+        }
+
+        container.innerHTML = html;
     }
 
-    container.innerHTML = html;
-}
+    // Event options dropdown functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle all event options buttons
+        document.querySelectorAll('[id^="eventOptionsBtn-"]').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const eventId = this.id.replace('eventOptionsBtn-', '');
+                const menu = document.getElementById(`eventOptionsMenu-${eventId}`);
 
-// Event options dropdown functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle all event options buttons
-    document.querySelectorAll('[id^="eventOptionsBtn-"]').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const eventId = this.id.replace('eventOptionsBtn-', '');
-            const menu = document.getElementById(`eventOptionsMenu-${eventId}`);
+                // Close all other menus first
+                document.querySelectorAll('[id^="eventOptionsMenu-"]').forEach(m => {
+                    if (m !== menu) m.classList.add('hidden');
+                });
 
-            // Close all other menus first
-            document.querySelectorAll('[id^="eventOptionsMenu-"]').forEach(m => {
-                if (m !== menu) m.classList.add('hidden');
+                // Toggle current menu
+                menu.classList.toggle('hidden');
+            });
+        });
+
+        // Close menus when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('[id^="eventOptionsBtn-"]')) {
+                document.querySelectorAll('[id^="eventOptionsMenu-"]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Enhanced animations for event cards
+        const eventCards = document.querySelectorAll('.activity-card');
+        eventCards.forEach((card, index) => {
+            // Stagger animation delays
+            card.style.animationDelay = `${0.1 + (index * 0.15)}s`;
+            card.classList.add('animate-fade-in');
+
+            // Add hover effect listener
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
             });
 
-            // Toggle current menu
-            menu.classList.toggle('hidden');
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Enhanced RSVP button interactions
+        document.querySelectorAll('.rsvp-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add floating animation to icons
+        document.querySelectorAll('.activity-card .w-10.h-10').forEach(icon => {
+            icon.style.animationDelay = `${Math.random() * 2}s`;
         });
     });
 
-    // Close menus when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('[id^="eventOptionsBtn-"]')) {
-            document.querySelectorAll('[id^="eventOptionsMenu-"]').forEach(menu => {
-                menu.classList.add('hidden');
-            });
-        }
-    });
-});
+    // Enhanced RSVP success animation
+    function animateRSVPSuccess(button, status) {
+        button.style.transform = 'scale(1.1)';
+        button.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
 
-function editEvent(eventId) {
-    // For now, just show an alert. In a real implementation, this would open an edit modal or redirect to edit page
-    alert(`Edit event ${eventId} - This functionality would open an edit form`);
-}
-
-function deleteEvent(eventId) {
-    if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-        // For now, just show an alert. In a real implementation, this would make an AJAX call to delete the event
-        alert(`Delete event ${eventId} - This would send a delete request to the server`);
+        setTimeout(() => {
+            button.style.transform = 'scale(1)';
+            button.style.boxShadow = '';
+        }, 300);
     }
-}
+
+    // Enhanced toggle description with animation
+    function toggleDescription(eventId) {
+        const desc = document.getElementById('desc-' + eventId);
+        const btn = document.getElementById('btn-' + eventId);
+
+        if (desc.classList.contains('line-clamp-3')) {
+            desc.classList.remove('line-clamp-3');
+            desc.style.transition = 'all 0.3s ease';
+            btn.textContent = 'See less';
+            btn.setAttribute('aria-expanded', 'true');
+
+            // Add fade-in effect
+            desc.style.opacity = '0';
+            setTimeout(() => {
+                desc.style.opacity = '1';
+            }, 50);
+        } else {
+            desc.classList.add('line-clamp-3');
+            btn.textContent = 'See more';
+            btn.setAttribute('aria-expanded', 'false');
+
+            // Add fade-out effect
+            desc.style.opacity = '0';
+            setTimeout(() => {
+                desc.style.opacity = '1';
+            }, 50);
+        }
+    }
+
+    // Enhanced RSVP function with animations
+    function rsvpEvent(status, eventId) {
+        // Check if max participants reached (only for 'going' status)
+        if (status === 'going') {
+            const goingCountElement = document.getElementById(`going-count-${eventId}`);
+            if (goingCountElement) {
+                const currentCount = parseInt(goingCountElement.textContent.trim()) || 0;
+                // Note: We can't easily check max_participants from frontend, so we'll let the backend handle it
+                // But we can show a warning if the count seems high
+            }
+        }
+
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('status', status);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        // Make AJAX request
+        fetch(`/event/rsvp/${eventId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button styles with animation
+                    updateRSVPButtons(eventId, status);
+
+                    // Animate the clicked button
+                    const clickedButton = document.getElementById(`rsvp-${status.replace('_', '-')}-${eventId}`);
+                    if (clickedButton) {
+                        animateRSVPSuccess(clickedButton, status);
+                    }
+
+                    // Update counts with animation
+                    const goingCount = document.getElementById(`going-count-${eventId}`);
+                    const interestedCount = document.getElementById(`interested-count-${eventId}`);
+
+                    goingCount.style.transition = 'all 0.3s ease';
+                    interestedCount.style.transition = 'all 0.3s ease';
+
+                    goingCount.style.transform = 'scale(1.2)';
+                    interestedCount.style.transform = 'scale(1.2)';
+
+                    setTimeout(() => {
+                        goingCount.style.transform = 'scale(1)';
+                        interestedCount.style.transform = 'scale(1)';
+                    }, 300);
+
+                    goingCount.innerHTML = `
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                ${data.going_count}
+            `;
+                    interestedCount.innerHTML = `
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                ${data.interested_count}
+            `;
+
+                    // Update attendee avatars with animation
+                    updateAttendeeAvatars(eventId, data.attendees, data.going_count);
+                } else {
+                    console.error('RSVP failed:', data.error);
+                    if (data.error && data.error.includes('maximum participants')) {
+                        alert('Maximum participants reached. Cannot RSVP as going.');
+                    } else {
+                        alert('Failed to update RSVP status. Please try again.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    }
+
+    // Add ripple animation keyframe
+    const style = document.createElement('style');
+    style.textContent = `
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+    document.head.appendChild(style);
+
+    function editEvent(eventId) {
+        // For now, just show an alert. In a real implementation, this would open an edit modal or redirect to edit page
+        alert(`Edit event ${eventId} - This functionality would open an edit form`);
+    }
+
+    function deleteEvent(eventId) {
+        if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+            // For now, just show an alert. In a real implementation, this would make an AJAX call to delete the event
+            alert(`Delete event ${eventId} - This would send a delete request to the server`);
+        }
+    }
 </script>
