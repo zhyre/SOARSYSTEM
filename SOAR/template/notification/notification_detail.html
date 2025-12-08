@@ -79,9 +79,9 @@
 
             <!-- Content Area -->
             <div class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
-                <div class="max-w-4xl mx-auto">
+                <div class="max-w-6xl mx-auto">
                     <!-- Notification Card -->
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                         <!-- Header Section -->
                         <div
                             class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 text-white relative overflow-hidden">
@@ -108,7 +108,7 @@
                                             {{ notification.get_priority_display }} Priority
                                         </span>
                                     </div>
-                                    <h2 class="text-3xl font-bold mb-3 text-white drop-shadow-lg">
+                                    <h2 class="text-2xl font-bold mb-2 text-white">
                                         {% if notification.notification_type == 'membership' %}
                                         Membership Approved
                                         {% elif notification.notification_type == 'event' %}
@@ -121,7 +121,7 @@
                                         General Notification
                                         {% endif %}
                                     </h2>
-                                    <div class="flex items-center text-sm text-white">
+                                    <div class="flex items-center text-sm text-white/90">
                                         <i class="far fa-clock mr-2"></i>
                                         <span class="font-medium">{{ notification.date_created|date:'F d, Y' }} at {{ notification.date_created|time:'h:i A' }}</span>
                                     </div>
@@ -201,6 +201,57 @@
                                 </div>
                             </div>
 
+                            <!-- Event RSVP Counts (if event notification) -->
+                            {% if notification.notification_type == 'event' and event_data %}
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-6">Event Response</h3>
+                            
+                            <!-- RSVP Counts Display -->
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                <!-- Going -->
+                                <div class="flex flex-col items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <p class="font-semibold text-gray-900 text-lg" id="going-count-notif">{{ event_data.going_count }}</p>
+                                    <p class="text-xs text-gray-600">Going</p>
+                                </div>
+
+                                <!-- Interested -->
+                                <div class="flex flex-col items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <p class="font-semibold text-gray-900 text-lg" id="interested-count-notif">{{ event_data.interested_count }}</p>
+                                    <p class="text-xs text-gray-600">Interested</p>
+                                </div>
+
+                                <!-- Not Going -->
+                                <div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <p class="font-semibold text-gray-900 text-lg" id="not-going-count-notif">{{ event_data.not_going_count }}</p>
+                                    <p class="text-xs text-gray-600">Not Going</p>
+                                </div>
+                            </div>
+
+                            <!-- RSVP Buttons -->
+                            <div class="rsvp-buttons flex justify-between gap-3 mb-6" data-event-id="{{ event_data.event_id }}">
+                                <button
+                                    onclick="rsvpEventFromNotif('going', '{{ event_data.event_id }}')"
+                                    class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700"
+                                    id="rsvp-going-notif-{{ event_data.event_id }}">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Going</span>
+                                </button>
+                                <button
+                                    onclick="rsvpEventFromNotif('interested', '{{ event_data.event_id }}')"
+                                    class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700"
+                                    id="rsvp-interested-notif-{{ event_data.event_id }}">
+                                    <i class="fas fa-star"></i>
+                                    <span>Interested</span>
+                                </button>
+                                <button
+                                    onclick="rsvpEventFromNotif('not_going', '{{ event_data.event_id }}')"
+                                    class="rsvp-btn flex-1 px-4 py-3 border border-gray-300 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-200 inline-flex items-center justify-center gap-2 font-medium text-gray-700"
+                                    id="rsvp-not-going-notif-{{ event_data.event_id }}">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>Not Going</span>
+                                </button>
+                            </div>
+                            {% endif %}
+
                             <!-- Action Buttons -->
                             <div class="mt-8 flex flex-wrap gap-4">
                                 <a href="{% url 'notifications' %}"
@@ -214,6 +265,11 @@
                                     <i class="fas fa-external-link-alt mr-2"></i>View Related Content
                                 </a>
                                 {% endif %}
+                                
+                                <button id="delete-notification-btn" data-notification-id="{{ notification.id }}"
+                                   class="px-6 py-3 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors text-center">
+                                    <i class="fas fa-trash mr-2"></i>Delete
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -238,6 +294,172 @@
                 sidebar.classList.remove('mobile-open');
                 overlay.classList.add('hidden');
             });
+        }
+        
+        // Delete notification function
+        const deleteBtn = document.getElementById('delete-notification-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-notification-id');
+                
+                if (!confirm('Are you sure you want to delete this notification?')) {
+                    return;
+                }
+                
+                fetch(`/notifications/delete/${notificationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Redirect back to notifications page
+                    window.location.href = '/notifications/';
+                } else {
+                    alert('Failed to delete notification');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the notification');
+            });
+            });
+        }
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Validate link before navigation
+        function validateLink(element) {
+            const url = element.getAttribute('href');
+            if (!url || url.length === 0) {
+                alert('This notification does not have a valid related link.');
+                return false;
+            }
+            return true;
+        }
+
+        // RSVP Event function from notification detail
+        function rsvpEventFromNotif(status, eventId) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const formData = new FormData();
+            formData.append('status', status);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(`/event/rsvp/${eventId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update counts in notification detail
+                    document.getElementById('going-count-notif').textContent = data.going_count;
+                    document.getElementById('interested-count-notif').textContent = data.interested_count;
+                    document.getElementById('not-going-count-notif').textContent = data.not_going_count;
+
+                    // Update RSVP buttons in notification detail
+                    updateRSVPButtonsNotif(eventId, status);
+
+                    // Also update counts in the background on the organization feed if visible
+                    updateFeedCounts(eventId, data);
+                } else {
+                    console.error('RSVP failed:', data.error);
+                    if (data.error && data.error.includes('maximum participants')) {
+                        alert('Maximum participants reached. Cannot RSVP as going.');
+                    } else {
+                        alert('Failed to update RSVP status. Please try again.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+
+        function updateRSVPButtonsNotif(eventId, activeStatus) {
+            const buttons = ['going', 'interested', 'not_going'];
+
+            buttons.forEach(status => {
+                const button = document.getElementById(`rsvp-${status.replace('_', '-')}-notif-${eventId}`);
+                if (button) {
+                    // Remove all active state classes
+                    button.classList.remove('bg-green-500', 'border-green-500', 'text-white', 'shadow-md');
+                    button.classList.remove('bg-blue-500', 'border-blue-500', 'text-white', 'shadow-md');
+                    button.classList.remove('bg-red-500', 'border-red-500', 'text-white', 'shadow-md');
+
+                    // Reset to default state
+                    button.classList.add('text-gray-700', 'border-gray-300');
+                    button.classList.remove('text-white');
+
+                    // Add active class if this is the selected status
+                    if (status === activeStatus) {
+                        button.classList.remove('text-gray-700', 'border-gray-300');
+                        button.classList.add('text-white', 'shadow-md');
+                        if (status === 'going') {
+                            button.classList.add('bg-green-500', 'border-green-500');
+                        } else if (status === 'interested') {
+                            button.classList.add('bg-blue-500', 'border-blue-500');
+                        } else if (status === 'not_going') {
+                            button.classList.add('bg-red-500', 'border-red-500');
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFeedCounts(eventId, data) {
+            // Update counts in the organization feed if the page is in a tab/frame
+            const feedGoingCount = document.getElementById(`going-count-${eventId}`);
+            if (feedGoingCount) {
+                feedGoingCount.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                    ${data.going_count}
+                `;
+            }
+
+            const feedInterestedCount = document.getElementById(`interested-count-${eventId}`);
+            if (feedInterestedCount) {
+                feedInterestedCount.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    ${data.interested_count}
+                `;
+            }
+
+            const feedNotGoingCount = document.getElementById(`not-going-count-${eventId}`);
+            if (feedNotGoingCount) {
+                feedNotGoingCount.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+                    </svg>
+                    ${data.not_going_count}
+                `;
+            }
         }
     </script>
 </body>

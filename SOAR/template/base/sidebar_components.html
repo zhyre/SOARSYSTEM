@@ -1,4 +1,7 @@
 {% load static %}
+<!-- Hidden data element for unread notification count -->
+<div id="unread-count-data" data-count="{% if unread_notifications %}{{ unread_notifications.count }}{% else %}0{% endif %}" style="display: none;"></div>
+
 <!-- Modern White Sidebar with Advanced Features -->
 {% if sidebar_type == 'admin' %}
 <aside id="admin-sidebar"

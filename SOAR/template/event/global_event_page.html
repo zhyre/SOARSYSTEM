@@ -1226,6 +1226,11 @@
             </svg>
             ${eventData.interested_count} Interested
         `;
+        
+        // Update RSVP button counts
+        document.getElementById('going-count').textContent = `${eventData.going_count} people`;
+        document.getElementById('interested-count').textContent = `${eventData.interested_count} people`;
+        document.getElementById('not-going-count').textContent = `${eventData.not_going_count} people`;
 
             // Handle membership-based UI
             const rsvpSection = document.getElementById('modalRSVPSection');
