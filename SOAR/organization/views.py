@@ -189,7 +189,7 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
                 message=message,
                 notification_type=Notification.TYPE_ORGANIZATION,
                 priority=Notification.PRIORITY_HIGH,
-                link=f"/organization/orgpage/{member.organization.id}/"
+                link=f"/organization/organization/{member.organization.id}/profile/"
             )
             
             return Response({
@@ -236,7 +236,7 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
                 message=message,
                 notification_type=Notification.TYPE_ORGANIZATION,
                 priority=Notification.PRIORITY_HIGH,
-                link=f"/organization/orgpage/{member.organization.id}/"
+                link=f"/organization/organization/{member.organization.id}/profile/"
             )
             
             return Response({
@@ -270,7 +270,7 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
             message=message,
             notification_type=Notification.TYPE_MEMBERSHIP,
             priority=Notification.PRIORITY_HIGH,
-            link=f"/organization/orgpage/{member.organization.id}/"
+            link=f"/organization/organization/{member.organization.id}/profile/"
         )
 
         send_mail(

@@ -40,14 +40,11 @@ def index(request):
     total_user_orgs = user_orgs.count()
     show_see_more = total_user_orgs > 3
 
-    # Get upcoming events user is going to (within 7 days)
-    from datetime import timedelta
-    seven_days_from_now = timezone.now() + timedelta(days=7)
+    # Get upcoming events the user is attending (no 7-day cap)
     user_events = OrganizationEvent.objects.filter(
         rsvps__user=request.user,
         rsvps__status='going',
-        event_date__gte=timezone.now(),
-        event_date__lte=seven_days_from_now
+        event_date__gte=timezone.now()
     ).distinct().order_by('event_date')
 
     # Add RSVP data to each event
@@ -70,12 +67,36 @@ def index(request):
     # Count total available organizations
     total_available_orgs = Organization.objects.count()
 
+    # Serialize user_events for modal on the dashboard
+    import json
+    user_events_json = json.dumps([
+        {
+            "id": str(event.id),
+            "title": event.title,
+            "organization": event.organization.name,
+            "organization_id": str(event.organization.id),
+            "organization_picture": event.organization.profile_picture.url if event.organization.profile_picture else None,
+            "date": event.event_date.isoformat(),
+            "description": event.description,
+            "type": event.activity_type,
+            "going_count": event.going_count,
+            "interested_count": event.interested_count,
+            "not_going_count": event.not_going_count,
+            "user_rsvp_status": getattr(event, "user_rsvp_status", None),
+            "location": event.location,
+            "max_participants": event.max_participants,
+            "is_user_member": True,
+        }
+        for event in user_events
+    ])
+
     context = {
         "user_orgs": user_orgs,  # for counting
         "org_data": org_data,    # for detailed display (limited to 3)
         "show_see_more": show_see_more,
         "total_orgs_count": total_user_orgs,
         "user_events": user_events,
+        "user_events_json": user_events_json,
         "total_available_orgs": total_available_orgs,
     }
     return render(request, "accounts/index.html", context)
@@ -229,7 +250,14 @@ def register(request):
                     user_obj.first_name = cd.get("first_name") or user_obj.first_name
                     user_obj.last_name = cd.get("last_name") or user_obj.last_name
                     user_obj.student_id = cd.get("student_id") or user_obj.student_id
-                    user_obj.course = cd.get("course") or user_obj.course
+
+                    course_value = cd.get("course")
+                    if isinstance(course_value, str):
+                        course_value = Program.objects.filter(
+                            Q(name=course_value) | Q(abbreviation=course_value)
+                        ).first()
+                    user_obj.course = course_value or user_obj.course
+
                     user_obj.year_level = cd.get("year_level") or user_obj.year_level
                 except User.DoesNotExist:
                     # Creating new user
