@@ -1,0 +1,72 @@
+<!-- Organization Member Details Modal Template -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-1 space-y-4">
+        <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+            <div class="text-xs text-blue-900 uppercase font-semibold">Member Status</div>
+            <div class="mt-2 flex items-center justify-between">
+                <span class="text-base font-bold text-blue-900">{{ status }}</span>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold">{{ status }}</span>
+            </div>
+            <p class="mt-2 text-xs text-blue-800"><i class="fas fa-calendar-day mr-2"></i>{{ dateJoined }}</p>
+            <p class="mt-1 text-xs text-blue-800"><i class="fas fa-user-tag mr-2"></i>{{ role }}</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm text-center">
+            <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow">
+                <img src="{{ user.profilePicture }}" alt="{{ user.firstName }} {{ user.lastName }}"
+                    class="w-full h-full object-cover">
+            </div>
+            <div class="mt-3">
+                <h4 class="text-lg font-bold text-gray-800">{{ user.firstName }} {{ user.lastName }}</h4>
+                <p class="text-sm text-gray-500">{{ user.username }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ user.email }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="md:col-span-2 space-y-8">
+        <div>
+            <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-building text-blue-600"></i>
+                Organization Information
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Organization</p>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ organization.name }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ organization.isPublic }}</p>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Description</p>
+                    <p class="text-sm text-gray-800 mt-1">{{ organization.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <i class="fas fa-user-graduate text-blue-600"></i>
+                Member Information
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Student ID</p>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ user.studentId }}</p>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Program</p>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ user.courseAbbreviation }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ user.courseName }}</p>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Year Level</p>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ user.yearLevel }}</p>
+                </div>
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <p class="text-xs text-gray-500">Role</p>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ role }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -14,6 +14,8 @@
 </head>
 
 <body class="bg-gray-50">
+    <!-- Loading Spinners -->
+    {% include 'base/spinners.html' %}
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='admin' %}
@@ -36,9 +38,7 @@
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
-                            <span class="text-sm text-gray-600">WELCOME, <strong>{{
-                                    request.user.get_full_name|upper|default:request.user.username|upper
-                                    }}</strong></span>
+                            <span class="text-sm text-gray-600">WELCOME, <strong>{% with full=request.user.get_full_name %}{% if full %}{{ full|upper }}{% else %}{{ request.user.username|upper }}{% endif %}{% endwith %}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -69,12 +69,12 @@
                         <!-- Filters -->
                         <div class="mt-4 flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
-                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                    <option>---------</option>
-                                    <option>Action 1</option>
-                                    <option>Action 2</option>
+                                <select id="bulk-action-select"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option value="">---------</option>
+                                    <option value="delete">Delete Selected</option>
                                 </select>
-                                <button
+                                <button onclick="executeBulkAction()"
                                     class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium">Go</button>
                             </div>
                             <span class="text-sm text-gray-500"><span id="selected-count">0</span> of <span
@@ -108,28 +108,28 @@
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col3-header">FIRST NAME</span>
+                                            <span id="col3-header">PROGRAM</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col4-header">LAST NAME</span>
+                                            <span id="col4-header">YEAR LEVEL</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col5-header">PROGRAM</span>
+                                            <span id="col5-header">ROLE</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col6-header">YEAR LEVEL</span>
+                                            <span id="col6-header">STATUS</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
@@ -208,6 +208,82 @@
         <div class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
             <i class="fas fa-check-circle text-xl"></i>
             <span id="toast-message">Success!</span>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="user-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">User Details</h3>
+                <button onclick="closeUserDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="user-details-content">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Event RSVP Details Modal -->
+    <div id="rsvp-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Event RSVP Details</h3>
+                <button onclick="closeRsvpDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="rsvp-details-content">
+                <!-- RSVP details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Event Details Modal -->
+    <div id="event-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Event Details</h3>
+                <button onclick="closeEventDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="event-details-content">
+                <!-- Event details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Member Details Modal -->
+    <div id="org-member-details-modal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Organization Member Details</h3>
+                <button onclick="closeOrgMemberDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="org-member-details-content">
+                <!-- Organization member details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Details Modal -->
+    <div id="org-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Organization Details</h3>
+                <button onclick="closeOrgDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="org-details-content">
+                <!-- Organization details will be loaded here -->
+            </div>
         </div>
     </div>
 

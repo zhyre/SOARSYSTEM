@@ -8,6 +8,7 @@ from SOAR.organization.forms import AdminOrganizationCreateForm
 from SOAR.organization.models import Organization, OrganizationMember, Program, ROLE_LEADER
 from SOAR.accounts.models import User
 from SOAR.event.models import OrganizationEvent, EventRSVP
+from SOAR.notification.models import Notification
 from django.db.models import Count
 import json
 from django.views.decorators.http import require_http_methods
@@ -15,7 +16,15 @@ from django.utils.dateparse import parse_datetime, parse_date
 
 SUPABASE_URL = config("SUPABASE_URL")
 SUPABASE_KEY = config("SUPABASE_KEY")
+SUPABASE_SERVICE_ROLE_KEY = config("SUPABASE_SERVICE_ROLE_KEY", default=None)
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Create a service role client for admin operations (deleting users from auth)
+if SUPABASE_SERVICE_ROLE_KEY:
+    supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+else:
+    supabase_admin = supabase  # Fallback to regular client if service role key not provided
 
 def admin_panel(request):
     if request.user.is_authenticated:
@@ -40,6 +49,9 @@ def admin_create_organization(request):
             organization = form.save(commit=False)
             organization.save()
             
+            # Save many-to-many relationships (allowed_programs)
+            form.save_m2m()
+            
             # Assign admin as Head Officer (Leader)
             OrganizationMember.objects.create(
                 organization=organization,
@@ -48,11 +60,50 @@ def admin_create_organization(request):
                 is_approved=True
             )
             
+            # Send notifications based on organization visibility
+            notifications = []
+            org_link = f"/organization/{organization.id}/"
+            message = f"🎉 New organization '{organization.name}' has been created! Check it out and join if you're interested."
+            
+            if organization.is_public:
+                # Public organization: notify all users
+                all_users = User.objects.filter(is_active=True).exclude(id=request.user.id)
+                for user in all_users:
+                    notifications.append(Notification(
+                        user=user,
+                        message=message,
+                        notification_type=Notification.TYPE_ORGANIZATION,
+                        priority=Notification.PRIORITY_MEDIUM,
+                        link=org_link
+                    ))
+            else:
+                # Private organization: notify users from allowed programs
+                allowed_programs = organization.allowed_programs.all()
+                if allowed_programs.exists():
+                    eligible_users = User.objects.filter(
+                        course__in=allowed_programs,
+                        is_active=True
+                    ).exclude(id=request.user.id)
+                    
+                    for user in eligible_users:
+                        notifications.append(Notification(
+                            user=user,
+                            message=message,
+                            notification_type=Notification.TYPE_ORGANIZATION,
+                            priority=Notification.PRIORITY_MEDIUM,
+                            link=org_link
+                        ))
+            
+            # Bulk create notifications for efficiency
+            if notifications:
+                Notification.objects.bulk_create(notifications)
+                print(f"Created {len(notifications)} notifications for new organization: {organization.name}")
+            
             messages.success(
                 request,
                 f'Organization "{organization.name}" created successfully! You have been assigned as Head Officer.'
             )
-            return redirect('organization_profile', org_id=organization.id)
+            return redirect('admin_panel')
         else:
             # Form has errors, they will be displayed in template
             pass
@@ -153,9 +204,11 @@ def get_users_data(request):
         if data.get('course'):
             try:
                 # Try to find program by code or name
-                program = Program.objects.filter(abbreviation=data.get('course')).first() or \
-                         Program.objects.filter(name=data.get('course')).first()
-            except Exception:
+                course_input = data.get('course').strip()
+                program = Program.objects.filter(abbreviation=course_input).first() or \
+                         Program.objects.filter(name=course_input).first()
+            except Exception as e:
+                print(f"Warning: Could not lookup program {data.get('course')}: {str(e)}")
                 program = None
 
         # Create Django user
@@ -215,19 +268,88 @@ def get_users_data(request):
             # Prefer the abbreviation (e.g., BSIT); fall back to name if needed
             course_display = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
 
+        # Determine user role
+        if user.is_superuser:
+            role = 'Admin'
+        elif user.is_staff:
+            role = 'Staff'
+        else:
+            role = 'Student'
+        
+        # Determine user status
+        status = 'Active' if user.is_active else 'Inactive'
+        
         users_data.append({
             'id': str(user.id),
             'studentId': user.student_id or 'N/A',
             #'username': user.username,
             'email': user.email,
-            'firstName': user.first_name,
-            'lastName': user.last_name,
             'course': course_display or 'N/A',
             'yearLevel': user.year_level if user.year_level is not None else 'N/A',
+            'role': role,
+            'status': status,
             'dateJoined': user.date_joined.strftime('%b. %d, %Y') if user.date_joined else 'N/A'
         })
 
     return JsonResponse({'data': users_data})
+
+@login_required
+def get_user_details(request, user_id):
+    """API endpoint to get detailed information for a specific user."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    
+    # Get course information
+    course_display = None
+    course_name = None
+    if user.course:
+        course_display = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
+        course_name = getattr(user.course, 'name', None)
+    
+    # Determine user role
+    if user.is_superuser:
+        role = 'Admin'
+    elif user.is_staff:
+        role = 'Staff'
+    else:
+        role = 'Student'
+    
+    # Determine user status
+    status = 'Active' if user.is_active else 'Inactive'
+    
+    # Get profile picture URL (ensure JSON-serializable string)
+    profile_picture_url = None
+    if user.profile_picture:
+        try:
+            profile_picture_url = user.profile_picture.url
+        except Exception:
+            # Fallback to the stored value as a string if .url is unavailable
+            profile_picture_url = str(user.profile_picture)
+    
+    user_details = {
+        'id': str(user.id),
+        'studentId': user.student_id or 'N/A',
+        'username': user.username,
+        'email': user.email,
+        'firstName': user.first_name or 'N/A',
+        'lastName': user.last_name or 'N/A',
+        'courseAbbreviation': course_display or 'N/A',
+        'courseName': course_name or 'N/A',
+        'yearLevel': user.year_level if user.year_level is not None else 'N/A',
+        'role': role,
+        'status': status,
+        'isActive': user.is_active,
+        'dateJoined': user.date_joined.strftime('%B %d, %Y at %I:%M %p') if user.date_joined else 'N/A',
+        'lastLogin': user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never',
+        'profilePicture': profile_picture_url
+    }
+    
+    return JsonResponse(user_details)
 
 @login_required
 def get_organizations_data(request):
@@ -257,6 +379,13 @@ def get_organizations_data(request):
         except Exception:
             programs_list = []
 
+        # Get adviser full name
+        adviser_name = 'N/A'
+        if org.adviser:
+            adviser_name = f"{org.adviser.first_name} {org.adviser.last_name}".strip()
+            if not adviser_name:
+                adviser_name = org.adviser.username
+
         orgs_data.append({
             'id': str(org.id),
             'orgName': org.name,
@@ -266,10 +395,69 @@ def get_organizations_data(request):
             'description': org.description,
             'isPublic': org.is_public,
             'programs': ', '.join(programs_list) if programs_list else '',
-            'adviser': org.adviser_id or 'N/A'
+            'adviser': adviser_name
         })
     
     return JsonResponse({'data': orgs_data})
+
+@login_required
+def get_organization_details(request, org_id):
+    """API endpoint to get detailed information for a specific organization."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        org = Organization.objects.select_related('adviser').prefetch_related('allowed_programs', 'members').get(id=org_id)
+    except Organization.DoesNotExist:
+        return JsonResponse({'error': 'Organization not found'}, status=404)
+
+    # Determine organization type
+    org_type = 'Academic'
+    if org.tags:
+        if 'sports' in [tag.lower() for tag in org.tags]:
+            org_type = 'Sports'
+        elif 'cultural' in [tag.lower() for tag in org.tags]:
+            org_type = 'Cultural'
+        elif any(tag.lower() in ['special', 'interest'] for tag in org.tags):
+            org_type = 'Special Interest'
+
+    # Collect allowed program names
+    programs_list = [p.name for p in org.allowed_programs.all()]
+
+    # Get adviser info
+    adviser_info = None
+    if org.adviser:
+        adviser_info = {
+            'id': str(org.adviser.id),
+            'name': f"{org.adviser.first_name} {org.adviser.last_name}".strip() or org.adviser.username,
+            'email': org.adviser.email,
+            'username': org.adviser.username
+        }
+
+    # Count members by role
+    members_by_role = {
+        'leader': org.members.filter(role='leader').count(),
+        'officer': org.members.filter(role='officer').count(),
+        'member': org.members.filter(role='member').count(),
+        'adviser': org.members.filter(role='adviser').count()
+    }
+    total_members = sum(members_by_role.values())
+
+    details = {
+        'id': str(org.id),
+        'name': org.name,
+        'description': org.description or '',
+        'type': org_type,
+        'isPublic': org.is_public,
+        'dateCreated': org.date_created.strftime('%B %d, %Y') if org.date_created else 'N/A',
+        'programs': programs_list,
+        'adviser': adviser_info,
+        'memberCounts': members_by_role,
+        'totalMembers': total_members,
+        'tags': org.tags or []
+    }
+
+    return JsonResponse(details)
 
 @login_required
 def get_organization_members_data(request):
@@ -341,6 +529,65 @@ def get_organization_members_data(request):
     return JsonResponse({'data': members_data})
 
 @login_required
+def get_organization_member_details(request, member_id):
+    """API endpoint to get detailed information for a specific organization member."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        member = OrganizationMember.objects.select_related(
+            'organization',
+            'student',
+            'student__course'
+        ).get(id=member_id)
+    except OrganizationMember.DoesNotExist:
+        return JsonResponse({'error': 'Member not found'}, status=404)
+
+    org = member.organization
+    user = member.student
+
+    # Course info
+    course_abbr = None
+    course_name = None
+    if getattr(user, 'course', None):
+        course_abbr = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
+        course_name = getattr(user.course, 'name', None)
+
+    profile_picture_url = None
+    if getattr(user, 'profile_picture', None):
+        try:
+            profile_picture_url = user.profile_picture.url
+        except Exception:
+            profile_picture_url = str(user.profile_picture)
+
+    details = {
+        'id': str(member.id),
+        'role': member.get_role_display(),
+        'status': 'Approved' if member.is_approved else 'Pending',
+        'dateJoined': member.date_joined.strftime('%B %d, %Y at %I:%M %p') if member.date_joined else 'N/A',
+        'organization': {
+            'id': str(org.id) if org else None,
+            'name': org.name if org else 'N/A',
+            'description': org.description if org else '',
+            'isPublic': org.is_public if org else False,
+        },
+        'user': {
+            'id': str(user.id),
+            'username': user.username,
+            'email': user.email,
+            'firstName': user.first_name or 'N/A',
+            'lastName': user.last_name or 'N/A',
+            'studentId': getattr(user, 'student_id', None) or 'N/A',
+            'courseAbbreviation': course_abbr or 'N/A',
+            'courseName': course_name or 'N/A',
+            'yearLevel': getattr(user, 'year_level', None) if getattr(user, 'year_level', None) is not None else 'N/A',
+            'profilePicture': profile_picture_url,
+        }
+    }
+
+    return JsonResponse(details)
+
+@login_required
 def get_events_data(request):
     """API endpoint to get all organization events data, and add new events via POST."""
     if not (request.user.is_superuser or request.user.is_staff):
@@ -398,6 +645,31 @@ def get_events_data(request):
             created_by=request.user
         )
 
+        # Create notifications for all approved organization members
+        approved_members = OrganizationMember.objects.filter(
+            organization=org,
+            is_approved=True
+        ).select_related('student')
+
+        event_date_str = event_date.strftime("%B %d, %Y at %I:%M %p")
+        message = f"📅 New event '{title}' has been created in {org.name}! Event date: {event_date_str}. Location: {location or 'TBA'}."
+        event_link = f"/event/{event.id}/"
+        
+        notifications = []
+        for member in approved_members:
+            notifications.append(Notification(
+                user=member.student,
+                message=message,
+                notification_type=Notification.TYPE_EVENT,
+                priority=Notification.PRIORITY_MEDIUM,
+                link=event_link
+            ))
+
+        # Bulk create notifications for efficiency
+        if notifications:
+            Notification.objects.bulk_create(notifications)
+            print(f"Created {len(notifications)} notifications for admin-created event: {event.title}")
+
         # Sync to Supabase
         try:
             supabase_payload = {
@@ -434,6 +706,44 @@ def get_events_data(request):
         })
     return JsonResponse({'data': events_data})
 
+
+@login_required
+def get_event_details(request, event_id):
+    """API endpoint to get detailed information for a specific organization event."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        event = OrganizationEvent.objects.select_related('organization', 'created_by').get(id=event_id)
+    except OrganizationEvent.DoesNotExist:
+        return JsonResponse({'error': 'Event not found'}, status=404)
+
+    org = event.organization
+    created_by = event.created_by
+
+    # Basic stats
+    rsvp_counts = {
+        'going': event.rsvps.filter(status='going').count(),
+        'interested': event.rsvps.filter(status='interested').count(),
+        'not_going': event.rsvps.filter(status='not_going').count(),
+    }
+
+    details = {
+        'id': str(event.id),
+        'title': event.title,
+        'organization': org.name if org else 'N/A',
+        'date': event.event_date.strftime('%B %d, %Y at %I:%M %p') if event.event_date else 'N/A',
+        'location': event.location or 'TBA',
+        'activityType': event.get_activity_type_display(),
+        'status': event.status,
+        'description': event.description or '',
+        'cancelled': event.cancelled,
+        'createdBy': created_by.get_full_name() if created_by and created_by.get_full_name() else (created_by.username if created_by else 'N/A'),
+        'createdAt': event.date_created.strftime('%B %d, %Y at %I:%M %p') if getattr(event, 'date_created', None) else 'N/A',
+        'rsvps': rsvp_counts,
+    }
+
+    return JsonResponse(details)
 @login_required
 def get_rsvps_data(request):
     """API endpoint to get all event RSVPs data."""
@@ -463,6 +773,73 @@ def get_rsvps_data(request):
     return JsonResponse({'data': rsvps_data})
 
 @login_required
+def get_rsvp_details(request, rsvp_id):
+    """API endpoint to get detailed information for a specific RSVP."""
+    if not (request.user.is_superuser or request.user.is_staff):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        rsvp = EventRSVP.objects.select_related('event__organization', 'user', 'user__course').get(id=rsvp_id)
+    except EventRSVP.DoesNotExist:
+        return JsonResponse({'error': 'RSVP not found'}, status=404)
+
+    event = rsvp.event
+    user = rsvp.user
+
+    # Event details
+    event_org = event.organization.name if event and event.organization else 'N/A'
+    event_date = event.event_date.strftime('%B %d, %Y at %I:%M %p') if event and event.event_date else 'N/A'
+    event_status = event.status if event else 'N/A'
+    activity_type = event.get_activity_type_display() if event else 'N/A'
+
+    # User/course details
+    course_display = None
+    course_name = None
+    if getattr(user, 'course', None):
+        course_display = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
+        course_name = getattr(user.course, 'name', None)
+
+    profile_picture_url = None
+    if getattr(user, 'profile_picture', None):
+        try:
+            profile_picture_url = user.profile_picture.url
+        except Exception:
+            profile_picture_url = str(user.profile_picture)
+
+    details = {
+        'id': str(rsvp.id),
+        'rsvpStatus': rsvp.get_status_display(),
+        'rsvpDate': rsvp.date_created.strftime('%B %d, %Y at %I:%M %p') if rsvp.date_created else 'N/A',
+
+        'event': {
+            'id': str(event.id) if event else None,
+            'title': event.title if event else 'N/A',
+            'organization': event_org,
+            'date': event_date,
+            'location': event.location if event and event.location else 'TBA',
+            'activityType': activity_type,
+            'status': event_status,
+            'description': event.description if event and event.description else ''
+        },
+
+        'user': {
+            'id': str(user.id),
+            'username': user.username,
+            'email': user.email,
+            'firstName': user.first_name or 'N/A',
+            'lastName': user.last_name or 'N/A',
+            'studentId': getattr(user, 'student_id', None) or 'N/A',
+            'courseAbbreviation': course_display or 'N/A',
+            'courseName': course_name or 'N/A',
+            'yearLevel': getattr(user, 'year_level', None) if getattr(user, 'year_level', None) is not None else 'N/A',
+            'profilePicture': profile_picture_url,
+        }
+    }
+
+    return JsonResponse(details)
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def get_programs_data(request):
     """API endpoint to get all programs data, and add new programs via POST."""
     if not (request.user.is_superuser or request.user.is_staff):
@@ -537,6 +914,15 @@ def delete_user(request, user_id):
             if not user:
                 return JsonResponse({'error': 'User not found.'}, status=404)
 
+            # Delete from Supabase auth first using service role key
+            try:
+                supabase_admin.auth.admin.delete_user(str(user_id), should_soft_delete=False)
+                print(f"Successfully deleted user {user_id} from Supabase auth")
+            except Exception as e:
+                # Log the error but don't fail - the user might not exist in Supabase
+                print(f"Warning: Could not delete user {user_id} from Supabase auth: {str(e)}")
+
+            # Delete from Django
             user.delete()
             return JsonResponse({'success': True})
         except Exception as e:
@@ -563,7 +949,17 @@ def delete_user(request, user_id):
         if 'email' in payload:
             user.email = payload.get('email')
         if 'course' in payload:
-            user.course = payload.get('course')
+            course_code = payload.get('course')
+            if course_code:
+                try:
+                    program = Program.objects.filter(abbreviation=course_code).first() or \
+                             Program.objects.filter(name=course_code).first()
+                    user.course = program
+                except Exception as e:
+                    print(f"Warning: Could not lookup program {course_code}: {str(e)}")
+                    user.course = None
+            else:
+                user.course = None
         if 'yearLevel' in payload:
             try:
                 user.year_level = int(payload.get('yearLevel')) if payload.get('yearLevel') not in [None, ''] else None

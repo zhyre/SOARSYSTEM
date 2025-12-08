@@ -1,0 +1,67 @@
+<!-- Organization Details Modal Template -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-1 space-y-4">
+        <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+            <div class="text-xs text-blue-900 uppercase font-semibold">Organization Status</div>
+            <p class="text-base font-bold text-blue-900 mt-2">{{ type }}</p>
+            <span
+                class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold {% if isPublic %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                {% if isPublic %}Public{% else %}Private{% endif %}
+            </span>
+            <p class="text-xs text-blue-800 mt-2"><i class="fas fa-calendar-day mr-2"></i>{{ dateCreated }}</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+            <div class="text-xs text-gray-500 uppercase font-semibold">Total Members</div>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ totalMembers }}</p>
+            <div class="grid grid-cols-4 gap-2 mt-3">
+                <div class="p-2 rounded-lg bg-blue-50 text-blue-800 text-xs font-semibold text-center">
+                    Leaders<br>{{ memberCounts.leader }}
+                </div>
+                <div class="p-2 rounded-lg bg-purple-50 text-purple-800 text-xs font-semibold text-center">
+                    Officers<br>{{ memberCounts.officer }}
+                </div>
+                <div class="p-2 rounded-lg bg-green-50 text-green-800 text-xs font-semibold text-center">
+                    Members<br>{{ memberCounts.member }}
+                </div>
+                <div class="p-2 rounded-lg bg-amber-50 text-amber-800 text-xs font-semibold text-center">
+                    Advisers<br>{{ memberCounts.adviser }}
+                </div>
+            </div>
+        </div>
+
+        {% if adviser %}
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <p class="text-xs text-gray-500 uppercase">Adviser</p>
+            <p class="text-sm font-semibold text-gray-900 mt-1">{{ adviser.name }}</p>
+            <p class="text-xs text-gray-600 mt-1"><i class="fas fa-envelope text-gray-400 mr-2"></i>{{ adviser.email }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="md:col-span-2 space-y-6">
+        <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div>
+                <p class="text-xs text-gray-500 uppercase">Organization</p>
+                <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ name }}</h3>
+                <p class="text-sm text-gray-600 mt-1">{{ type }}</p>
+            </div>
+            <div class="mt-4">
+                <p class="text-xs text-gray-500 uppercase">Description</p>
+                <p class="text-sm text-gray-800 mt-1">{{ description|default:"No description provided" }}</p>
+            </div>
+            {% if programs %}
+            <div class="mt-4">
+                <h4 class="text-sm font-bold text-gray-800 mb-2">Allowed Programs</h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for program in programs %}
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ program
+                        }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
