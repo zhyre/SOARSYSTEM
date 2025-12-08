@@ -15,7 +15,15 @@ from django.utils.dateparse import parse_datetime, parse_date
 
 SUPABASE_URL = config("SUPABASE_URL")
 SUPABASE_KEY = config("SUPABASE_KEY")
+SUPABASE_SERVICE_ROLE_KEY = config("SUPABASE_SERVICE_ROLE_KEY", default=None)
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Create a service role client for admin operations (deleting users from auth)
+if SUPABASE_SERVICE_ROLE_KEY:
+    supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+else:
+    supabase_admin = supabase  # Fallback to regular client if service role key not provided
 
 def admin_panel(request):
     if request.user.is_authenticated:
@@ -153,9 +161,11 @@ def get_users_data(request):
         if data.get('course'):
             try:
                 # Try to find program by code or name
-                program = Program.objects.filter(abbreviation=data.get('course')).first() or \
-                         Program.objects.filter(name=data.get('course')).first()
-            except Exception:
+                course_input = data.get('course').strip()
+                program = Program.objects.filter(abbreviation=course_input).first() or \
+                         Program.objects.filter(name=course_input).first()
+            except Exception as e:
+                print(f"Warning: Could not lookup program {data.get('course')}: {str(e)}")
                 program = None
 
         # Create Django user
@@ -537,6 +547,15 @@ def delete_user(request, user_id):
             if not user:
                 return JsonResponse({'error': 'User not found.'}, status=404)
 
+            # Delete from Supabase auth first using service role key
+            try:
+                supabase_admin.auth.admin.delete_user(str(user_id), should_soft_delete=False)
+                print(f"Successfully deleted user {user_id} from Supabase auth")
+            except Exception as e:
+                # Log the error but don't fail - the user might not exist in Supabase
+                print(f"Warning: Could not delete user {user_id} from Supabase auth: {str(e)}")
+
+            # Delete from Django
             user.delete()
             return JsonResponse({'success': True})
         except Exception as e:
@@ -563,7 +582,17 @@ def delete_user(request, user_id):
         if 'email' in payload:
             user.email = payload.get('email')
         if 'course' in payload:
-            user.course = payload.get('course')
+            course_code = payload.get('course')
+            if course_code:
+                try:
+                    program = Program.objects.filter(abbreviation=course_code).first() or \
+                             Program.objects.filter(name=course_code).first()
+                    user.course = program
+                except Exception as e:
+                    print(f"Warning: Could not lookup program {course_code}: {str(e)}")
+                    user.course = None
+            else:
+                user.course = None
         if 'yearLevel' in payload:
             try:
                 user.year_level = int(payload.get('yearLevel')) if payload.get('yearLevel') not in [None, ''] else None

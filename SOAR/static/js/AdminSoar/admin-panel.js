@@ -537,6 +537,9 @@ function closeAddModal() {
     for (let [key, value] of formData.entries()) {
         itemData[key] = value;
     }
+    
+    console.log('DEBUG: Form data before submit:', itemData);
+    
     // Ensure checkbox values are captured (FormData omits unchecked boxes)
     // Read checkbox fields from the form directly so we can send true/false
     const currentFormFields = sectionData[currentSection].formFields || [];
@@ -692,64 +695,90 @@ function editItem(id) {
     const modalTitleEl = document.getElementById('modal-title');
     if (modalTitleEl) modalTitleEl.textContent = 'Edit ' + String(data.title || '').replace('Select ', '').replace(' to change', '');
 
-    // Generate form fields with existing data
-    const formFields = document.getElementById('form-fields');
-    if (!formFields) {
-        console.warn('editItem: form fields container missing');
-        showToast('Form container not found', 'error');
-        return;
-    }
-    formFields.innerHTML = '';
-
-    (data.formFields || []).forEach(field => {
-        const fieldDiv = document.createElement('div');
-        const value = (item[field.name] !== undefined && item[field.name] !== null) ? item[field.name] : '';
-        // When editing, do not enforce 'required' so fields are optional
-        const requiredAttr = '';
-        const readonlyAttr = field.readonly ? 'readonly' : '';
-
-        if (field.type === 'textarea') {
-            fieldDiv.innerHTML = `
-                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
-            `;
-        } else if (field.type === 'select') {
-            fieldDiv.innerHTML = `
-                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
-                    <option value="">Select ${field.label}</option>
-                    ${ (field.options || []).map(opt => `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`).join('')}
-                </select>
-            `;
-        } else if (field.type === 'checkbox') {
-            const checked = value === true || String(value) === 'true' || String(value) === '1' ? 'checked' : '';
-            fieldDiv.innerHTML = `
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${checked} ${readonlyAttr}>
-                    <span class="text-sm font-medium text-gray-700">${field.label}</span>
-                </label>
-            `;
-        } else {
-            // escape value for attribute
-            const safeVal = String(value).replace(/"/g, '&quot;');
-            fieldDiv.innerHTML = `
-                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
-                <input type="${field.type}" name="${field.name}" value="${safeVal}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
-            `;
+    // Fetch options for selects (same as in openAddModal)
+    (async () => {
+        if (currentSection === 'organization-events' || currentSection === 'organization-members') {
+            const orgs = await fetchOrganizations();
+            const orgField = (data.formFields || []).find(f => f.name === 'organization');
+            if (orgField) {
+                orgField.options = orgs;
+            }
+        } else if (currentSection === 'users') {
+            const programs = await fetchPrograms();
+            const courseField = (data.formFields || []).find(f => f.name === 'course');
+            if (courseField) {
+                courseField.options = programs;
+            }
         }
 
-        formFields.appendChild(fieldDiv);
-    });
+        // Generate form fields with existing data
+        const formFields = document.getElementById('form-fields');
+        if (!formFields) {
+            console.warn('editItem: form fields container missing');
+            showToast('Form container not found', 'error');
+            return;
+        }
+        formFields.innerHTML = '';
 
-    // Store editing item id
-    window.editingItemId = id;
+        (data.formFields || []).forEach(field => {
+            const fieldDiv = document.createElement('div');
+            const value = (item[field.name] !== undefined && item[field.name] !== null) ? item[field.name] : '';
+            // When editing, do not enforce 'required' so fields are optional
+            const requiredAttr = '';
+            const readonlyAttr = field.readonly ? 'readonly' : '';
 
-    // Show modal
-    const addModalEl = document.getElementById('add-modal');
-    if (addModalEl) {
-        addModalEl.classList.remove('hidden');
-        addModalEl.classList.add('flex');
-    }
+            if (field.type === 'textarea') {
+                fieldDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                    <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
+                `;
+            } else if (field.type === 'select') {
+                // Handle both array of strings and array of objects with value/label
+                const optionsHTML = field.options.map(opt => {
+                    if (typeof opt === 'object' && opt.value && opt.label) {
+                        return `<option value="${opt.value}" ${String(opt.value) === String(value) ? 'selected' : ''}>${opt.label}</option>`;
+                    } else {
+                        return `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`;
+                    }
+                }).join('');
+                
+                fieldDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                    <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+                        <option value="">Select ${field.label}</option>
+                        ${optionsHTML}
+                    </select>
+                `;
+            } else if (field.type === 'checkbox') {
+                const checked = value === true || String(value) === 'true' || String(value) === '1' ? 'checked' : '';
+                fieldDiv.innerHTML = `
+                    <label class="inline-flex items-center space-x-2">
+                        <input type="checkbox" name="${field.name}" class="form-checkbox h-4 w-4 text-blue-600" ${checked} ${readonlyAttr}>
+                        <span class="text-sm font-medium text-gray-700">${field.label}</span>
+                    </label>
+                `;
+            } else {
+                // escape value for attribute
+                const safeVal = String(value).replace(/"/g, '&quot;');
+                fieldDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                    <input type="${field.type}" name="${field.name}" value="${safeVal}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
+                `;
+            }
+
+            formFields.appendChild(fieldDiv);
+        });
+
+        // Store editing item id
+        window.editingItemId = id;
+
+        // Show modal
+        const addModalEl = document.getElementById('add-modal');
+        if (addModalEl) {
+            addModalEl.classList.remove('hidden');
+            addModalEl.classList.add('flex');
+        }
+    })();
 }
 
 // Delete item

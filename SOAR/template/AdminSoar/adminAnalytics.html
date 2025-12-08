@@ -1,36 +1,92 @@
 <div class="analytics-dashboard">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h2>
-            <p class="text-gray-600 mt-1">Monitor key metrics and trends</p>
-        </div>
-        <div class="flex items-center space-x-3">
-            <div class="flex items-center space-x-2">
-                <input type="checkbox" id="auto-refresh-toggle"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <label for="auto-refresh-toggle" class="text-sm text-gray-700">Auto-refresh (30s)</label>
+    <!-- Ultra-Enhanced Blue Theme Header -->
+    <div
+        class="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-3xl shadow-2xl p-8 mb-10 text-white relative overflow-hidden">
+        <!-- Animated Blue Background Pattern -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute inset-0"
+                style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.15\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
             </div>
-            <button id="refresh-analytics"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                <i class="fas fa-sync-alt"></i>
-                <span>Refresh</span>
-            </button>
-            <button id="export-analytics"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                <i class="fas fa-download"></i>
-                <span>Export</span>
-            </button>
+        </div>
+
+        <div class="relative z-10">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+                <div class="flex-1">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="p-3 bg-white/25 backdrop-blur-sm rounded-2xl animate-pulse border border-white/30">
+                            <i class="fas fa-chart-line text-white text-2xl"></i>
+                        </div>
+                        <div
+                            class="px-3 py-1 bg-cyan-400 text-blue-900 rounded-full text-xs font-bold animate-bounce shadow-lg">
+                            LIVE
+                        </div>
+                    </div>
+                    <h2
+                        class="text-4xl lg:text-5xl font-black mb-3 bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-100">
+                        Analytics Dashboard
+                    </h2>
+                    <p class="text-blue-100 text-lg lg:text-xl mb-4">Real-time insights and performance metrics</p>
+                    <div class="flex items-center gap-6 text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-lg"></div>
+                            <span class="text-blue-100">Last updated: Just now</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-clock text-cyan-200"></i>
+                            <span class="text-blue-100">Response time: 1.2s</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div
+                        class="flex items-center space-x-3 bg-white/15 backdrop-blur-md rounded-xl px-4 py-3 border border-white/25">
+                        <div class="relative">
+                            <input type="checkbox" id="auto-refresh-toggle" class="sr-only peer">
+                            <label for="auto-refresh-toggle" class="flex items-center cursor-pointer">
+                                <div
+                                    class="relative w-11 h-6 bg-blue-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500">
+                                </div>
+                                <span class="ml-3 text-sm font-medium">Auto-refresh</span>
+                            </label>
+                        </div>
+                        <span class="text-xs text-cyan-200">30s</span>
+                    </div>
+                    <button id="refresh-analytics"
+                        class="group bg-white/25 hover:bg-white/35 backdrop-blur-md text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 border border-white/30 hover:scale-105 hover:shadow-xl">
+                        <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
+                        <span>Refresh</span>
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                    </button>
+                    <button id="export-analytics"
+                        class="group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 shadow-lg hover:shadow-2xl hover:scale-105">
+                        <i class="fas fa-download group-hover:animate-bounce"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700">Date Range:</label>
+    <!-- Enhanced Filters Section -->
+    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 p-6 mb-10">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-filter text-blue-600"></i>
+                Data Filters
+            </h3>
+            <button class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <i class="fas fa-redo"></i>
+                Reset Filters
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-calendar text-blue-500 text-xs"></i>
+                    Date Range
+                </label>
                 <select id="date-range"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:border-blue-400 transition-colors">
                     <option value="7">Last 7 days</option>
                     <option value="30" selected>Last 30 days</option>
                     <option value="90">Last 90 days</option>
@@ -38,129 +94,155 @@
                     <option value="custom">Custom Range</option>
                 </select>
             </div>
-            <div id="custom-date-range" class="hidden flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700">From:</label>
-                <input type="date" id="start-date"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <label class="text-sm font-medium text-gray-700">To:</label>
-                <input type="date" id="end-date"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <div id="custom-date-range" class="hidden space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-calendar-alt text-blue-500 text-xs"></i>
+                    Custom Period
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="date" id="start-date"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <span class="text-gray-500">to</span>
+                    <input type="date" id="end-date"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
                 <button id="apply-custom-range"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    Apply
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg">
+                    Apply Range
                 </button>
             </div>
-            <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700">Chart Type:</label>
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-blue-500 text-xs"></i>
+                    Chart Type
+                </label>
                 <select id="chart-type"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:border-blue-400 transition-colors">
                     <option value="line">Line Chart</option>
                     <option value="bar" selected>Bar Chart</option>
                     <option value="doughnut">Doughnut Chart</option>
+                    <option value="area">Area Chart</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-download text-blue-500 text-xs"></i>
+                    Export Format
+                </label>
+                <select
+                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:border-blue-400 transition-colors">
+                    <option>CSV</option>
+                    <option>Excel</option>
+                    <option>PDF</option>
+                    <option>JSON</option>
                 </select>
             </div>
         </div>
     </div>
 
-    <!-- Metrics Cards -->
+    <!-- Enhanced Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Users Card -->
         <div
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-            <div class="flex items-center">
+            class="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg border border-blue-100 p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
                 <div
-                    class="p-3 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    class="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-users text-white text-2xl"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-600">Total Users</p>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-3xl font-bold text-gray-900" id="total-users">0</p>
-                        <div
-                            class="loading-spinner hidden w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin">
-                        </div>
-                    </div>
-                    <div id="users-trend" class="trend-indicator flex items-center space-x-1 mt-1">
-                        <i class="fas fa-arrow-up text-green-500 text-xs"></i>
-                        <span class="text-xs text-green-600 font-medium">+12.5%</span>
-                        <span class="text-xs text-gray-500">vs last month</span>
+                <div
+                    class="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12.5%</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Total Users</p>
+                <div class="flex items-center space-x-2">
+                    <p class="text-4xl font-bold text-gray-900" id="total-users">0</p>
+                    <div
+                        class="loading-spinner hidden w-5 h-5 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin">
                     </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-2">vs last month</p>
             </div>
         </div>
 
         <!-- Total Organizations Card -->
         <div
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-            <div class="flex items-center">
+            class="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg border border-green-100 p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
                 <div
-                    class="p-3 bg-gradient-to-br from-green-100 to-green-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-building text-green-600 text-2xl"></i>
+                    class="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-building text-white text-2xl"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-600">Organizations</p>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-3xl font-bold text-gray-900" id="total-orgs">0</p>
-                        <div
-                            class="loading-spinner hidden w-4 h-4 border-2 border-green-200 border-t-green-600 rounded-full animate-spin">
-                        </div>
-                    </div>
-                    <div id="orgs-trend" class="trend-indicator flex items-center space-x-1 mt-1">
-                        <i class="fas fa-arrow-up text-green-500 text-xs"></i>
-                        <span class="text-xs text-green-600 font-medium">+8.3%</span>
-                        <span class="text-xs text-gray-500">vs last month</span>
+                <div
+                    class="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>8.3%</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Organizations</p>
+                <div class="flex items-center space-x-2">
+                    <p class="text-4xl font-bold text-gray-900" id="total-orgs">0</p>
+                    <div
+                        class="loading-spinner hidden w-5 h-5 border-2 border-green-200 border-t-green-600 rounded-full animate-spin">
                     </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-2">vs last month</p>
             </div>
         </div>
 
         <!-- Total Events Card -->
         <div
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-            <div class="flex items-center">
+            class="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
                 <div
-                    class="p-3 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-calendar-alt text-purple-600 text-2xl"></i>
+                    class="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-calendar-alt text-white text-2xl"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-600">Events</p>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-3xl font-bold text-gray-900" id="total-events">0</p>
-                        <div
-                            class="loading-spinner hidden w-4 h-4 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin">
-                        </div>
-                    </div>
-                    <div id="events-trend" class="trend-indicator flex items-center space-x-1 mt-1">
-                        <i class="fas fa-arrow-down text-red-500 text-xs"></i>
-                        <span class="text-xs text-red-600 font-medium">-3.2%</span>
-                        <span class="text-xs text-gray-500">vs last month</span>
+                <div
+                    class="flex items-center space-x-1 bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>3.2%</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Events</p>
+                <div class="flex items-center space-x-2">
+                    <p class="text-4xl font-bold text-gray-900" id="total-events">0</p>
+                    <div
+                        class="loading-spinner hidden w-5 h-5 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin">
                     </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-2">vs last month</p>
             </div>
         </div>
 
         <!-- Total RSVPs Card -->
         <div
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-            <div class="flex items-center">
+            class="bg-gradient-to-br from-white to-yellow-50 rounded-2xl shadow-lg border border-yellow-100 p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
                 <div
-                    class="p-3 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-check-circle text-yellow-600 text-2xl"></i>
+                    class="p-4 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-check-circle text-white text-2xl"></i>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-600">RSVPs</p>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-3xl font-bold text-gray-900" id="total-rsvps">0</p>
-                        <div
-                            class="loading-spinner hidden w-4 h-4 border-2 border-yellow-200 border-t-yellow-600 rounded-full animate-spin">
-                        </div>
-                    </div>
-                    <div id="rsvps-trend" class="trend-indicator flex items-center space-x-1 mt-1">
-                        <i class="fas fa-arrow-up text-green-500 text-xs"></i>
-                        <span class="text-xs text-green-600 font-medium">+15.7%</span>
-                        <span class="text-xs text-gray-500">vs last month</span>
+                <div
+                    class="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>15.7%</span>
+                </div>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">RSVPs</p>
+                <div class="flex items-center space-x-2">
+                    <p class="text-4xl font-bold text-gray-900" id="total-rsvps">0</p>
+                    <div
+                        class="loading-spinner hidden w-5 h-5 border-2 border-yellow-200 border-t-yellow-600 rounded-full animate-spin">
                     </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-2">vs last month</p>
             </div>
         </div>
     </div>

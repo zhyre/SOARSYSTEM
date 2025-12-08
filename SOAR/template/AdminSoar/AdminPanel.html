@@ -37,7 +37,7 @@
                                     class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
                             <span class="text-sm text-gray-600">WELCOME, <strong>{{
-                                    request.user.get_full_name|upper|default:request.user.username|upper
+                                    request.user.get_full_name|default:request.user.username|default:"Admin"|upper
                                     }}</strong></span>
                         </div>
                     </div>
