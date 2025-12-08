@@ -133,8 +133,8 @@ const sectionData = {
             { name: 'orgName', label: 'Organization Name', type: 'text', required: false },
             { name: 'description', label: 'Description', type: 'textarea', required: false },
             { name: 'isPublic', label: 'Public', type: 'checkbox', required: false },
-            { name: 'programs', label: 'Programs (comma-separated)', type: 'text', required: false },
-            { name: 'adviser', label: 'Adviser (user id)', type: 'text', required: false }
+            { name: 'programs', label: 'Allowed Programs', type: 'multiselect', options: [], required: false },
+            { name: 'adviser', label: 'Adviser', type: 'select', options: [], required: false }
         ],
         data: []
     },
@@ -221,6 +221,27 @@ async function fetchPrograms() {
         }));
     } catch (error) {
         console.error('Error fetching programs:', error);
+        return [];
+    }
+}
+
+// Fetch staff users for adviser selection
+async function fetchStaffUsers() {
+    try {
+        const response = await fetch('/admin-panel/api/users/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch users');
+        }
+        const result = await response.json();
+        // Filter staff users and return as options
+        return result.data
+            .filter(user => user.role === 'Staff' || user.role === 'Admin')
+            .map(user => ({
+                value: user.id,
+                label: user.email
+            }));
+    } catch (error) {
+        console.error('Error fetching staff users:', error);
         return [];
     }
 }
@@ -395,7 +416,20 @@ function renderTable() {
             const value = fieldKey ? resolveFieldValue(item, fieldKey) : '';
 
             if (i === 0) {
-                html += `<td class="px-6 py-4 text-sm ${value ? 'text-blue-600 hover:text-blue-800 font-medium cursor-pointer' : 'text-gray-700'}">${value}</td>`;
+                // Make first column clickable for certain sections
+                if (currentSection === 'users' && value) {
+                    html += `<td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer user-clickable" data-user-id="${item.id}">${value}</td>`;
+                } else if (currentSection === 'event-rsvps' && value) {
+                    html += `<td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer rsvp-clickable" data-rsvp-id="${item.id}">${value}</td>`;
+                } else if (currentSection === 'organization-events' && value) {
+                    html += `<td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer event-clickable" data-event-id="${item.id}">${value}</td>`;
+                } else if (currentSection === 'organization-members' && value) {
+                    html += `<td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer org-member-clickable" data-member-id="${item.id}">${value}</td>`;
+                } else if (currentSection === 'organizations' && value) {
+                    html += `<td class="px-6 py-4 text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer org-clickable" data-org-id="${item.id}">${value}</td>`;
+                } else {
+                    html += `<td class="px-6 py-4 text-sm ${value ? 'text-blue-600 hover:text-blue-800 font-medium cursor-pointer' : 'text-gray-700'}">${value}</td>`;
+                }
             } else {
                 html += `<td class="px-6 py-4 text-sm text-gray-700">${value}</td>`;
             }
@@ -413,6 +447,50 @@ function renderTable() {
         `;
 
         row.innerHTML = html;
+        
+        // Add click event listener for detail modals
+        if (currentSection === 'users') {
+            const userClickable = row.querySelector('.user-clickable');
+            if (userClickable) {
+                userClickable.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    openUserDetailsModal(userId);
+                });
+            }
+        } else if (currentSection === 'event-rsvps') {
+            const rsvpClickable = row.querySelector('.rsvp-clickable');
+            if (rsvpClickable) {
+                rsvpClickable.addEventListener('click', function() {
+                    const rsvpId = this.getAttribute('data-rsvp-id');
+                    openRsvpDetailsModal(rsvpId);
+                });
+            }
+        } else if (currentSection === 'organization-events') {
+            const eventClickable = row.querySelector('.event-clickable');
+            if (eventClickable) {
+                eventClickable.addEventListener('click', function() {
+                    const eventId = this.getAttribute('data-event-id');
+                    openEventDetailsModal(eventId);
+                });
+            }
+        } else if (currentSection === 'organization-members') {
+            const memberClickable = row.querySelector('.org-member-clickable');
+            if (memberClickable) {
+                memberClickable.addEventListener('click', function() {
+                    const memberId = this.getAttribute('data-member-id');
+                    openOrgMemberDetailsModal(memberId);
+                });
+            }
+        } else if (currentSection === 'organizations') {
+            const orgClickable = row.querySelector('.org-clickable');
+            if (orgClickable) {
+                orgClickable.addEventListener('click', function() {
+                    const orgId = this.getAttribute('data-org-id');
+                    openOrgDetailsModal(orgId);
+                });
+            }
+        }
+        
         tbody.appendChild(row);
     });
 
@@ -467,6 +545,17 @@ async function openAddModal() {
         if (courseField) {
             courseField.options = programs;
         }
+    } else if (currentSection === 'organizations') {
+        const programs = await fetchPrograms();
+        const staffUsers = await fetchStaffUsers();
+        const programsField = (data.formFields || []).find(f => f.name === 'programs');
+        const adviserField = (data.formFields || []).find(f => f.name === 'adviser');
+        if (programsField) {
+            programsField.options = programs;
+        }
+        if (adviserField) {
+            adviserField.options = [{ value: '', label: '-- Select Adviser --' }, ...staffUsers];
+        }
     }
 
     // Generate form fields
@@ -487,6 +576,23 @@ async function openAddModal() {
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                 <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}></textarea>
+            `;
+        } else if (field.type === 'multiselect') {
+            // Multi-select for programs
+            const optionsHTML = (field.options || []).map(opt => {
+                if (typeof opt === 'object' && opt.value && opt.label) {
+                    return `<option value="${opt.value}">${opt.label}</option>`;
+                } else {
+                    return `<option value="${opt}">${opt}</option>`;
+                }
+            }).join('');
+            
+            fieldDiv.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                <select name="${field.name}" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr} size="5">
+                    ${optionsHTML}
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
             `;
         } else if (field.type === 'select') {
             // Handle both array of strings and array of objects with value/label
@@ -554,6 +660,13 @@ function closeAddModal() {
             const el = event.target.querySelector(`[name="${f.name}"]`);
             if (el) {
                 itemData[f.name] = !!el.checked;
+            }
+        } else if (f.type === 'multiselect') {
+            // Handle multiselect - get all selected values
+            const selectEl = event.target.querySelector(`[name="${f.name}"]`);
+            if (selectEl) {
+                const selectedValues = Array.from(selectEl.selectedOptions).map(opt => opt.value);
+                itemData[f.name] = selectedValues.join(','); // Send as comma-separated string
             }
         }
     }
@@ -715,6 +828,17 @@ function editItem(id) {
             if (courseField) {
                 courseField.options = programs;
             }
+        } else if (currentSection === 'organizations') {
+            const programs = await fetchPrograms();
+            const staffUsers = await fetchStaffUsers();
+            const programsField = (data.formFields || []).find(f => f.name === 'programs');
+            const adviserField = (data.formFields || []).find(f => f.name === 'adviser');
+            if (programsField) {
+                programsField.options = programs;
+            }
+            if (adviserField) {
+                adviserField.options = [{ value: '', label: '-- Select Adviser --' }, ...staffUsers];
+            }
         }
 
         // Generate form fields with existing data
@@ -737,6 +861,30 @@ function editItem(id) {
                 fieldDiv.innerHTML = `
                     <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                     <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}>${value}</textarea>
+                `;
+            } else if (field.type === 'multiselect') {
+                // Multi-select with current values selected
+                const selectedValues = value ? String(value).split(',').map(v => v.trim()) : [];
+                const optionsHTML = (field.options || []).map(opt => {
+                    let optValue = '';
+                    let optLabel = '';
+                    if (typeof opt === 'object' && opt.value && opt.label) {
+                        optValue = opt.value;
+                        optLabel = opt.label;
+                    } else {
+                        optValue = opt;
+                        optLabel = opt;
+                    }
+                    const isSelected = selectedValues.includes(String(optValue));
+                    return `<option value="${optValue}" ${isSelected ? 'selected' : ''}>${optLabel}</option>`;
+                }).join('');
+                
+                fieldDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
+                    <select name="${field.name}" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr} size="5">
+                        ${optionsHTML}
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
                 `;
             } else if (field.type === 'select') {
                 // Handle both array of strings and array of objects with value/label
@@ -923,3 +1071,619 @@ document.addEventListener('change', function(e) {
         updateCounts();
     }
 });
+
+// User Details Modal Functions
+async function openUserDetailsModal(userId) {
+    const modal = document.getElementById('user-details-modal');
+    const content = document.getElementById('user-details-content');
+    
+    if (!modal || !content) return;
+    
+    // Show loading state
+    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading user details...</p></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    try {
+        const response = await fetch(`/admin-panel/api/users/${userId}/details/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch user details');
+        }
+        
+        const user = await response.json();
+        
+        // Render user details using the template
+        content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Profile Picture Section -->
+                <div class="md:col-span-1 flex flex-col items-center">
+                    <div class="w-48 h-48 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow-lg">
+                        ${user.profilePicture 
+                            ? `<img src="${user.profilePicture}" alt="${user.firstName} ${user.lastName}" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
+                                <i class="fas fa-user"></i>
+                               </div>`
+                        }
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h4 class="text-xl font-bold text-gray-800">${user.firstName} ${user.lastName}</h4>
+                        <p class="text-sm text-gray-500 mt-1">${user.role}</p>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${user.status}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- User Details Section -->
+                <div class="md:col-span-2">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>Personal Information
+                    </h4>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Student ID</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.studentId}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Username</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.username}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">First Name</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.firstName}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Last Name</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.lastName}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase">Email Address</label>
+                            <p class="text-sm text-gray-800 font-medium mt-1">
+                                <i class="fas fa-envelope text-gray-400 mr-2"></i>${user.email}
+                            </p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Program</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1" title="${user.courseName}">${user.courseAbbreviation}</p>
+                                ${user.courseName !== user.courseAbbreviation && user.courseName !== 'N/A' ? `<p class="text-xs text-gray-500 mt-0.5">${user.courseName}</p>` : ''}
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Year Level</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.yearLevel}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Role</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">
+                                    <i class="fas ${user.role === 'Admin' ? 'fa-shield-alt text-red-500' : user.role === 'Staff' ? 'fa-user-tie text-blue-500' : 'fa-user text-gray-500'} mr-2"></i>${user.role}
+                                </p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-500 uppercase">Account Status</label>
+                                <p class="text-sm text-gray-800 font-medium mt-1">${user.status}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 mt-6">
+                        <i class="fas fa-clock text-blue-600 mr-2"></i>Account Activity
+                    </h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase">Date Joined</label>
+                            <p class="text-sm text-gray-800 font-medium mt-1">
+                                <i class="fas fa-calendar-plus text-gray-400 mr-2"></i>${user.dateJoined}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase">Last Login</label>
+                            <p class="text-sm text-gray-800 font-medium mt-1">
+                                <i class="fas fa-sign-in-alt text-gray-400 mr-2"></i>${user.lastLogin}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+                <p class="mt-4 text-gray-600">Failed to load user details. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function closeUserDetailsModal() {
+    const modal = document.getElementById('user-details-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// RSVP Details Modal Functions
+async function openRsvpDetailsModal(rsvpId) {
+    const modal = document.getElementById('rsvp-details-modal');
+    const content = document.getElementById('rsvp-details-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading RSVP details...</p></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    try {
+        const response = await fetch(`/admin-panel/api/rsvps/${rsvpId}/details/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch RSVP details');
+        }
+
+        const data = await response.json();
+        const user = data.user || {};
+        const event = data.event || {};
+
+        content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- RSVP / Event Badge Column -->
+                <div class="md:col-span-1 space-y-4">
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-semibold text-blue-900">RSVP Status</div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${data.rsvpStatus === 'Going' ? 'bg-green-100 text-green-800' : data.rsvpStatus === 'Interested' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${data.rsvpStatus}</span>
+                        </div>
+                        <p class="mt-2 text-xs text-blue-800"><i class="fas fa-calendar-plus mr-2"></i>${data.rsvpDate || 'N/A'}</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm text-center">
+                        <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow">
+                            ${user.profilePicture ? `<img src="${user.profilePicture}" alt="${user.firstName || ''} ${user.lastName || ''}" class="w-full h-full object-cover">` : `<div class=\"w-full h-full flex items-center justify-center text-gray-400 text-5xl\"><i class=\"fas fa-user\"></i></div>`}
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="text-lg font-bold text-gray-800">${user.firstName || 'N/A'} ${user.lastName || ''}</h4>
+                            <p class="text-sm text-gray-500">${user.username || ''}</p>
+                            <p class="text-xs text-gray-500 mt-1">${user.email || ''}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Column -->
+                <div class="md:col-span-2 space-y-8">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt text-blue-600"></i>
+                            Event Information
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Event</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${event.title || 'N/A'}</p>
+                                <p class="text-xs text-gray-500 mt-1">${event.organization || 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Date & Time</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${event.date || 'N/A'}</p>
+                                <p class="text-xs text-gray-500 mt-1">${event.location || 'TBA'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Activity Type</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${event.activityType || 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Event Status</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${event.status || 'N/A'}</p>
+                            </div>
+                        </div>
+                        ${event.description ? `<div class="mt-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm"><p class="text-xs text-gray-500">Description</p><p class="text-sm text-gray-800 mt-1">${event.description}</p></div>` : ''}
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-user-graduate text-blue-600"></i>
+                            Student Information
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Student ID</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${user.studentId || 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Program</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1" title="${user.courseName || ''}">${user.courseAbbreviation || 'N/A'}</p>
+                                ${(user.courseName && user.courseName !== user.courseAbbreviation) ? `<p class="text-xs text-gray-500 mt-1">${user.courseName}</p>` : ''}
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Year Level</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${user.yearLevel ?? 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Email</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1 flex items-center gap-2"><i class="fas fa-envelope text-gray-400"></i>${user.email || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error fetching RSVP details:', error);
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+                <p class="mt-4 text-gray-600">Failed to load RSVP details. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function closeRsvpDetailsModal() {
+    const modal = document.getElementById('rsvp-details-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Organization Event Details Modal Functions
+async function openEventDetailsModal(eventId) {
+    const modal = document.getElementById('event-details-modal');
+    const content = document.getElementById('event-details-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading event details...</p></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    try {
+        const response = await fetch(`/admin-panel/api/events/${eventId}/details/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch event details');
+        }
+
+        const event = await response.json();
+
+        content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+                        <div class="text-xs text-blue-900 uppercase font-semibold">Event Status</div>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-base font-bold text-blue-900">${event.status || 'N/A'}</span>
+                            ${event.cancelled ? '<span class="px-3 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Cancelled</span>' : ''}
+                        </div>
+                        <p class="mt-2 text-xs text-blue-800"><i class="fas fa-calendar-day mr-2"></i>${event.date || 'N/A'}</p>
+                        <p class="mt-1 text-xs text-blue-800"><i class="fas fa-map-marker-alt mr-2"></i>${event.location || 'TBA'}</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase">RSVPs</div>
+                        <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+                            <div class="p-2 rounded-lg bg-green-50 text-green-800 text-xs font-semibold">Going<br>${event.rsvps?.going ?? 0}</div>
+                            <div class="p-2 rounded-lg bg-amber-50 text-amber-800 text-xs font-semibold">Interested<br>${event.rsvps?.interested ?? 0}</div>
+                            <div class="p-2 rounded-lg bg-red-50 text-red-800 text-xs font-semibold">Not Going<br>${event.rsvps?.not_going ?? 0}</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase">Created By</div>
+                        <p class="text-sm font-semibold text-gray-900 mt-1">${event.createdBy || 'N/A'}</p>
+                        <p class="text-xs text-gray-500 mt-1">${event.createdAt || 'N/A'}</p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 space-y-6">
+                    <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase">Event</p>
+                                <h3 class="text-xl font-bold text-gray-900 mt-1">${event.title || 'N/A'}</h3>
+                                <p class="text-sm text-gray-600 mt-1">${event.organization || 'N/A'} · ${event.activityType || 'N/A'}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">${event.status || 'N/A'}</span>
+                        </div>
+                        ${event.description ? `<div class="mt-4 text-sm text-gray-800 leading-relaxed">${event.description}</div>` : ''}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                            <p class="text-xs text-gray-500 uppercase">Date & Time</p>
+                            <p class="text-sm font-semibold text-gray-900 mt-1">${event.date || 'N/A'}</p>
+                        </div>
+                        <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                            <p class="text-xs text-gray-500 uppercase">Location</p>
+                            <p class="text-sm font-semibold text-gray-900 mt-1">${event.location || 'TBA'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error fetching event details:', error);
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+                <p class="mt-4 text-gray-600">Failed to load event details. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function closeEventDetailsModal() {
+    const modal = document.getElementById('event-details-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Organization Member Details Modal Functions
+async function openOrgMemberDetailsModal(memberId) {
+    const modal = document.getElementById('org-member-details-modal');
+    const content = document.getElementById('org-member-details-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading member details...</p></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    try {
+        const response = await fetch(`/admin-panel/api/organization-members/${memberId}/details/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch organization member details');
+        }
+
+        const data = await response.json();
+        const user = data.user || {};
+        const org = data.organization || {};
+
+        content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+                        <div class="text-xs text-blue-900 uppercase font-semibold">Member Status</div>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-base font-bold text-blue-900">${data.status || 'N/A'}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${data.status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${data.status || 'N/A'}</span>
+                        </div>
+                        <p class="mt-2 text-xs text-blue-800"><i class="fas fa-calendar-day mr-2"></i>${data.dateJoined || 'N/A'}</p>
+                        <p class="mt-1 text-xs text-blue-800"><i class="fas fa-user-tag mr-2"></i>${data.role || 'N/A'}</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm text-center">
+                        <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow">
+                            ${user.profilePicture ? `<img src="${user.profilePicture}" alt="${user.firstName || ''} ${user.lastName || ''}" class="w-full h-full object-cover">` : `<div class=\"w-full h-full flex items-center justify-center text-gray-400 text-5xl\"><i class=\"fas fa-user\"></i></div>`}
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="text-lg font-bold text-gray-800">${user.firstName || 'N/A'} ${user.lastName || ''}</h4>
+                            <p class="text-sm text-gray-500">${user.username || ''}</p>
+                            <p class="text-xs text-gray-500 mt-1">${user.email || ''}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 space-y-8">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-building text-blue-600"></i>
+                            Organization Information
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Organization</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${org.name || 'N/A'}</p>
+                                <p class="text-xs text-gray-500 mt-1">${org.isPublic ? 'Public' : 'Private'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Description</p>
+                                <p class="text-sm text-gray-800 mt-1">${org.description || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-user-graduate text-blue-600"></i>
+                            Member Information
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Student ID</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${user.studentId || 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Program</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1" title="${user.courseName || ''}">${user.courseAbbreviation || 'N/A'}</p>
+                                ${(user.courseName && user.courseName !== user.courseAbbreviation) ? `<p class="text-xs text-gray-500 mt-1">${user.courseName}</p>` : ''}
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Year Level</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${user.yearLevel ?? 'N/A'}</p>
+                            </div>
+                            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <p class="text-xs text-gray-500">Role</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">${data.role || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error fetching organization member details:', error);
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+                <p class="mt-4 text-gray-600">Failed to load member details. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function closeOrgMemberDetailsModal() {
+    const modal = document.getElementById('org-member-details-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Organization Details Modal Functions
+async function openOrgDetailsModal(orgId) {
+    const modal = document.getElementById('org-details-modal');
+    const content = document.getElementById('org-details-content');
+
+    if (!modal || !content) return;
+
+    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading organization details...</p></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    try {
+        const response = await fetch(`/admin-panel/api/organizations/${orgId}/details/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch organization details');
+        }
+
+        const org = await response.json();
+
+        // Build member counts display
+        const memberCountsHTML = `
+            <div class="grid grid-cols-4 gap-2 mt-3">
+                <div class="p-2 rounded-lg bg-blue-50 text-blue-800 text-xs font-semibold text-center">
+                    Leaders<br>${org.memberCounts?.leader ?? 0}
+                </div>
+                <div class="p-2 rounded-lg bg-purple-50 text-purple-800 text-xs font-semibold text-center">
+                    Officers<br>${org.memberCounts?.officer ?? 0}
+                </div>
+                <div class="p-2 rounded-lg bg-green-50 text-green-800 text-xs font-semibold text-center">
+                    Members<br>${org.memberCounts?.member ?? 0}
+                </div>
+                <div class="p-2 rounded-lg bg-amber-50 text-amber-800 text-xs font-semibold text-center">
+                    Advisers<br>${org.memberCounts?.adviser ?? 0}
+                </div>
+            </div>
+        `;
+
+        // Build adviser section
+        const adviserHTML = org.adviser ? `
+            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <p class="text-xs text-gray-500 uppercase">Adviser</p>
+                <p class="text-sm font-semibold text-gray-900 mt-1">${org.adviser.name}</p>
+                <p class="text-xs text-gray-600 mt-1"><i class="fas fa-envelope text-gray-400 mr-2"></i>${org.adviser.email}</p>
+            </div>
+        ` : '';
+
+        // Build programs section
+        const programsHTML = org.programs && org.programs.length > 0 ? `
+            <div class="mt-4">
+                <h4 class="text-sm font-bold text-gray-800 mb-2">Allowed Programs</h4>
+                <div class="flex flex-wrap gap-2">
+                    ${org.programs.map(prog => `<span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${prog}</span>`).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+                        <div class="text-xs text-blue-900 uppercase font-semibold">Organization Status</div>
+                        <p class="text-base font-bold text-blue-900 mt-2">${org.type || 'N/A'}</p>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${org.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${org.isPublic ? 'Public' : 'Private'}
+                        </span>
+                        <p class="text-xs text-blue-800 mt-2"><i class="fas fa-calendar-day mr-2"></i>${org.dateCreated || 'N/A'}</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase font-semibold">Total Members</div>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${org.totalMembers || 0}</p>
+                        ${memberCountsHTML}
+                    </div>
+
+                    ${adviserHTML}
+                </div>
+
+                <div class="md:col-span-2 space-y-6">
+                    <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase">Organization</p>
+                            <h3 class="text-2xl font-bold text-gray-900 mt-1">${org.name || 'N/A'}</h3>
+                            <p class="text-sm text-gray-600 mt-1">${org.type || 'N/A'}</p>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-xs text-gray-500 uppercase">Description</p>
+                            <p class="text-sm text-gray-800 mt-1">${org.description || 'No description provided'}</p>
+                        </div>
+                        ${programsHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error fetching organization details:', error);
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+                <p class="mt-4 text-gray-600">Failed to load organization details. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function closeOrgDetailsModal() {
+    const modal = document.getElementById('org-details-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}

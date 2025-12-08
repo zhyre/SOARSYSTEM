@@ -36,7 +36,7 @@
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
-                            <span class="text-sm text-gray-600">WELCOME, <strong>{% if request.user.first_name and request.user.last_name %}{{ request.user.first_name|upper }} {{ request.user.last_name|upper }}{% else %}{% if request.user.first_name %}{{ request.user.first_name|upper }}{% else %}{{ request.user.username|upper }}{% endif %}{% endif %}</strong></span>
+                            <span class="text-sm text-gray-600">WELCOME, <strong>{% with full=request.user.get_full_name %}{% if full %}{{ full|upper }}{% else %}{{ request.user.username|upper }}{% endif %}{% endwith %}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -206,6 +206,82 @@
         <div class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
             <i class="fas fa-check-circle text-xl"></i>
             <span id="toast-message">Success!</span>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="user-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">User Details</h3>
+                <button onclick="closeUserDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="user-details-content">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Event RSVP Details Modal -->
+    <div id="rsvp-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Event RSVP Details</h3>
+                <button onclick="closeRsvpDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="rsvp-details-content">
+                <!-- RSVP details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Event Details Modal -->
+    <div id="event-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Event Details</h3>
+                <button onclick="closeEventDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="event-details-content">
+                <!-- Event details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Member Details Modal -->
+    <div id="org-member-details-modal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Organization Member Details</h3>
+                <button onclick="closeOrgMemberDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="org-member-details-content">
+                <!-- Organization member details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Details Modal -->
+    <div id="org-details-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">Organization Details</h3>
+                <button onclick="closeOrgDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6" id="org-details-content">
+                <!-- Organization details will be loaded here -->
+            </div>
         </div>
     </div>
 

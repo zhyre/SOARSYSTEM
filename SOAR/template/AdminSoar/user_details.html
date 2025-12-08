@@ -1,0 +1,110 @@
+<!-- User Details Template -->
+<!-- This template is rendered dynamically via JavaScript in the user details modal -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Profile Picture Section -->
+    <div class="md:col-span-1 flex flex-col items-center">
+        <div class="w-48 h-48 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow-lg">
+            {% if user.profilePicture %}
+            <img src="{{ user.profilePicture }}" alt="{{ user.firstName }} {{ user.lastName }}"
+                class="w-full h-full object-cover">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
+                <i class="fas fa-user"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="mt-4 text-center">
+            <h4 class="text-xl font-bold text-gray-800">{{ user.firstName }} {{ user.lastName }}</h4>
+            <p class="text-sm text-gray-500 mt-1">{{ user.role }}</p>
+            <span
+                class="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium {% if user.isActive %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                {{ user.status }}
+            </span>
+        </div>
+    </div>
+
+    <!-- User Details Section -->
+    <div class="md:col-span-2">
+        <h4 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+            <i class="fas fa-info-circle text-blue-600 mr-2"></i>Personal Information
+        </h4>
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Student ID</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.studentId }}</p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Username</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.username }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">First Name</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.firstName }}</p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Last Name</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.lastName }}</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-medium text-gray-500 uppercase">Email Address</label>
+                <p class="text-sm text-gray-800 font-medium mt-1">
+                    <i class="fas fa-envelope text-gray-400 mr-2"></i>{{ user.email }}
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Program</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1" title="{{ user.courseName }}">{{
+                        user.courseAbbreviation }}</p>
+                    {% if user.courseName != user.courseAbbreviation and user.courseName != 'N/A' %}
+                    <p class="text-xs text-gray-500 mt-0.5">{{ user.courseName }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Year Level</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.yearLevel }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Role</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">
+                        <i
+                            class="fas {% if user.role == 'Admin' %}fa-shield-alt text-red-500{% elif user.role == 'Staff' %}fa-user-tie text-blue-500{% else %}fa-user text-gray-500{% endif %} mr-2"></i>{{
+                        user.role }}
+                    </p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase">Account Status</label>
+                    <p class="text-sm text-gray-800 font-medium mt-1">{{ user.status }}</p>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 mt-6">
+            <i class="fas fa-clock text-blue-600 mr-2"></i>Account Activity
+        </h4>
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-medium text-gray-500 uppercase">Date Joined</label>
+                <p class="text-sm text-gray-800 font-medium mt-1">
+                    <i class="fas fa-calendar-plus text-gray-400 mr-2"></i>{{ user.dateJoined }}
+                </p>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-gray-500 uppercase">Last Login</label>
+                <p class="text-sm text-gray-800 font-medium mt-1">
+                    <i class="fas fa-sign-in-alt text-gray-400 mr-2"></i>{{ user.lastLogin }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
