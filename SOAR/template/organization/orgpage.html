@@ -8,8 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
-    <style>
+        <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -53,45 +52,6 @@
             animation: slideIn 0.4s ease-out forwards;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            transition: transform 0.3s ease, width 0.3s ease;
-            z-index: 50;
-            overflow-y: auto;
-        }
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar.collapsed .sidebar-text,
-        .sidebar.collapsed .logo-text {
-            display: none;
-        }
-
-        /* Mobile sidebar */
-        @media (min-width: 768px) {
-            .sidebar {
-                transform: translateX(0);
-            }
-        }
-        
-        @media (max-width: 767px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-
         /* Logo animation */
         @keyframes rocketFloat {
             0%, 100% { transform: translateY(0); }
@@ -101,15 +61,18 @@
             animation: rocketFloat 2s ease-in-out infinite;
         }
 
-        /* Activity Card Styles */
+        /* Main Content Styles */
         .main-content {
-            margin-left: 260px;
-            width: calc(100% - 260px);
+            margin-left: 0;
+            width: 100%;
             transition: margin 0.3s ease, width 0.3s ease;
         }
-        .activity-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        
+        /* Override main content to use full available width */
+        .main-content.flex-1 {
+            width: auto !important;
+            margin-left: 0;
+            flex: 1 !important;
         }
 
         /* Empty state animation */
@@ -121,31 +84,6 @@
             animation: float 3s ease-in-out infinite;
         }
 
-        /* Image preview */
-        .image-preview {
-            max-height: 400px;
-            object-fit: cover;
-        }
-
-        /* Response button states */
-        .response-btn.active {
-            font-weight: 600;
-        }
-        .response-btn.going.active {
-            background-color: #dcfce7;
-            color: #16a34a;
-            border-color: #16a34a;
-        }
-        .response-btn.interested.active {
-            background-color: #fef3c7;
-            color: #d97706;
-            border-color: #d97706;
-        }
-        .response-btn.not-going.active {
-            background-color: #fee2e2;
-            color: #dc2626;
-            border-color: #dc2626;
-        }
     </style>
 </head>
     {% csrf_token %}
@@ -154,8 +92,33 @@
         {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
         <!-- Main content wrapper -->
         <div class="main-content flex-1 flex flex-col overflow-hidden">
-            <!-- HEADER -->
-            {% include 'base/header_component.html' with page_title="Organization Feed" page_subtitle="Stay updated with the latest activities" %}
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Organization Page</h1>
+                        </div>
+                    </div>
+                    <!-- Right Side: Notification Bell + User Profile -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Notification Bell -->
+                        {% include 'base/notification_bell.html' %}
+                        
+                        <div class="hidden md:block text-right">
+                            <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
+                            
+                        </div>
+                        <a href="{% url 'profile' %}">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </header>
 
             <!-- Organization Header with Photo -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 w-full relative overflow-hidden">
@@ -200,7 +163,7 @@
                                 </span>
                             </div>
                         </div>
-                        <p class="text-blue-100 text-base sm:text-lg max-w-3xl mb-4">{{ organization.description|default:"Organization description goes here" }}</p>
+                        <p class="text-blue-100 text-base sm:text-lg mb-4">{{ organization.description|default:"Organization description goes here" }}</p>
                         
                         <div class="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
                             {% if user.is_authenticated and user_role %}
@@ -218,7 +181,7 @@
 
             <!-- MAIN CONTENT -->
             <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-                <div class="max-w-5xl mx-auto">
+                <div class="w-full">
                     {% if user_role in "adviser,leader" %}
                         <div class="flex justify-end mb-6">
                             <button id="openEventModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
@@ -297,12 +260,6 @@
                             </label>
                             <input type="file" name="attachment" id="eventImage" accept="image/*" class="hidden">
                             <span id="imageFileName" class="text-sm text-gray-500">No file chosen</span>
-                        </div>
-                        <div id="imagePreviewContainer" class="mt-3 hidden">
-                            <img id="imagePreview" src="" alt="Preview" class="rounded-lg border border-gray-300 w-full image-preview">
-                            <button type="button" id="removeImage" class="mt-2 text-sm text-red-600 hover:text-red-800">
-                                <i class="fas fa-times mr-1"></i> Remove Image
-                            </button>
                         </div>
                     </div>
 
@@ -395,26 +352,7 @@
                 }
             });
 
-            // Mobile menu toggle
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('mobile-open');
-                    overlay.classList.toggle('hidden');
-                });
-            }
-
-            if (overlay) {
-                overlay.addEventListener('click', () => {
-                    sidebar.classList.remove('mobile-open');
-                    overlay.classList.add('hidden');
-                });
-            }
         });
-
         
         // Leave Organization functionality
         function leaveOrganization(orgId) {
