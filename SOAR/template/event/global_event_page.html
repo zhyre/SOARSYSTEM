@@ -89,6 +89,234 @@
         .calendar-header-shadow {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
+
+        /* Animated Gradient Background */
+        .content-area {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            position: relative;
+        }
+
+        /* Event Card Enhancements */
+        .event-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.03) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .event-card:hover::before {
+            opacity: 1;
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 40px -10px rgba(59, 130, 246, 0.15),
+                0 10px 20px -5px rgba(59, 130, 246, 0.1),
+                0 0 0 1px rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Shimmer Effect */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .event-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(59, 130, 246, 0.1),
+                transparent
+            );
+            transition: left 0.7s;
+        }
+
+        .event-card:hover::after {
+            left: 100%;
+        }
+
+        /* Fade In Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; }
+        .animate-delay-2 { animation-delay: 0.2s; }
+        .animate-delay-3 { animation-delay: 0.3s; }
+        .animate-delay-4 { animation-delay: 0.4s; }
+        .animate-delay-5 { animation-delay: 0.5s; }
+
+        /* Section Headers */
+        .section-header {
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, transparent);
+            border-radius: 2px;
+        }
+
+        /* Filter Button Enhancement */
+        .filter-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .filter-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Calendar Day Enhancements */
+        .calendar-day {
+            min-height: 100px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .calendar-day:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 
+                0 10px 25px -5px rgba(59, 130, 246, 0.15),
+                0 5px 10px -5px rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Event Dot Enhancements */
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .event-dot:hover {
+            transform: scale(1.5);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Modal Enhancements */
+        .event-popup {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 
+                0 20px 40px -10px rgba(0, 0, 0, 0.15),
+                0 10px 20px -5px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(59, 130, 246, 0.1);
+            padding: 20px;
+            width: 300px;
+            animation: fadeInUp 0.3s ease-out;
+            pointer-events: auto;
+            max-width: calc(100vw - 40px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* Smooth Scroll */
+        .overflow-y-auto {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .calendar-header-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Enhanced Search Input */
+        #eventSearch {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        #eventSearch:focus {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 25px -5px rgba(59, 130, 246, 0.15),
+                0 5px 10px -5px rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -131,8 +359,8 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <!-- Enhanced Content Area -->
+            <div class="flex-1 overflow-y-auto p-6 content-area">
                 <!-- Debug panel shown when a search query is present -->
                 {% if q %}
                 <div id="debugPanel" class="mb-4 p-4 rounded bg-yellow-50 border-l-4 border-yellow-400 text-sm text-gray-700">
@@ -164,16 +392,19 @@
                     </button>
                 </div>
 
-
-                <!-- Upcoming Events Section -->
-                <div id="eventsView" class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
+                <!-- Enhanced Upcoming Events Section -->
+                <div id="eventsView" class="mb-8 animate-fade-in animate-delay-1">
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold text-gray-800">Upcoming Events</h2>
+                    </div>
 
                     <div id="eventsSection" class="space-y-6">
                         {% for event in events %}
-                            {% include 'event/event_activitycard.html' %}
+                            <div class="event-card animate-fade-in animate-delay-{{ forloop.counter0|add:2 }}">
+                                {% include 'event/event_activitycard.html' %}
+                            </div>
                         {% empty %}
-                            <div class="text-center py-12">
+                            <div class="text-center py-12 animate-fade-in animate-delay-2">
                                 <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
                                 <h3 class="text-xl font-semibold text-gray-600 mb-2">No upcoming events</h3>
                                 <p class="text-gray-500">Check back later for new events from organizations.</p>
@@ -182,9 +413,11 @@
                     </div>
                 </div>
 
-                <!-- Calendar View -->
-                <div id="calendarView" class="mb-8 hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Event Calendar</h2>
+                <!-- Enhanced Calendar View -->
+                <div id="calendarView" class="mb-8 hidden animate-fade-in animate-delay-3">
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold text-gray-800">Event Calendar</h2>
+                    </div>
 
                     <!-- Month Navigation -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -1159,6 +1392,73 @@
         if (e.key === 'Escape' && !document.getElementById('eventModal').classList.contains('hidden')) {
             closeEventModal();
         }
+    });
+
+    // Enhanced Animations and Interactions
+    document.addEventListener('DOMContentLoaded', () => {
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        mobileMenuToggle?.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay?.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.add('hidden');
+        });
+
+        // Add stagger animation to event cards
+        const eventCards = document.querySelectorAll('.event-card');
+        eventCards.forEach((card, index) => {
+            card.style.animationDelay = `${0.2 + (index * 0.1)}s`;
+            card.classList.add('animate-fade-in');
+        });
+
+        // Add observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observe calendar days for animation
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            observer.observe(day);
+        });
+
+        // Enhanced filter button interactions
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                
+                // Add active class to clicked button
+                this.classList.remove('bg-gray-200', 'text-gray-700');
+                this.classList.add('bg-blue-600', 'text-white');
+            });
+        });
+
+        // Search input enhancement
+        const searchInput = document.getElementById('eventSearch');
+        searchInput?.addEventListener('focus', function() {
+            this.parentElement.classList.add('animate-fade-in');
+        });
+
+        // Add hover effects to modal
+        const modal = document.getElementById('eventModal');
+        modal?.addEventListener('mouseenter', () => {
+            modal.classList.add('animate-fade-in');
+        });
     });
 </script>
 </body>

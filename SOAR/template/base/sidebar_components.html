@@ -187,9 +187,7 @@
             <a href="{% url 'notifications' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
                 <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Notifications</span>
-                <!-- Badge Count -->
-                <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
-                {% if request.resolver_match.url_name == 'notifications' %}
+                                {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>
@@ -353,9 +351,7 @@
             <a href="{% url 'notifications' %}" class="nav-item group flex items-center space-x-3 px-4 py-3 rounded-lg {% if request.resolver_match.url_name == 'notifications' %}bg-blue-50 text-blue-600 shadow-sm{% else %}hover:bg-gray-50 text-gray-700{% endif %} transition-all duration-200 ripple sidebar-nav-item">
                 <i class="fas fa-bell text-lg {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-500 group-hover:text-blue-600{% endif %} transition-colors"></i>
                 <span class="font-medium {% if request.resolver_match.url_name == 'notifications' %}text-blue-600{% else %}text-gray-700 group-hover:text-blue-600{% endif %} sidebar-text">Notifications</span>
-                <!-- Badge Count -->
-                <span id="sidebar-notification-badge" class="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50 min-w-[20px] text-center hidden">0</span>
-                {% if request.resolver_match.url_name == 'notifications' %}
+                                {% if request.resolver_match.url_name == 'notifications' %}
                 <div class="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                 {% endif %}
             </a>

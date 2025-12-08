@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SOAR - Organization Profile</title>
-  <link rel="stylesheet" href="{% static 'css/accounts/organization.css' %}">
   <link rel="stylesheet" href="{% static 'css/accounts/profile.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,18 +16,250 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
+
+    /* Enhanced Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #2563eb, #1d4ed8);
+    }
+
+    /* Glass Morphism Effects */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    /* Gradient Animations */
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .animated-gradient {
+      background-size: 200% 200%;
+      animation: gradient-shift 8s ease infinite;
+    }
+
+    /* Shimmer Effect */
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .shimmer-effect {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shimmer-effect::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: translateX(-100%);
+    }
+
+    .shimmer-effect:hover::after {
+      animation: shimmer 1.5s ease-in-out;
+    }
+
+    /* Fade In Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Stagger Animation */
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+
+    /* Card Hover Effects */
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Info Card Effects */
+    .info-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .info-card:hover::before {
+      left: 100%;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Button Hover Effects */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Badge Effects */
+    .status-badge {
+      transition: all 0.3s ease;
+    }
+
+    .status-badge:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px -3px currentColor;
+    }
+
+    /* Profile Picture Enhancement */
+    .profile-pic-wrapper {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .profile-pic-wrapper:hover {
+      transform: scale(1.08) rotate(5deg);
+    }
+
+    .profile-pic-badge {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+      }
+    }
+
+    /* Program Chip Effects */
+    .program-chip {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .program-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s;
+    }
+
+    .program-chip:hover::before {
+      left: 100%;
+    }
+
+    .program-chip:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Section Enhancement */
+    .section-card {
+      transition: all 0.3s ease;
+    }
+
+    .section-card:hover {
+      box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+    }
+
+    /* Cover Pattern Animation */
+    @keyframes pattern-move {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 100% 100%; }
+    }
+
+    .animated-pattern {
+      animation: pattern-move 20s linear infinite;
+      background-size: 200% 200%;
+    }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-blue-50">
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 animated-gradient">
 <div class="flex h-screen overflow-hidden">
   <!-- Sidebar -->
   {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
-
+  
   <!-- Main Content -->
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-blue-100">
+    <header class="glass-card shadow-lg border-b border-blue-200">
       <div class="px-6 py-5 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-800 flex items-center">
@@ -40,7 +271,7 @@
         <div class="flex items-center gap-3">
           {% if can_edit %}
           <a href="{% url 'organization_editprofile' organization.id %}"
-             class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 font-medium">
+             class="btn-primary bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg transition-all duration-200 shadow-md flex items-center gap-2 font-medium">
             <i class="fas fa-edit"></i>
             <span class="hidden sm:inline">Edit Profile</span>
           </a>
@@ -50,7 +281,7 @@
             <form method="POST" action="{% url 'join_org' organization.id %}">
               {% csrf_token %}
               <button type="submit"
-                      class="bg-gradient-to-r from-green-600 to-green-700 text-white px-5 py-2.5 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                      class="btn-primary bg-gradient-to-r from-green-600 to-green-700 text-white px-5 py-2.5 rounded-lg transition-all duration-200 shadow-md font-medium">
                 <i class="fas fa-user-plus mr-2"></i>Join Club
               </button>
             </form>
@@ -64,11 +295,6 @@
             <span class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-lg border border-gray-200 text-sm">
               <i class="fas fa-lock mr-2"></i>Not Eligible
             </span>
-            {% else %}
-            <!-- <button onclick="leaveOrganization('{{ organization.id }}')"
-                    class="bg-gradient-to-r from-red-600 to-red-700 text-white px-5 py-2.5 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-              <i class="fas fa-sign-out-alt mr-2"></i>Leave Organization
-            </button> -->
             {% endif %}
           {% endif %}
         </div>
@@ -79,22 +305,22 @@
     <main class="flex-1 overflow-y-auto p-6">
       <div class="max-w-5xl mx-auto">
         <!-- Profile Card -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100">
+        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden border border-blue-200 hover-lift fade-in-up">
           <!-- Cover Background -->
-          <div class="h-32 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 relative">
+          <div class="h-32 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700 relative animated-gradient">
             <div class="absolute inset-0 bg-black opacity-10"></div>
-            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="absolute inset-0 animated-pattern" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
           </div>
           
           <!-- Profile Content -->
           <div class="px-8 pb-8">
             <!-- Profile Picture -->
-            <div class="flex flex-col items-center -mt-16 mb-6">
-              <div class="relative">
+            <div class="flex flex-col items-center -mt-16 mb-6 fade-in-up stagger-1">
+              <div class="relative profile-pic-wrapper">
                 <img src="{{ organization.profile_picture.url|default:'/static/images/default_org.png' }}"
                      alt="{{ organization.name }}"
-                     class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl ring-4 ring-blue-100">
-                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                     class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-2xl ring-4 ring-blue-200">
+                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg profile-pic-badge">
                   <i class="fas fa-building text-white text-sm"></i>
                 </div>
               </div>
@@ -107,7 +333,7 @@
             <!-- Info Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
               <!-- Visibility Card -->
-              <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+              <div class="info-card glass-card p-6 rounded-xl border border-blue-200 fade-in-up stagger-2">
                 <div class="flex items-center justify-between">
                   <div>
                     <h3 class="text-sm font-medium text-gray-500 mb-2 flex items-center">
@@ -116,11 +342,11 @@
                     </h3>
                     <p class="text-lg font-bold text-gray-800">
                       {% if organization.is_public %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+                      <span class="status-badge inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
                         <i class="fas fa-globe mr-2"></i>Public
                       </span>
                       {% else %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-semibold">
+                      <span class="status-badge inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-semibold">
                         <i class="fas fa-lock mr-2"></i>Private
                       </span>
                       {% endif %}
@@ -133,7 +359,7 @@
               </div>
 
               <!-- Adviser Card -->
-              <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+              <div class="info-card glass-card p-6 rounded-xl border border-blue-200 fade-in-up stagger-3">
                 <div class="flex items-center justify-between">
                   <div>
                     <h3 class="text-sm font-medium text-gray-500 mb-2 flex items-center">
@@ -152,7 +378,7 @@
             </div>
 
             <!-- About Section -->
-            <div class="mt-8 p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200">
+            <div class="section-card mt-8 p-6 glass-card rounded-xl border border-gray-200 fade-in-up stagger-4">
               <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                 <i class="fas fa-info-circle text-blue-600 mr-2"></i>
                 About
@@ -161,7 +387,7 @@
             </div>
 
             <!-- Programs Section -->
-            <div class="mt-8 p-6 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100">
+            <div class="section-card mt-8 p-6 glass-card rounded-xl border border-blue-200 fade-in-up stagger-4">
               <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-graduation-cap text-blue-600 mr-2"></i>
                 Programs Affiliated
@@ -169,7 +395,7 @@
               <div class="flex flex-wrap gap-3">
                 {% if organization.allowed_programs.all %}
                   {% for program in organization.allowed_programs.all %}
-                    <span class="inline-flex items-center bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 text-sm px-4 py-2 rounded-full font-medium border border-blue-200 hover:shadow-md transition-shadow">
+                    <span class="program-chip inline-flex items-center bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 text-sm px-4 py-2 rounded-full font-medium border border-blue-200 shadow-sm">
                       <i class="fas fa-book mr-2 text-blue-600"></i>
                       {{ program.name }}
                     </span>
@@ -203,7 +429,6 @@ function leaveOrganization(orgId) {
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                // Redirect to dashboard
                 window.location.href = '/accounts/index/';
             } else {
                 alert('Error: ' + data.error);

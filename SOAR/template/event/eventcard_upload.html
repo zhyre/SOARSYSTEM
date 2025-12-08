@@ -1,5 +1,154 @@
 {% load static %}
-<article class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02]" data-status="{{ event.status }}">
+<style>
+/* Enhanced Event Card Effects */
+.activity-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.activity-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.activity-card:hover::before {
+    opacity: 1;
+}
+
+.activity-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 20px 40px -10px rgba(59, 130, 246, 0.15),
+        0 10px 20px -5px rgba(59, 130, 246, 0.1),
+        0 0 0 1px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.activity-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(59, 130, 246, 0.1),
+        transparent
+    );
+    transition: left 0.7s;
+    pointer-events: none;
+}
+
+.activity-card:hover::after {
+    left: 100%;
+}
+
+/* Fade In Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+/* RSVP Button Enhancement */
+.rsvp-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.rsvp-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.rsvp-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Icon Float Animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+}
+
+.activity-card .w-10.h-10 {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Glow Effect */
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.4); }
+}
+
+.activity-card:hover .w-10.h-10 {
+    animation: glow 3s ease-in-out infinite;
+}
+
+/* Enhanced Image Hover */
+.activity-card img.transition-transform {
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Button Hover Effects */
+.rsvp-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Status Badge Enhancement */
+.activity-card .absolute.top-4.left-4 span {
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.activity-card:hover .absolute.top-4.left-4 span {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+</style>
+
+<article class="activity-card group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-fade-in" data-status="{{ event.status }}">
 
     {% csrf_token %}
     <!-- Event Content -->
@@ -385,7 +534,190 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // Enhanced animations for event cards
+    const eventCards = document.querySelectorAll('.activity-card');
+    eventCards.forEach((card, index) => {
+        // Stagger animation delays
+        card.style.animationDelay = `${0.1 + (index * 0.15)}s`;
+        card.classList.add('animate-fade-in');
+        
+        // Add hover effect listener
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Enhanced RSVP button interactions
+    document.querySelectorAll('.rsvp-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Add ripple effect
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.pointerEvents = 'none';
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Add floating animation to icons
+    document.querySelectorAll('.activity-card .w-10.h-10').forEach(icon => {
+        icon.style.animationDelay = `${Math.random() * 2}s`;
+    });
 });
+
+// Enhanced RSVP success animation
+function animateRSVPSuccess(button, status) {
+    button.style.transform = 'scale(1.1)';
+    button.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
+    
+    setTimeout(() => {
+        button.style.transform = 'scale(1)';
+        button.style.boxShadow = '';
+    }, 300);
+}
+
+// Enhanced toggle description with animation
+function toggleDescription(eventId) {
+    const desc = document.getElementById('desc-' + eventId);
+    const btn = document.getElementById('btn-' + eventId);
+
+    if (desc.classList.contains('line-clamp-3')) {
+        desc.classList.remove('line-clamp-3');
+        desc.style.transition = 'all 0.3s ease';
+        btn.textContent = 'See less';
+        btn.setAttribute('aria-expanded', 'true');
+        
+        // Add fade-in effect
+        desc.style.opacity = '0';
+        setTimeout(() => {
+            desc.style.opacity = '1';
+        }, 50);
+    } else {
+        desc.classList.add('line-clamp-3');
+        btn.textContent = 'See more';
+        btn.setAttribute('aria-expanded', 'false');
+        
+        // Add fade-out effect
+        desc.style.opacity = '0';
+        setTimeout(() => {
+            desc.style.opacity = '1';
+        }, 50);
+    }
+}
+
+// Enhanced RSVP function with animations
+function rsvpEvent(status, eventId) {
+    // Check if max participants reached (only for 'going' status)
+    if (status === 'going') {
+        const goingCountElement = document.getElementById(`going-count-${eventId}`);
+        if (goingCountElement) {
+            const currentCount = parseInt(goingCountElement.textContent.trim()) || 0;
+            // Note: We can't easily check max_participants from frontend, so we'll let the backend handle it
+            // But we can show a warning if the count seems high
+        }
+    }
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('status', status);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    // Make AJAX request
+    fetch(`/event/rsvp/${eventId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update button styles with animation
+            updateRSVPButtons(eventId, status);
+            
+            // Animate the clicked button
+            const clickedButton = document.getElementById(`rsvp-${status.replace('_', '-')}-${eventId}`);
+            if (clickedButton) {
+                animateRSVPSuccess(clickedButton, status);
+            }
+
+            // Update counts with animation
+            const goingCount = document.getElementById(`going-count-${eventId}`);
+            const interestedCount = document.getElementById(`interested-count-${eventId}`);
+            
+            goingCount.style.transition = 'all 0.3s ease';
+            interestedCount.style.transition = 'all 0.3s ease';
+            
+            goingCount.style.transform = 'scale(1.2)';
+            interestedCount.style.transform = 'scale(1.2)';
+            
+            setTimeout(() => {
+                goingCount.style.transform = 'scale(1)';
+                interestedCount.style.transform = 'scale(1)';
+            }, 300);
+
+            goingCount.innerHTML = `
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                ${data.going_count}
+            `;
+            interestedCount.innerHTML = `
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                ${data.interested_count}
+            `;
+
+            // Update attendee avatars with animation
+            updateAttendeeAvatars(eventId, data.attendees, data.going_count);
+        } else {
+            console.error('RSVP failed:', data.error);
+            if (data.error && data.error.includes('maximum participants')) {
+                alert('Maximum participants reached. Cannot RSVP as going.');
+            } else {
+                alert('Failed to update RSVP status. Please try again.');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+// Add ripple animation keyframe
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 function editEvent(eventId) {
     // For now, just show an alert. In a real implementation, this would open an edit modal or redirect to edit page
