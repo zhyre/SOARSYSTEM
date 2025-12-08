@@ -194,7 +194,7 @@
                     </div>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ event.created_by.get_full_name|default:event.created_by.username }}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ event.created_by.get_full_name|title|default:event.created_by.username }}</p>
                     <p class="text-xs text-gray-500">{{ user_role|default:"Member" }}</p>
                 </div>
             </div>
@@ -335,7 +335,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-900">{{ event.event_date|date:"l, F j, Y"|default:"Friday, January 1, 2024" }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ event.event_date|time:"g:i A"|default:"10:00 AM" }} - {{ event.end_time|time:"g:i A"|default:"4:00 PM" }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ event.event_date|time:"g:i A"|default:"10:00 AM" }}</p>
                 </div>
             </div>
 
