@@ -3,6 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
+from SOAR.organization.models import Program
 
 COMMON_PASSWORDS = [
     'password', '12345678', 'qwerty', '11111111', 'abcdefgh'
@@ -43,21 +44,10 @@ class StudentRegistrationForm(UserCreationForm):
             'title': 'Format: 12-3456-789'
         })
     )
-    COURSE_CHOICES = [
-        ('', 'Select a course'),
-        ('BS in Computer Science', 'BS in Computer Science'),
-        ('BS in Information Technology', 'BS in Information Technology'),
-        ('BS in Computer Engineering', 'BS in Computer Engineering'),
-        ('BS in Information Systems', 'BS in Information Systems'),
-        ('BS in Electronics Engineering', 'BS in Electronics Engineering'),
-        ('BS in Civil Engineering', 'BS in Civil Engineering'),
-        ('BS in Mechanical Engineering', 'BS in Mechanical Engineering'),
-        ('BS in Electrical Engineering', 'BS in Electrical Engineering'),
-    ]
-    
-    course = forms.ChoiceField(
+    course = forms.ModelChoiceField(
+        queryset=Program.objects.all().order_by('name'),
         required=True,
-        choices=COURSE_CHOICES,
+        empty_label='Select a course',
         label='',
         widget=forms.Select(attrs={
             'class': 'form-select',

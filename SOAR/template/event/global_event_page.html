@@ -580,7 +580,7 @@
                     <div class="flex items-center gap-4 mb-6">
                         <div class="flex-shrink-0">
                             <div id="modalOrgLogo"
-                                class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden flex-shrink-0">
                                 <span class="text-white font-bold text-2xl">O</span>
                             </div>
                         </div>
@@ -716,6 +716,7 @@
             title: event.title,
             organization: event.organization,
             organization_id: event.organization_id,
+            organization_picture: event.organization_picture,
             date: new Date(event.date),
             description: event.description,
             type: event.type,
@@ -732,6 +733,7 @@
             title: event.title,
             organization: event.organization,
             organization_id: event.organization_id,
+            organization_picture: event.organization_picture,
             date: new Date(event.date),
             description: event.description,
             type: event.type,
@@ -1189,9 +1191,13 @@
                 window.location.href = `/organization/orgpage/${eventData.organization_id}/`;
             };
 
-            // Set organization logo (placeholder for now)
+            // Set organization logo
             const orgLogo = document.getElementById('modalOrgLogo');
-            orgLogo.innerHTML = `<span class="text-white font-bold text-2xl">${eventData.organization.charAt(0).toUpperCase()}</span>`;
+            if (eventData.organization_picture) {
+                orgLogo.innerHTML = `<img src="${eventData.organization_picture}" alt="${eventData.organization}" class="w-full h-full object-cover rounded-lg">`;
+            } else {
+                orgLogo.innerHTML = `<span class="text-white font-bold text-2xl">${eventData.organization.charAt(0).toUpperCase()}</span>`;
+            }
 
             document.getElementById('modalEventDescription').textContent = eventData.description;
             document.getElementById('modalEventType').textContent = eventData.type.charAt(0).toUpperCase() + eventData.type.slice(1);
@@ -1227,11 +1233,6 @@
             ${eventData.interested_count} Interested
         `;
         
-        // Update RSVP button counts
-        document.getElementById('going-count').textContent = `${eventData.going_count} people`;
-        document.getElementById('interested-count').textContent = `${eventData.interested_count} people`;
-        document.getElementById('not-going-count').textContent = `${eventData.not_going_count} people`;
-
             // Handle membership-based UI
             const rsvpSection = document.getElementById('modalRSVPSection');
             const rsvpButtons = document.getElementById('modalRSVPButtons');
