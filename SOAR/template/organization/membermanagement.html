@@ -668,8 +668,17 @@
 
                 <div class="content-card">
                     <div class="mb-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
-                        <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
+                                <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
+                            </div>
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="member-search" placeholder="Search by name, email, or role..."
+                                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="table-responsive">
@@ -751,15 +760,6 @@
                             <i class="fas fa-users"></i>
                             <p>No members yet</p>
                         </div>
-                    </div>
-
-                    <div class="pagination">
-                        <span class="text-sm text-gray-600">Showing 1 to 2 of 2 entries</span>
-                        <div class="table-actions"></div>
-                        <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn" disabled>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
                     </div>
                 </div>
             </main>
@@ -1556,6 +1556,50 @@
                 }, 3000);
             }
         }
+
+        // Member Search Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('member-search');
+            const tableRows = document.querySelectorAll('.members-table tbody tr');
+            const noMembers = document.getElementById('no-members');
+            const noMembersInitial = document.getElementById('no-members-initial');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    let visibleCount = 0;
+
+                    tableRows.forEach(row => {
+                        const name = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+                        const email = row.querySelector('td:nth-child(1)')?.innerHTML.toLowerCase() || '';
+                        const role = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                        
+                        const matchesSearch = name.includes(searchTerm) || 
+                                            email.includes(searchTerm) || 
+                                            role.includes(searchTerm);
+                        
+                        if (matchesSearch) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Show/hide no results message
+                    if (visibleCount === 0 && searchTerm) {
+                        if (noMembers) noMembers.style.display = 'flex';
+                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                    } else if (visibleCount === 0 && !searchTerm) {
+                        if (noMembers) noMembers.style.display = 'none';
+                        if (noMembersInitial) noMembersInitial.style.display = 'flex';
+                    } else {
+                        if (noMembers) noMembers.style.display = 'none';
+                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

@@ -717,6 +717,7 @@ def calendar_view(request, org_id):
     for event in events:
         event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
         event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        event.not_going_count = EventRSVP.objects.filter(event=event, status='not_going').count()
         try:
             user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
             event.user_rsvp_status = user_rsvp.status
@@ -735,6 +736,7 @@ def calendar_view(request, org_id):
             'type': event.activity_type if event.activity_type != 'other' else 'event',
             'going_count': event.going_count,
             'interested_count': event.interested_count,
+            'not_going_count': event.not_going_count,
             'user_rsvp_status': event.user_rsvp_status,
             'location': event.location or '',
             'max_participants': event.max_participants,

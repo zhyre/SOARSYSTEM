@@ -40,17 +40,21 @@ def index(request):
     total_user_orgs = user_orgs.count()
     show_see_more = total_user_orgs > 3
 
-    # Get upcoming events user is going to
+    # Get upcoming events user is going to (within 7 days)
+    from datetime import timedelta
+    seven_days_from_now = timezone.now() + timedelta(days=7)
     user_events = OrganizationEvent.objects.filter(
         rsvps__user=request.user,
         rsvps__status='going',
-        event_date__gte=timezone.now()
+        event_date__gte=timezone.now(),
+        event_date__lte=seven_days_from_now
     ).distinct().order_by('event_date')
 
     # Add RSVP data to each event
     for event in user_events:
         event.going_count = EventRSVP.objects.filter(event=event, status='going').count()
         event.interested_count = EventRSVP.objects.filter(event=event, status='interested').count()
+        event.not_going_count = EventRSVP.objects.filter(event=event, status='not_going').count()
         try:
             user_rsvp = EventRSVP.objects.get(event=event, user=request.user)
             event.user_rsvp_status = user_rsvp.status
@@ -63,12 +67,16 @@ def index(request):
             status='going'
         ).select_related('user').order_by('date_created')[:5]
 
+    # Count total available organizations
+    total_available_orgs = Organization.objects.count()
+
     context = {
         "user_orgs": user_orgs,  # for counting
         "org_data": org_data,    # for detailed display (limited to 3)
         "show_see_more": show_see_more,
         "total_orgs_count": total_user_orgs,
         "user_events": user_events,
+        "total_available_orgs": total_available_orgs,
     }
     return render(request, "accounts/index.html", context)
 
