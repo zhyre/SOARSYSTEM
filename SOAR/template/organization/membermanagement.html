@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,53 +10,30 @@
     <link rel="stylesheet" href="{% static 'css/accounts/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/accounts/members_management.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        
+
         body {
-            background-color: #f8fafc;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            background-attachment: fixed;
         }
-        
-        /* Ensure sidebar is visible */
-        aside.modern-sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            z-index: 50;
-        }
-        
-        /* Main content layout - matches orgpage.html */
-        .main-content {
-            margin-left: 256px;
-            min-height: 100vh;
-            transition: margin 0.3s ease;
-            width: calc(100% - 256px);
-        }
-        
-        @media (max-width: 767px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-        
+
         /* Enhanced member row animations */
         .member-row[data-member-id] {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .member-row:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-        
+
         /* Modern Modal Styles with Backdrop Blur */
         .simple-modal {
             display: none;
@@ -71,27 +49,33 @@
             align-items: center;
             animation: fadeIn 0.2s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(20px) scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
         }
-        
+
         .simple-modal.show {
             display: flex;
         }
-        
+
         .simple-modal-content {
             background: white;
             padding: 32px;
@@ -104,7 +88,7 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .simple-modal-header {
             display: flex;
             justify-content: space-between;
@@ -113,7 +97,7 @@
             padding-bottom: 20px;
             border-bottom: 2px solid #f1f5f9;
         }
-        
+
         .simple-modal-header h3 {
             margin: 0;
             font-size: 1.5rem;
@@ -121,7 +105,7 @@
             color: #0f172a;
             letter-spacing: -0.02em;
         }
-        
+
         .close-btn {
             background: #f1f5f9;
             border: none;
@@ -136,17 +120,17 @@
             justify-content: center;
             transition: all 0.2s ease;
         }
-        
+
         .close-btn:hover {
             background: #e2e8f0;
             color: #334155;
             transform: rotate(90deg);
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 10px;
@@ -154,7 +138,7 @@
             color: #334155;
             font-size: 0.9375rem;
         }
-        
+
         .form-group input,
         .form-group select {
             width: 100%;
@@ -165,7 +149,7 @@
             transition: all 0.2s ease;
             background: #f8fafc;
         }
-        
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
@@ -173,7 +157,7 @@
             background: white;
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
-        
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -182,7 +166,7 @@
             padding-top: 20px;
             border-top: 2px solid #f1f5f9;
         }
-        
+
         .error-message {
             color: #dc2626;
             font-size: 0.8125rem;
@@ -190,62 +174,84 @@
             display: none;
             font-weight: 500;
         }
-        
-        /* Sidebar handled by sidebar_components.html */
-        
+
+        /* Enhanced Sidebar */
+        .sidebar {
+            transition: transform 0.3s ease, width 0.3s ease;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                width: 16rem;
+                height: 100vh;
+                overflow-y: auto;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+
         /* Enhanced Main Content Cards */
+        main {
+            background: transparent;
+        }
+
         .content-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px;
             margin-bottom: 24px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
-        
+
         .content-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
         }
-        
+
         /* Enhanced Search Box */
         .search-box {
             position: relative;
-            width: 100%;
         }
-        
-        .search-box i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 14px;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
+
         .search-box input {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
-            border-radius: 12px;
+            padding-left: 16px;
+            border-radius: 14px;
             border: 2px solid #e2e8f0;
             transition: all 0.3s ease;
-            font-size: 14px;
+            font-size: 0.9375rem;
             background: #f8fafc;
         }
-        
+
         .search-box input:focus {
-            border-color: #3b82f6;
+            border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
             outline: none;
         }
-        
-        .search-box input::placeholder {
-            color: #94a3b8;
-        }
-        
+
         /* Enhanced Buttons */
         .btn-primary {
             background: #3b82f6;
@@ -261,16 +267,16 @@
             justify-content: center;
             gap: 8px;
         }
-        
+
         .btn-primary:hover:not(:disabled) {
             background: #2563eb;
         }
-        
+
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
         .btn-secondary {
             background: #f1f5f9;
             color: #475569;
@@ -281,29 +287,29 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .btn-secondary:hover {
             background: #e2e8f0;
             color: #334155;
         }
-        
+
         /* Enhanced Table */
         .table-responsive {
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid #f1f5f9;
         }
-        
+
         .members-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
         }
-        
+
         .members-table thead {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
-        
+
         .members-table thead th {
             text-align: left;
             padding: 16px 20px;
@@ -314,22 +320,22 @@
             text-transform: uppercase;
             border-bottom: 2px solid #e2e8f0;
         }
-        
+
         .members-table tbody td {
             padding: 20px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             background: white;
         }
-        
+
         .members-table tbody tr {
             transition: all 0.2s ease;
         }
-        
+
         .members-table tbody tr:hover {
             background: #fafbfc;
         }
-        
+
         /* Enhanced Member Info */
         .member-info {
             display: flex;
@@ -337,7 +343,7 @@
             gap: 14px;
             min-width: 220px;
         }
-        
+
         .member-avatar {
             width: 48px;
             height: 48px;
@@ -352,14 +358,14 @@
             font-size: 1rem;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
+
         .member-details .member-name {
             color: #0f172a;
             font-weight: 600;
             font-size: 0.9375rem;
             margin-bottom: 4px;
         }
-        
+
         .member-details .member-email {
             color: #64748b;
             font-size: 0.8125rem;
@@ -368,7 +374,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         /* Enhanced Role Tags */
         .role-tag {
             display: inline-flex;
@@ -380,27 +386,27 @@
             letter-spacing: 0.02em;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
-        
+
         .role-tag.admin {
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             color: #1e40af;
         }
-        
+
         .role-tag.leader {
             background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
             color: #166534;
         }
-        
+
         .role-tag.officer {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             color: #92400e;
         }
-        
+
         .role-tag.member {
             background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
             color: #334155;
         }
-        
+
         /* Enhanced Status Badge */
         .status-badge {
             display: inline-flex;
@@ -412,12 +418,12 @@
             letter-spacing: 0.02em;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
-        
+
         .status-badge.active {
             background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
             color: #166534;
         }
-        
+
         .status-badge.active::before {
             content: '';
             width: 6px;
@@ -427,18 +433,25 @@
             margin-right: 6px;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
-        
+
         /* Enhanced Action Buttons */
         .actions {
             display: flex;
             gap: 8px;
         }
-        
+
         .btn-icon {
             display: inline-flex;
             align-items: center;
@@ -453,37 +466,37 @@
             cursor: pointer;
             position: relative;
         }
-        
+
         .btn-icon:hover {
             background: #f8fafc;
             border-color: #cbd5e1;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-icon:active {
             transform: translateY(0);
         }
-        
+
         .btn-icon.danger {
             color: #dc2626;
             border-color: #fecaca;
             background: #fef2f2;
         }
-        
+
         .btn-icon.danger:hover {
             background: #fee2e2;
             border-color: #fca5a5;
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
-        
+
         /* Enhanced User Search Dropdown */
         #user-search-results {
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             border: 2px solid #e2e8f0;
         }
-        
+
         .search-result-item {
             display: flex;
             align-items: center;
@@ -492,11 +505,11 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .search-result-item:hover {
             background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
         }
-        
+
         .search-result-avatar {
             width: 36px;
             height: 36px;
@@ -509,7 +522,7 @@
             color: #334155;
             font-weight: 700;
         }
-        
+
         /* Enhanced No Results */
         .no-results {
             display: flex;
@@ -520,14 +533,14 @@
             color: #64748b;
             font-size: 0.9375rem;
         }
-        
+
         .no-results i {
             font-size: 3rem;
             margin-bottom: 1rem;
             color: #cbd5e1;
             opacity: 0.5;
         }
-        
+
         /* Enhanced Pagination */
         .pagination {
             display: flex;
@@ -537,7 +550,7 @@
             background: #f8fafc;
             border-radius: 0 0 16px 16px;
         }
-        
+
         .pagination-btn {
             padding: 8px 16px;
             border-radius: 10px;
@@ -548,29 +561,29 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .pagination-btn:hover:not(:disabled) {
             border-color: #667eea;
             color: #667eea;
             transform: translateY(-2px);
         }
-        
+
         .pagination-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #261bc2 100%);
             color: white;
             border-color: #667eea;
         }
-        
+
         .pagination-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
-        
+
         /* Enhanced Header */
         .page-header {
             margin-bottom: 8px;
         }
-        
+
         .page-header h1 {
             font-size: 2rem;
             font-weight: 800;
@@ -578,12 +591,12 @@
             letter-spacing: -0.02em;
             margin-bottom: 8px;
         }
-        
+
         .page-header p {
             color: #64748b;
             font-size: 0.9375rem;
         }
-        
+
         /* Mobile Menu Button Enhancement */
         #mobileMenuToggle {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -591,12 +604,12 @@
             border-radius: 12px;
             transition: all 0.2s ease;
         }
-        
+
         #mobileMenuToggle:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
-        
+
         /* Radio Button Enhancement */
         .form-group input[type="radio"] {
             width: 20px;
@@ -604,7 +617,7 @@
             accent-color: #667eea;
             cursor: pointer;
         }
-        
+
         .form-group label[style*="inline-flex"] {
             cursor: pointer;
             padding: 10px 16px;
@@ -613,32 +626,33 @@
             border: 2px solid #e2e8f0;
             background: #f8fafc;
         }
-        
+
         .form-group label[style*="inline-flex"]:hover {
             background: white;
             border-color: #cbd5e1;
         }
-        
+
         .form-group label[style*="inline-flex"]:has(input:checked) {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
             border-color: #667eea;
         }
     </style>
 </head>
-<body class="organization-page" data-user-role="{{ user_role }}" data-org-id="{{ organization.id }}" data-user-search-url="/organization/organizations/{{ organization.id }}/users/search/" data-add-member-url="/organization/members/">
+
+<body class="organization-page" data-user-role="{{ user_role }}" data-org-id="{{ organization.id }}"
+    data-user-search-url="/organization/organizations/{{ organization.id }}/users/search/"
+    data-add-member-url="/organization/members/">
     <!-- Overlay for mobile -->
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
-    
-    <div class="flex">
+
+    <div class="flex h-screen overflow-hidden">
         <!-- Include Organization Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
+        <div class="flex-1 flex flex-col overflow-hidden">
 
-        <div class="main-content flex-1 flex flex-col overflow-hidden">
-            <!-- HEADER -->
-            {% include 'base/header_component.html' with page_title="Members Management" page_subtitle="Manage your organization members and their roles" %}
-            
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-gray-50">
-                <div class="max-w-6xl mx-auto w-full">
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 pt-16 md:pt-8">
+                {% include 'base/header_component.html' with page_title="Members Management" page_subtitle="Manage your organization members and their roles" %}
+
                 {% if "adviser" in user_role or "leader" in user_role %}
                 <div class="content-card flex items-center justify-between">
                     <div>
@@ -653,17 +667,11 @@
                 {% endif %}
 
                 <div class="content-card">
-                    <div class="mb-6 flex items-start justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
-                            <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
-                        </div>
-                        <div class="search-box" style="max-width: 400px; min-width: 300px;">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="member-search" placeholder="Search members by name, email, or role..." autocomplete="off">
-                        </div>
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
+                        <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
                     </div>
-                    
+
                     <div class="table-responsive">
                         <table class="members-table">
                             <thead>
@@ -677,10 +685,13 @@
                             </thead>
                             <tbody id="members-tbody">
                                 {% for member in members %}
-                                <tr class="member-row" data-member-id="{{ member.id }}" data-name="{{ member.student.username }}" data-email="{{ member.student.email }}" data-role="{{ member.role }}">
+                                <tr class="member-row" data-member-id="{{ member.id }}"
+                                    data-name="{{ member.student.username }}" data-email="{{ member.student.email }}"
+                                    data-role="{{ member.role }}">
                                     <td>
                                         <div class="member-info">
-                                            <div class="member-avatar">{{ member.student.username|slice:":2"|upper }}</div>
+                                            <div class="member-avatar">{{ member.student.username|slice:":2"|upper }}
+                                            </div>
                                             <div class="member-details">
                                                 <div class="member-name">{{ member.student.username }}</div>
                                                 <div class="member-email">{{ member.student.email }}</div>
@@ -693,33 +704,39 @@
                                     <td>{{ member.date_joined|date:"Y-m-d" }}</td>
                                     <td>
                                         {% if member.is_approved %}
-                                            <span class="status-badge active">Active</span>
+                                        <span class="status-badge active">Active</span>
                                         {% else %}
-                                            <span class="status-badge" style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;">Pending</span>
+                                        <span class="status-badge"
+                                            style="background:linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);color:#991b1b;">Pending</span>
                                         {% endif %}
                                     </td>
                                     <td class="actions">
                                         {% if member.is_approved %}
-                                            {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
-                                                <button class="btn-icon" title="Promote/Demote" onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
-                                                    <i class="fas fa-arrow-up"></i>
-                                                </button>
-                                                <button class="btn-icon" title="Demote" onclick="demoteMember('{{ member.id }}', '{{ member.role }}')">
-                                                    <i class="fas fa-arrow-down"></i>
-                                                </button>
-                                                <button class="btn-icon danger" title="Remove Member" onclick="confirmRemoveMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            {% endif %}
+                                        {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
+                                        <button class="btn-icon" title="Promote/Demote"
+                                            onclick="toggleMemberRole('{{ member.id }}', '{{ member.role }}')">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                        <button class="btn-icon" title="Demote"
+                                            onclick="demoteMember('{{ member.id }}', '{{ member.role }}')">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </button>
+                                        <button class="btn-icon danger" title="Remove Member"
+                                            onclick="confirmRemoveMember('{{ member.id }}', '{{ member.student.username }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
                                         {% else %}
-                                            {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
-                                                <button class="btn-icon" title="Approve" onclick="approveMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                                <button class="btn-icon danger" title="Reject" onclick="rejectMember('{{ member.id }}', '{{ member.student.username }}')">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            {% endif %}
+                                        {% if "adviser" in user_role or "leader" in user_role or "admin" in user_role %}
+                                        <button class="btn-icon" title="Approve"
+                                            onclick="approveMember('{{ member.id }}', '{{ member.student.username }}')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn-icon danger" title="Reject"
+                                            onclick="rejectMember('{{ member.id }}', '{{ member.student.username }}')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -735,7 +752,15 @@
                             <p>No members yet</p>
                         </div>
                     </div>
-                </div>
+
+                    <div class="pagination">
+                        <span class="text-sm text-gray-600">Showing 1 to 2 of 2 entries</span>
+                        <div class="table-actions"></div>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -753,8 +778,11 @@
                 <div class="form-group">
                     <label for="user-search-input">Search User</label>
                     <div style="position: relative;">
-                        <input type="text" id="user-search-input" placeholder="Search users affiliated with this organization" autocomplete="off">
-                        <div id="user-search-results" style="position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e7eb; border-top: none; max-height: 300px; overflow-y: auto; z-index: 10; display: none;"></div>
+                        <input type="text" id="user-search-input"
+                            placeholder="Search users affiliated with this organization" autocomplete="off">
+                        <div id="user-search-results"
+                            style="position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #e5e7eb; border-top: none; max-height: 300px; overflow-y: auto; z-index: 10; display: none;">
+                        </div>
                     </div>
                     <div id="name-error" class="error-message"></div>
                 </div>
@@ -777,7 +805,8 @@
                     <div id="role-error" class="error-message"></div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" disabled><i class="fas fa-plus"></i> Add Member</button>
+                    <button type="submit" class="btn btn-primary" disabled><i class="fas fa-plus"></i> Add
+                        Member</button>
                     <button type="button" id="cancel-add-member" class="btn btn-secondary">Cancel</button>
                 </div>
             </form>
@@ -785,14 +814,15 @@
     </div>
 
     <!-- Success Message Toast -->
-    <div id="success-message" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-green-500 text-white rounded-xl shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none">
+    <div id="success-message"
+        class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-green-500 text-white rounded-xl shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none">
         <i class="fas fa-check-circle text-xl"></i>
         <span class="font-medium"></span>
     </div>
 
     <script>
         // Mobile menu toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -813,7 +843,7 @@
 
             const navLinks = document.querySelectorAll('#sidebar a');
             navLinks.forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function () {
                     if (window.innerWidth <= 768) {
                         toggleMobileMenu();
                     }
@@ -920,7 +950,7 @@
             window.alert(message);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const menuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -1028,7 +1058,7 @@
                 }
                 userSearchResults.innerHTML = users.map(u => {
                     const initials = (u.name || u.full_name || u.username || '?')
-                        .split(' ').map(s => s[0]).join('').substring(0,2).toUpperCase();
+                        .split(' ').map(s => s[0]).join('').substring(0, 2).toUpperCase();
                     const name = u.name || u.full_name || u.username || 'Unknown';
                     const email = u.email || '';
                     const program = u.program || u.affiliation || '';
@@ -1116,7 +1146,7 @@
             }
 
             const debouncedSearch = debounce(doSearch, 300);
-            debouncedSearch.flush = function(){};
+            debouncedSearch.flush = function () { };
 
             if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
             if (overlay) overlay.addEventListener('click', () => {
@@ -1124,7 +1154,7 @@
                 overlay.classList.add('hidden');
             });
             if (sidebarClose) sidebarClose.addEventListener('click', () => {
-                
+
             });
 
             const mobileActionsBtn = document.getElementById('mobileActionsBtn');
@@ -1157,7 +1187,7 @@
             });
 
             if (searchInput) {
-                searchInput.addEventListener('input', function() {
+                searchInput.addEventListener('input', function () {
                     const searchTerm = this.value.toLowerCase().trim();
                     const memberRows = document.querySelectorAll('#members-tbody .member-row');
                     let visibleCount = 0;
@@ -1198,7 +1228,7 @@
             }
 
             if (addMemberForm) {
-                addMemberForm.addEventListener('submit', function(e) {
+                addMemberForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     clearMemberErrors();
 
@@ -1419,7 +1449,7 @@
                         credentials: 'same-origin'
                     }).then(async (res) => {
                         let data = null;
-                        try { data = await res.json(); } catch(e) { }
+                        try { data = await res.json(); } catch (e) { }
                         if (!res.ok) {
                             const err = (data && (data.error || data.detail)) || res.statusText || 'Request failed';
                             throw new Error(err);
@@ -1512,12 +1542,12 @@
                 if (messageText) {
                     messageText.textContent = message;
                 }
-                
+
                 successMessage.style.display = 'flex';
                 setTimeout(() => {
                     successMessage.style.opacity = '1';
                 }, 10);
-                
+
                 setTimeout(() => {
                     successMessage.style.opacity = '0';
                     setTimeout(() => {
@@ -1528,4 +1558,5 @@
         }
     </script>
 </body>
+
 </html>

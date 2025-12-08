@@ -1,13 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOAR - Organization</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/organization/organization_page.css' %}">
     <style>
         * {
@@ -15,26 +17,85 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+
         .sidebar {
             transition: transform 0.3s ease;
         }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
                 position: fixed;
                 z-index: 50;
             }
+
             .sidebar.mobile-open {
                 transform: translateX(0);
             }
         }
+
+        /* Animated Gradient Background */
+        .content-area {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            position: relative;
+        }
+
+        /* Organization Card Enhancements */
         .org-card {
-            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
         }
+
+        .org-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
         .org-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-6px);
+            box-shadow:
+                0 20px 35px -10px rgba(59, 130, 246, 0.2),
+                0 10px 20px -5px rgba(59, 130, 246, 0.15),
+                0 0 0 1px rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
         }
+
+        .org-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Shimmer Effect */
+        .org-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(59, 130, 246, 0.08),
+                    transparent);
+            transition: left 0.7s;
+        }
+
+        .org-card:hover::after {
+            left: 100%;
+        }
+
         .org-desc {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -44,8 +105,264 @@
             text-overflow: ellipsis;
             min-height: 2.5rem;
         }
+
+        /* Search Bar Enhancement */
+        .search-container {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            transform: translateY(-2px);
+        }
+
+        .search-input {
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow:
+                0 0 0 3px rgba(59, 130, 246, 0.1),
+                0 10px 20px -5px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Join Button Enhancement */
+        .btn-join {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-join::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-join:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-join:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Section Header */
+        .section-header {
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, transparent);
+            border-radius: 2px;
+        }
+
+        /* Debug Panel Enhancement */
+        .debug-panel {
+            animation: slideDown 0.4s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Fade In Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .animate-delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .animate-delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        .animate-delay-4 {
+            animation-delay: 0.4s;
+        }
+
+        /* Modal Enhancements */
+        #joinModal {
+            backdrop-filter: blur(8px);
+        }
+
+        #joinModal>div:first-child {
+            background: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #joinModal>div:last-child>div {
+            animation: modalSlideUp 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-close-btn {
+            transition: all 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: #fee;
+            color: #dc2626;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px dashed #cbd5e1;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Custom Scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Icon Enhancement */
+        .icon-badge {
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within .icon-badge {
+            color: #3b82f6;
+            transform: scale(1.1);
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Card Grid Stagger */
+        .org-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .org-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .org-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .org-card:nth-child(4) {
+            animation-delay: 0.25s;
+        }
+
+        .org-card:nth-child(5) {
+            animation-delay: 0.3s;
+        }
+
+        .org-card:nth-child(6) {
+            animation-delay: 0.35s;
+        }
+
+        /* Focus States */
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Loading State (if needed) */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <!-- Overlay for mobile -->
     <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
@@ -61,7 +378,7 @@
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center space-x-4">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">Track Organizations     </h1>
+                            <h1 class="text-2xl font-bold text-gray-800">Track Organizations</h1>
                         </div>
                     </div>
 
@@ -69,16 +386,19 @@
                     <div class="flex items-center space-x-3">
                         <!-- Notification Bell -->
                         {% include 'base/notification_bell.html' %}
-                        
+
                         <div class="hidden md:block text-right">
-                            <p class="text-sm font-medium text-gray-700">{{ user.first_name|title }} {{ user.last_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
-                            
+                            <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
+
                         </div>
                         <a href="{% url 'profile' %}">
                             {% if user.profile_picture %}
-                                <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}"
+                                class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
                             {% else %}
-                                <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff" alt="{{ user.last_name }}, {{ user.first_name }}" class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                            <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff"
+                                alt="{{ user.last_name }}, {{ user.first_name }}"
+                                class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
                             {% endif %}
                         </a>
                     </div>
@@ -86,53 +406,94 @@
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-6">
-                <!-- Debug panel shown when a search query is present -->
-                {% if q %}
-                <div id="debugPanel" class="mb-4 p-4 rounded bg-yellow-50 border-l-4 border-yellow-400 text-sm text-gray-700">
-                    <strong>Debug</strong>: query = "{{ q }}" — server matched {{ all_orgs|length }} organization(s).
-                    <div class="mt-2 text-xs text-gray-600">Matched names: {% for o in all_orgs %}{% if not forloop.first %}, {% endif %}{{ o.name }}{% empty %}— none —{% endfor %}</div>
-                </div>
-                {% endif %}
-                <!-- Search + Join -->
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="relative flex-1">
-                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <!-- Top search: client-side filter for "Your Organizations" -->
-                        <input id="orgSearch" type="text" placeholder="Search your organizations" aria-label="Search your organizations" value="" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <div class="flex-1 overflow-y-auto p-6 content-area">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Debug panel shown when a search query is present -->
+                    {% if q %}
+                    <div id="debugPanel"
+                        class="mb-6 p-4 rounded-xl bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 text-sm text-gray-700 shadow-md debug-panel">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-yellow-600 mt-0.5"></i>
+                            <div class="flex-1">
+                                <strong class="font-semibold">Debug</strong>: query = "{{ q }}" — server matched {{
+                                all_orgs|length }} organization(s).
+                                <div class="mt-2 text-xs text-gray-600">Matched names: {% for o in all_orgs %}{% if not forloop.first %}, {% endif %}{{ o.name }}{% empty %}— none —{% endfor %}</div>
+                            </div>
+                        </div>
                     </div>
-                    <button id="joinBtn" class="px-5 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition">Join organization</button>
-                </div>
+                    {% endif %}
 
-    <!-- My Organizations Section -->
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Organizations</h2>
+                    <!-- Search + Join -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10 animate-fade-in">
+                        <div class="search-container relative flex-1">
+                            <i
+                                class="fas fa-search icon-badge absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input id="orgSearch" type="text" placeholder="Search your organizations"
+                                aria-label="Search your organizations" value=""
+                                class="search-input w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+                        </div>
+                        <button id="joinBtn"
+                            class="btn-join px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all relative z-10 whitespace-nowrap">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            <span>Join Organization</span>
+                        </button>
+                    </div>
 
-                    <div id="myOrgsSection">
-                        {% include 'organization/normal_org_card.html' %}
+                    <!-- My Organizations Section -->
+                    <div class="mb-12 animate-fade-in animate-delay-2">
+                        <div class="section-header mb-8">
+                            <h2 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-building text-white text-lg"></i>
+                                </div>
+                                Your Organizations
+                            </h2>
+                            <p class="text-gray-600 mt-3 ml-13">Manage and track your organization memberships</p>
+                        </div>
+
+                        <div id="myOrgsSection" class="animate-fade-in animate-delay-3">
+                            {% include 'organization/normal_org_card.html' %}
+                        </div>
                     </div>
                 </div>
-
-
 
                 <!-- Join Organizations Modal -->
                 <div id="joinModal" class="fixed inset-0 z-50 hidden">
                     <div id="joinModalOverlay" class="absolute inset-0 bg-black bg-opacity-50"></div>
-                    <div class="absolute inset-0 flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto min-h-screen">
-                        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] relative flex flex-col">
-                            <!-- Always-visible close button (viewport-fixed so it's always reachable) -->
-                            <button id="joinModalCloseTop" class="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 md:p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors" aria-label="Close join modal">
+                    <div
+                        class="absolute inset-0 flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto min-h-screen">
+                        <div
+                            class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] relative flex flex-col">
+                            <!-- Always-visible close button -->
+                            <button id="joinModalCloseTop"
+                                class="modal-close-btn absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 md:p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-all"
+                                aria-label="Close join modal">
                                 <i class="fas fa-times text-gray-700 text-lg"></i>
                             </button>
-                            <div class="flex items-center justify-between p-4 md:p-6 border-b flex-shrink-0">
+
+                            <!-- Modal Header -->
+                            <div
+                                class="flex items-center justify-between p-4 md:p-6 border-b flex-shrink-0 bg-gradient-to-r from-blue-50 to-white">
                                 <div class="pr-8">
-                                    <h3 class="text-lg md:text-xl font-semibold text-gray-900">Browse All Organizations</h3>
-                                    <p class="text-sm text-gray-500">Find and join student organizations</p>
+                                    <h3 class="text-lg md:text-2xl font-bold text-gray-900 flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-search text-white text-sm"></i>
+                                        </div>
+                                        Browse All Organizations
+                                    </h3>
+                                    <p class="text-sm text-gray-600 mt-2 ml-11">Find and join student organizations that
+                                        match your interests</p>
                                 </div>
-                                <button id="joinModalClose" class="p-2 rounded hover:bg-gray-100 hidden md:block" aria-label="Close">
-                                    <i class="fas fa-times"></i>
+                                <button id="joinModalClose"
+                                    class="modal-close-btn p-2 rounded-lg hover:bg-gray-100 hidden md:block"
+                                    aria-label="Close">
+                                    <i class="fas fa-times text-gray-600 text-xl"></i>
                                 </button>
                             </div>
+
+                            <!-- Modal Content -->
                             <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
                                 {% include 'organization/join_org_card.html' %}
                             </div>
@@ -149,7 +510,7 @@
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
-        
+
         mobileMenuToggle?.addEventListener('click', () => {
             sidebar.classList.toggle('mobile-open');
             overlay.classList.toggle('hidden');
@@ -160,13 +521,14 @@
             overlay.classList.add('hidden');
         });
 
-    // Search filtering across visible cards
-    const searchInput = document.getElementById('orgSearch');
-    const myOrgsSection = document.getElementById('myOrgsSection');
+        // Search filtering across visible cards
+        const searchInput = document.getElementById('orgSearch');
+        const myOrgsSection = document.getElementById('myOrgsSection');
+
         function normalize(str) { return (str || '').toString().toLowerCase(); }
 
         // Helper to extract sensible title/description from a card using multiple fallbacks
-        function cardText(card){
+        function cardText(card) {
             const titleEl = card.querySelector('.org-title') || card.querySelector('h3');
             const descEl = card.querySelector('.org-desc') || card.querySelector('p');
             const name = titleEl ? titleEl.textContent : (card.getAttribute('data-org-name') || '');
@@ -182,13 +544,14 @@
                 card.style.display = match ? '' : 'none';
             });
         }
+
         // typing filters only the user's org cards; pressing Enter won't submit
         searchInput?.addEventListener('input', (e) => filterUserOrgs(e.target.value));
         searchInput?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') { e.preventDefault(); filterUserOrgs(searchInput.value); }
         });
 
-        function filterUserOrgs(query){
+        function filterUserOrgs(query) {
             const q = normalize(query);
             if (!myOrgsSection) return;
             myOrgsSection.querySelectorAll('.org-card').forEach(card => {
@@ -207,7 +570,7 @@
         const modalSearch = document.getElementById('modalOrgSearch');
         let lastFocused = null;
 
-        function getFocusable(container){
+        function getFocusable(container) {
             const selectors = [
                 'a[href]', 'button:not([disabled])', 'input:not([disabled])', 'select:not([disabled])',
                 'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])'
@@ -216,7 +579,7 @@
                 .filter(el => el.offsetParent !== null);
         }
 
-        function onModalKeydown(e){
+        function onModalKeydown(e) {
             if (e.key === 'Escape') { e.preventDefault(); closeJoinModal(); return; }
             if (e.key === 'Tab') {
                 const focusables = getFocusable(joinModal);
@@ -228,7 +591,7 @@
             }
         }
 
-        function openJoinModal(){
+        function openJoinModal() {
             if (!joinModal) return;
             lastFocused = document.activeElement;
             joinModal.classList.remove('hidden');
@@ -237,7 +600,8 @@
             // Focus search input first, fallback to visible close button
             setTimeout(() => { (modalSearch || document.getElementById('joinModalCloseTop') || joinModalClose)?.focus(); }, 0);
         }
-        function closeJoinModal(){
+
+        function closeJoinModal() {
             if (!joinModal) return;
             joinModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
@@ -247,7 +611,7 @@
         }
 
         // Scoped filtering inside modal only
-        function filterModalCards(query){
+        function filterModalCards(query) {
             const q = (query || '').toString().toLowerCase();
             if (!joinModal) return;
             joinModal.querySelectorAll('.org-card').forEach(card => {
@@ -257,13 +621,13 @@
             });
         }
 
-        modalSearch?.addEventListener('input', (e)=> filterModalCards(e.target.value));
+        modalSearch?.addEventListener('input', (e) => filterModalCards(e.target.value));
 
         joinBtn?.addEventListener('click', openJoinModal);
         joinModalOverlay?.addEventListener('click', closeJoinModal);
-    joinModalClose?.addEventListener('click', closeJoinModal);
-    const joinModalCloseTop = document.getElementById('joinModalCloseTop');
-    joinModalCloseTop?.addEventListener('click', closeJoinModal);
+        joinModalClose?.addEventListener('click', closeJoinModal);
+        const joinModalCloseTop = document.getElementById('joinModalCloseTop');
+        joinModalCloseTop?.addEventListener('click', closeJoinModal);
 
         // If the page was loaded with a query, open modal and apply it to modal search
         const initialQuery = "{{ q|default:''|escapejs }}";
@@ -279,10 +643,20 @@
                 const modalCards = joinModal ? joinModal.querySelectorAll('.org-card') : [];
                 console.log('modalCards count before filter:', modalCards.length);
                 filterModalCards(initialQuery);
-                const modalCardsAfter = joinModal ? Array.from(joinModal.querySelectorAll('.org-card')).filter(c=>c.style.display!=='none') : [];
+                const modalCardsAfter = joinModal ? Array.from(joinModal.querySelectorAll('.org-card')).filter(c => c.style.display !== 'none') : [];
                 console.log('modalCards visible after filter:', modalCardsAfter.length);
             }, 50);
         }
+
+        // Add stagger animation to organization cards on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const orgCards = document.querySelectorAll('.org-card');
+            orgCards.forEach((card, index) => {
+                card.style.animationDelay = `${0.1 + (index * 0.05)}s`;
+                card.classList.add('animate-fade-in');
+            });
+        });
     </script>
 </body>
+
 </html>

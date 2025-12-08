@@ -1,5 +1,37 @@
 
 document.addEventListener('DOMContentLoaded', function() {
+    const errorBanner = document.getElementById('notification-error');
+    const errorText = document.getElementById('notification-error-text');
+    const csrfInput = document.querySelector('#csrf-token-form [name=csrfmiddlewaretoken]');
+
+    function showError(message) {
+        if (!errorBanner || !errorText) return;
+        errorText.textContent = message || 'Something went wrong. Please try again.';
+        errorBanner.classList.remove('hidden');
+        setTimeout(() => errorBanner.classList.add('hidden'), 6000);
+    }
+
+    function getCsrf() {
+        return csrfInput ? csrfInput.value : '';
+    }
+
+    async function safeFetch(url, options = {}) {
+        const opts = {
+            ...options,
+            headers: {
+                'X-CSRFToken': getCsrf(),
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+        };
+        const res = await fetch(url, opts);
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || `Request failed (${res.status})`);
+        }
+        return res.json();
+    }
+
     // Tab switching functionality
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -30,16 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mark all as read functionality
     const markAllReadBtn = document.getElementById('mark-all-read');
     if (markAllReadBtn) {
-        markAllReadBtn.addEventListener('click', () => {
-            fetch('/notification/mark-all-read/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
+        markAllReadBtn.addEventListener('click', async () => {
+            try {
+                const data = await safeFetch('/notification/mark-all-read/', { method: 'POST' });
                 if (data.status === 'success') {
                     document.querySelectorAll('.unread').forEach(item => {
                         item.classList.remove('unread', 'bg-gradient-to-r', 'from-blue-50', 'to-white', 'border-l-4', 'border-blue-500');
@@ -48,41 +73,30 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (indicator) indicator.remove();
                     });
 
-                    // Update unread count
                     const unreadBadge = document.querySelector('button[data-tab="unread"] span');
                     if (unreadBadge) unreadBadge.textContent = '0';
-
-                    // Show success message
-                    alert('All notifications marked as read');
                 }
-            });
+            } catch (err) {
+                showError('Could not mark notifications as read.');
+            }
         });
     }
 
     // Mark individual notification as read
     document.querySelectorAll('.notification-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
             const notificationId = item.dataset.notificationId;
             const orgId = item.dataset.orgId;
 
             if (item.classList.contains('unread')) {
-                // Mark as read via API
-                fetch(`/notification/mark-read/${notificationId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
+                try {
+                    const data = await safeFetch(`/notification/mark-read/${notificationId}/`, { method: 'POST' });
                     if (data.status === 'success') {
                         item.classList.remove('unread', 'bg-gradient-to-r', 'from-blue-50', 'to-white', 'border-l-4', 'border-blue-500');
                         item.classList.add('bg-white', 'border', 'border-gray-200');
                         const indicator = item.querySelector('.absolute');
                         if (indicator) indicator.remove();
 
-                        // Update unread count
                         const unreadBadge = document.querySelector('button[data-tab="unread"] span');
                         if (unreadBadge) {
                             let count = parseInt(unreadBadge.textContent) || 0;
@@ -92,7 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     }
-                });
+                } catch (err) {
+                    showError('Could not mark this notification as read.');
+                    return;
+                }
             }
 
             // Redirect to organization page
@@ -120,20 +137,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('all-notifications').appendChild(clone);
 
                 // Reattach event listener
-                clone.addEventListener('click', () => {
+                clone.addEventListener('click', async () => {
                     const notificationId = clone.dataset.notificationId;
                     const orgId = clone.dataset.orgId;
 
                     if (clone.classList.contains('unread')) {
-                        fetch(`/notification/mark-read/${notificationId}/`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                                'Content-Type': 'application/json',
-                            },
-                        })
-                        .then(response => response.json())
-                        .then(data => {
+                        try {
+                            const data = await safeFetch(`/notification/mark-read/${notificationId}/`, { method: 'POST' });
                             if (data.status === 'success') {
                                 clone.classList.remove('unread', 'bg-gradient-to-r', 'from-blue-50', 'to-white', 'border-l-4', 'border-blue-500');
                                 clone.classList.add('bg-white', 'border', 'border-gray-200');
@@ -148,7 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }
                                 }
                             }
-                        });
+                        } catch (err) {
+                            showError('Could not mark this notification as read.');
+                            return;
+                        }
                     }
 
                     window.location.href = `/organization/orgpage/${orgId}/`;

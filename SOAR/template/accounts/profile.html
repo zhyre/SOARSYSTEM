@@ -9,27 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/accounts/profile.css' %}">
     <style>
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 50;
-            }
-
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
+        body {
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
@@ -41,8 +24,6 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='dashboard' %}
-
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Bar -->
             <header class="bg-white shadow-sm z-10">
@@ -58,7 +39,8 @@
                         {% include 'base/notification_bell.html' %}
 
                         <div class="hidden md:block text-right">
-                            <p class="text-sm font-medium text-gray-700">{{ user.first_name|title }} {{ user.last_name|title }}</p>
+                            <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{ user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}</p>
+
                         </div>
                         <a href="{% url 'profile' %}">
                             {% if user.profile_picture %}
@@ -73,220 +55,159 @@
                     </div>
                 </div>
             </header>
-
-            <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-6">
-                <!-- Profile Container -->
-                <div class="max-w-6xl mx-auto">
-                    <!-- Profile Header with Card Design -->
-                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 mb-6">
-                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-                            <div>
-                                <h1
-                                    class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                    Student Profile</h1>
-                                <p class="text-gray-600 mt-2">Manage your personal and academic information</p>
-                            </div>
-                            <div class="mt-4 md:mt-0">
-                                <div
-                                    class="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                    <i class="fas fa-check-circle mr-2"></i>
-                                    Profile Active
-                                </div>
+            <div class="dashboard-content flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6">
+                <!-- Profile Header with Card Design -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 mb-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+                        <div>
+                            <h1
+                                class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                Student Profile</h1>
+                            <p class="text-gray-600 mt-2">Manage your personal and academic information</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <div
+                                class="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Profile Active
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Profile Content with Enhanced Design -->
-                    <div class="profile-container">
-                        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                            <!-- Profile Picture Section -->
-                            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 md:p-8">
-                                <div
-                                    class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                                    <div class="relative">
-                                        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white p-1">
-                                            <div class="w-full h-full rounded-full overflow-hidden">
-                                                {% if user.profile_picture %}
-                                                <img src="{{ user.profile_picture.url }}" alt="Student Profile"
-                                                    id="preview-image" class="w-full h-full object-cover">
-                                                {% else %}
-                                                <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=2563eb&color=fff"
-                                                    alt="Student Profile" class="w-full h-full object-cover">
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <button type="button"
-                                            class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                            aria-label="Upload profile picture"
-                                            onclick="document.getElementById('profile-picture-input').click()">
-                                            <i class="fas fa-camera text-sm"></i>
-                                        </button>
-                                    </div>
-                                    <div class="text-center md:text-left flex-1">
-                                        <h3 class="text-2xl font-bold text-white" style="text-transform: capitalize;">{{ user.get_full_name }}</h3>
-                                        <p class="text-blue-100 mt-1">CIT-U Student</p>
-                                        <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
-                                            <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">Student
-                                                ID: {{ user.student_id|default:"Not Set" }}</span>
-                                            <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">{{ user.course|default:"Not Set" }}</span>
+                <!-- Profile Content with Enhanced Design -->
+                <div class="profile-container">
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                        <!-- Profile Picture Section -->
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 md:p-8">
+                            <div
+                                class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+                                <div class="relative">
+                                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white p-1">
+                                        <div class="w-full h-full rounded-full overflow-hidden">
+                                            {% if user.profile_picture %}
+                                            <img src="{{ user.profile_picture.url }}" alt="Student Profile"
+                                                id="preview-image" class="w-full h-full object-cover">
+                                            {% else %}
+                                            <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=2563eb&color=fff"
+                                                alt="Student Profile" id="preview-image"
+                                                class="w-full h-full object-cover">
+                                            {% endif %}
                                         </div>
                                     </div>
-                                    <div class="flex space-x-3">
+                                    <div class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors"
+                                        onclick="document.getElementById('profile-picture-input').click()">
+                                        <i class="fas fa-camera text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="text-center md:text-left flex-1">
+                                    <h3 class="text-2xl font-bold text-white">{{ user.get_full_name }}</h3>
+                                    <p class="text-blue-100 mt-1">CIT-U Student</p>
+                                    <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
+                                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">Student ID:
+                                            {{ user.student_id|default:"Not Set" }}</span>
+                                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">{{
+                                            user.course|default:"Not Set" }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button type="button"
+                                        class="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                                        onclick="document.getElementById('profile-picture-input').click()">
+                                        <i class="fas fa-upload mr-2"></i>
+                                        Upload
+                                    </button>
+                                    <button type="button"
+                                        class="px-4 py-2 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors">
+                                        <i class="fas fa-trash mr-2"></i>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="file" id="profile-picture-input" name="profile_picture" accept="image/*"
+                                style="display: none;">
+                        </div>
+
+                        <!-- Form Section -->
+                        <div class="p-6 md:p-8">
+                            <div class="mb-6">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Personal Information</h2>
+                                <p class="text-gray-600">Update your personal and academic details below.</p>
+                            </div>
+
+                            <form class="edit-profile-form" id="edit-profile-form" method="post"
+                                enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Form Fields Section -->
+                                    <div class="form-fields-section">
+                                        <div class="form-group">
+                                            <label for="id_first_name"
+                                                class="block text-sm font-medium text-gray-700 mb-2">First name</label>
+                                            {{ form.first_name }}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="id_last_name"
+                                                class="block text-sm font-medium text-gray-700 mb-2">Last name</label>
+                                            {{ form.last_name }}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="id_email"
+                                                class="block text-sm font-medium text-gray-700 mb-2">Email
+                                                address</label>
+                                            {{ form.email }}
+                                        </div>
+                                    </div>
+
+                                    <div class="form-fields-section">
+                                        <div class="form-group">
+                                            <label for="id_student_id"
+                                                class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+                                            {{ form.student_id }}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="id_course"
+                                                class="block text-sm font-medium text-gray-700 mb-2">Course</label>
+                                            {{ form.course }}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="id_year_level"
+                                                class="block text-sm font-medium text-gray-700 mb-2">Year Level</label>
+                                            {{ form.year_level }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="profile-footer mt-8 pt-6 border-t border-gray-200">
+                                    <div
+                                        class="flex flex-col md:flex-row justify-end space-y-3 md:space-y-0 md:space-x-4">
                                         <button type="button"
-                                            class="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
-                                            onclick="document.getElementById('profile-picture-input').click()">
-                                            <i class="fas fa-upload mr-2"></i>
-                                            Upload
+                                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                                            id="cancel-profile-btn">
+                                            <i class="fas fa-times mr-2"></i>
+                                            Cancel
                                         </button>
-                                        <button type="button"
-                                            class="px-4 py-2 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors">
-                                            <i class="fas fa-trash mr-2"></i>
-                                            Remove
+                                        <button type="submit"
+                                            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all"
+                                            id="save-profile-btn">
+                                            <i class="fas fa-save mr-2"></i>
+                                            Save Changes
                                         </button>
                                     </div>
                                 </div>
-                                <input type="file" id="profile-picture-input" name="profile_picture" accept="image/*"
-                                    style="display: none;">
-                            </div>
-
-                            <!-- Form Section -->
-                            <div class="p-6 md:p-8">
-                                <div class="mb-8">
-                                    <div class="flex items-center space-x-3 mb-2">
-                                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-user text-blue-600"></i>
-                                        </div>
-                                        <h2 class="text-xl font-semibold text-gray-900">Personal Information</h2>
-                                    </div>
-                                    <p class="text-gray-600 ml-11">Update your personal and academic details below.</p>
-                                </div>
-
-                                <form class="edit-profile-form" id="edit-profile-form" method="post"
-                                    enctype="multipart/form-data">
-                                    {% csrf_token %}
-
-                                    <!-- Basic Info Section -->
-                                    <div class="mb-8">
-                                        <div class="flex items-center space-x-2 mb-4">
-                                            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                                                Basic Information</h3>
-                                            <div class="flex-1 h-px bg-gray-200"></div>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div class="form-group">
-                                                <label for="id_first_name"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <span>First name</span>
-                                                    <span class="text-red-500">*</span>
-                                                </label>
-                                                {{ form.first_name }}
-                                                <p class="text-xs text-gray-500 mt-1">Your first name as it appears in
-                                                    official records</p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="id_last_name"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <span>Last name</span>
-                                                    <span class="text-red-500">*</span>
-                                                </label>
-                                                {{ form.last_name }}
-                                                <p class="text-xs text-gray-500 mt-1">Your family name</p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="id_email"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <i class="fas fa-envelope text-blue-500 text-xs"></i>
-                                                    <span>Email address</span>
-                                                    <span class="text-red-500">*</span>
-                                                </label>
-                                                {{ form.email }}
-                                                <p class="text-xs text-gray-500 mt-1">We'll use this for notifications
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Academic Info Section -->
-                                    <div class="mb-8">
-                                        <div class="flex items-center space-x-2 mb-4">
-                                            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                                                Academic Information</h3>
-                                            <div class="flex-1 h-px bg-gray-200"></div>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div class="form-group">
-                                                <label for="id_student_id"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <i class="fas fa-id-card text-purple-500 text-xs"></i>
-                                                    <span>Student ID</span>
-                                                    <span class="text-red-500">*</span>
-                                                </label>
-                                                {{ form.student_id }}
-                                                <p class="text-xs text-gray-500 mt-1">Your university student
-                                                    identification number</p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="id_course"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <i class="fas fa-book text-green-500 text-xs"></i>
-                                                    <span>Course</span>
-                                                </label>
-                                                {{ form.course }}
-                                                <p class="text-xs text-gray-500 mt-1">Your academic program or major</p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="id_year_level"
-                                                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-                                                    <i class="fas fa-graduation-cap text-orange-500 text-xs"></i>
-                                                    <span>Year Level</span>
-                                                </label>
-                                                {{ form.year_level }}
-                                                <p class="text-xs text-gray-500 mt-1">Your current academic year</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="profile-footer mt-8 pt-8 border-t border-gray-200">
-                                        <div
-                                            class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                                            <p class="text-sm text-gray-500">
-                                                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                                                Changes will be saved to your profile
-                                            </p>
-                                            <div
-                                                class="flex flex-col xs:flex-row w-full sm:w-auto space-y-2 xs:space-y-0 xs:space-x-3">
-                                                <button type="button"
-                                                    class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
-                                                    id="cancel-profile-btn">
-                                                    <i class="fas fa-times mr-2"></i>
-                                                    Cancel
-                                                </button>
-                                                <button type="submit"
-                                                    class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
-                                                    id="save-profile-btn">
-                                                    <i class="fas fa-check mr-2"></i>
-                                                    Save Changes
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                            </form>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Success Message -->
-                    <div class="success-message" id="success-message">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="success-text">Profile updated successfully!</span>
-                    </div>
+                <!-- Success Message -->
+                <div class="success-message" id="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="success-text">Profile updated successfully!</span>
                 </div>
             </div>
         </main>
