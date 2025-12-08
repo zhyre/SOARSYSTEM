@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Event - {{ organization.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <a href="{% url 'orgpage' organization.id %}" class="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Organization
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">Delete Event</h1>
+            </div>
+
+            <!-- Warning Card -->
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <!-- Warning Icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
+                    </div>
+                </div>
+
+                <!-- Message -->
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-3">Are you sure?</h2>
+                    <p class="text-gray-600 mb-4">
+                        You are about to permanently delete the event:
+                    </p>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ event.title }}</h3>
+                        <p class="text-gray-600 mt-1">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            {{ event.event_date|date:"F d, Y \a\t g:i A" }}
+                        </p>
+                    </div>
+                    <p class="text-red-600 font-medium">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        This action cannot be undone.
+                    </p>
+                </div>
+
+                <!-- Confirmation Information -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        All RSVPs, attendees, and event data associated with this event will be permanently deleted.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-4">
+                    <a href="{% url 'orgpage' organization.id %}"
+                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium inline-flex items-center gap-2">
+                        <i class="fas fa-times mr-1"></i>
+                        <span>Keep Event</span>
+                    </a>
+                    <form method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium inline-flex items-center gap-2">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            <span>Delete Event</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
