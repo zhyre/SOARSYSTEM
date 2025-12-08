@@ -1,6 +1,7 @@
-{% load static %}
+z{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +9,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="{% static 'js/organization/sidebar.js' %}" defer></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+
         body {
             background-color: #f8fafc;
         }
@@ -24,31 +25,50 @@
             width: 6px;
             height: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .animate-slide-in {
             animation: slideIn 0.4s ease-out forwards;
         }
@@ -64,7 +84,7 @@
             z-index: 50;
             overflow-y: auto;
         }
-        
+
         /* Mobile overlay */
         .sidebar-overlay {
             position: fixed;
@@ -76,7 +96,7 @@
             z-index: 40;
             display: none;
         }
-        
+
         .sidebar-overlay.active {
             display: block;
         }
@@ -86,6 +106,7 @@
             .modern-sidebar {
                 transform: translateX(-100%);
             }
+
             .modern-sidebar.mobile-open {
                 transform: translateX(0);
             }
@@ -93,365 +114,356 @@
 
         /* Logo animation */
         @keyframes rocketFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
         }
+
         .rocket-animate:hover {
             animation: rocketFloat 2s ease-in-out infinite;
         }
 
-        /* Activity Card Styles */
+        /* Main Content Styles */
         .main-content {
+            margin-left: 0;
+            width: 100%;
             margin-left: 260px;
             min-height: 100vh;
             transition: margin 0.3s ease, width 0.3s ease;
         }
-        
-        @media (max-width: 767px) {
-            .main-content {
-                margin-left: 0;
+
+        /* Override main content to use full available width */
+        .main-content.flex-1 {
+            width: auto !important;
+            margin-left: 0;
+            flex: 1 !important;
+
+            @media (max-width: 767px) {
+                .main-content {
+                    margin-left: 0;
+                }
             }
-        }
-        
-        .activity-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
 
-        /* Empty state animation */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-        }
+            .activity-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
 
-        /* Image preview */
-        .image-preview {
-            max-height: 400px;
-            object-fit: cover;
-        }
+            /* Empty state animation */
+            @keyframes float {
 
-        /* Response button states */
-        .response-btn.active {
-            font-weight: 600;
-        }
-        .response-btn.going.active {
-            background-color: #dcfce7;
-            color: #16a34a;
-            border-color: #16a34a;
-        }
-        .response-btn.interested.active {
-            background-color: #fef3c7;
-            color: #d97706;
-            border-color: #d97706;
-        }
-        .response-btn.not-going.active {
-            background-color: #fee2e2;
-            color: #dc2626;
-            border-color: #dc2626;
-        }
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            .float-animation {
+                animation: float 3s ease-in-out infinite;
+            }
     </style>
 </head>
-    {% csrf_token %}
-    
-    <!-- Mobile Overlay -->
-    <div id="overlay" class="sidebar-overlay"></div>
-    
-    <div class="flex">
-        <!-- Sidebar -->
-        {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
-        <!-- Main content wrapper -->
-        <div class="main-content flex-1 flex flex-col overflow-hidden">
-            <!-- HEADER -->
-            {% include 'base/header_component.html' with page_title="Organization Feed" page_subtitle="Stay updated with the latest activities" %}
+{% csrf_token %}
 
-            <!-- Organization Header with Photo -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
-                <!-- Background Pattern -->
-                <div class="absolute inset-0">
-                    <div class="absolute inset-0 bg-black/10"></div>
-                    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+<!-- Mobile Overlay -->
+<div id="overlay" class="sidebar-overlay"></div>
+
+<div class="flex">
+    <!-- Sidebar -->
+    {% include 'base/sidebar_components.html' with sidebar_type='organization' %}
+    <!-- Main content wrapper -->
+    <div class="main-content flex-1 flex flex-col overflow-hidden">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm z-10">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Organization Page</h1>
+                    </div>
                 </div>
-                
-                <div class="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6 max-w-7xl mx-auto">
-                    
-                    <!-- Organization Photo -->
-                    <div class="relative group">
-                        <div class="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white p-1">
-                            <img src="{{ organization.profile_picture.url|default:'/static/images/default_org.png' }}" 
-                                alt="{{ organization.name }}" 
-                                class="w-full h-full object-contain">
-                        </div>
-                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <button class="p-2 sm:p-3 bg-white bg-opacity-90 rounded-full text-blue-600 hover:bg-white transition-all">
-                                <i class="fas fa-camera text-sm sm:text-lg"></i>
-                            </button>
-                        </div>
-                        <!-- Status Indicator -->
-                        <div class="absolute -bottom-1 -right-1 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                            <i class="fas fa-check text-white text-xs"></i>
-                        </div>
-                    </div>
+                <!-- Right Side: Notification Bell + User Profile -->
+                <div class="flex items-center space-x-3">
+                    <!-- Notification Bell -->
+                    {% include 'base/notification_bell.html' %}
 
-                    <!-- Organization Info -->
-                    <div class="text-left text-white flex-1 text-center md:text-left">
-                        <div class="flex flex-col md:flex-row md:items-center md:gap-4 mb-3">
-                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">{{ organization.name|default:"Organization Name" }}</h1>
-                            <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 mt-2 md:mt-0">
-                                <span class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
-                                    <i class="fas fa-star mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
-                                    {{ organization.members.count }} Members
-                                </span>
-                                <span class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
-                                    <i class="fas fa-calendar-alt mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
-                                    Since {{ organization.date_created|date:"Y" }}
-                                </span>
-                            </div>
-                        </div>
-                        <p class="text-blue-100 text-base sm:text-lg max-w-3xl mb-4">{{ organization.description|default:"Organization description goes here" }}</p>
-                        
-                        <div class="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
-                            {% if user.is_authenticated and user_role %}
-                                <button id="leaveOrgBtn" class="px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition border border-white/30 text-sm sm:text-base" onclick="leaveOrganization('{{ organization.id }}')">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
-                                </button>
-                            {% endif %}
-                        </div>
+                    <div class="hidden md:block text-right">
+                        <p class="text-sm font-medium text-gray-700">{{ user.last_name|title }}, {{
+                            user.first_name|title }}{% if user.middle_name %} {{ user.middle_name|title }}{% endif %}
+                        </p>
+
                     </div>
+                    <a href="{% url 'profile' %}">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.last_name }}, {{ user.first_name }}"
+                            class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                        {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ user.last_name }}+{{ user.first_name }}&background=2563eb&color=fff"
+                            alt="{{ user.last_name }}, {{ user.first_name }}"
+                            class="w-10 h-10 rounded-full border-2 border-blue-500 cursor-pointer hover:border-blue-600 transition">
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Organization Header with Photo -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0">
+                <div class="absolute inset-0 bg-black/10"></div>
+                <div class="absolute inset-0"
+                    style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
                 </div>
             </div>
 
-            <!-- MAIN CONTENT -->
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-gray-50">
-                <div class="max-w-6xl mx-auto w-full">
-                    {% if user_role in "adviser,leader" %}
-                        <div class="flex justify-end mb-6">
-                            <button id="openEventModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
-                                <i class="fas fa-calendar-plus"></i><span>Create Event</span>
-                            </button>
-                        </div>
-                    {% endif %}
+            <div
+                class="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-end md:justify-start gap-4 sm:gap-6 max-w-7xl mx-auto">
 
-                    <div class="mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
+                <!-- Organization Photo -->
+                <div class="relative group">
+                    <div
+                        class="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white p-1">
+                        <img src="{{ organization.profile_picture.url|default:'/static/images/default_org.png' }}"
+                            alt="{{ organization.name }}" class="w-full h-full object-contain">
                     </div>
+                    <div
+                        class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <button
+                            class="p-2 sm:p-3 bg-white bg-opacity-90 rounded-full text-blue-600 hover:bg-white transition-all">
+                            <i class="fas fa-camera text-sm sm:text-lg"></i>
+                        </button>
+                    </div>
+                    <!-- Status Indicator -->
+                    <div
+                        class="absolute -bottom-1 -right-1 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                </div>
 
-                    <!-- Activity Feed -->
-                    <div class="space-y-6">
-                        {% if activities %}
-                            {% for event in activities %}
-                                {% include 'event/eventcard_upload.html' with event=event organization=organization user_role=user_role %}
-                            {% endfor %}
-                        {% else %}
-                            <!-- Empty State -->
-                            <div class="text-center py-16">
-                                <div class="float-animation inline-block mb-4">
-                                    <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
-                                </div>
-                                <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
-                                <p class="text-gray-500">Create one to get started!</p>
-                            </div>
+                <!-- Organization Info -->
+                <div class="text-left text-white flex-1 text-center md:text-left">
+                    <div class="flex flex-col md:flex-row md:items-center md:gap-4 mb-3">
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">{{
+                            organization.name|default:"Organization Name" }}</h1>
+                        <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 mt-2 md:mt-0">
+                            <span
+                                class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
+                                <i class="fas fa-star mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
+                                {{ organization.members.count }} Members
+                            </span>
+                            <span
+                                class="inline-flex items-center px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
+                                <i class="fas fa-calendar-alt mr-1 sm:mr-1.5 text-xs sm:text-sm"></i>
+                                Since {{ organization.date_created|date:"Y" }}
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-blue-100 text-base sm:text-lg mb-4">{{ organization.description|default:"Organization
+                        description goes here" }}</p>
+
+                    <div class="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3">
+                        {% if user.is_authenticated and user_role %}
+                        <button id="leaveOrgBtn"
+                            class="px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition border border-white/30 text-sm sm:text-base"
+                            onclick="leaveOrganization('{{ organization.id }}')">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Leave Organization
+                        </button>
                         {% endif %}
                     </div>
                 </div>
-            </main>
-
-            <!-- FOOTER -->
-            <footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
-                <p>&copy; {{ now|date:"Y" }} SOAR System. All rights reserved.</p>
-            </footer>
-        </div>
-    </div>
-
-    <!-- EVENT MODAL -->
-    <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden justify-center items-center">
-        <div class="bg-white rounded-2xl shadow-lg max-w-3xl w-full mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
-            <button id="closeEventModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">
-                <i class="fas fa-times"></i>
-            </button>
-            
-            <!-- Create/Edit Event Form -->
-            <div class="mt-2">
-                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-6">Create New Event</h2>
-                <form id="createEventForm" action="{% url 'create_event' organization.id %}" method="post" enctype="multipart/form-data" class="space-y-4">
-                    {% csrf_token %}
-                    <input type="hidden" id="eventId">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
-                        <input type="text" name="title" id="eventTitle" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Enter event title">
-                    </div>
-
-                    <!-- Image Upload Section -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Image (Optional)</label>
-                        <div class="flex items-center space-x-4">
-                            <label for="eventImage" class="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition inline-flex items-center">
-                                <i class="fas fa-image mr-2"></i>
-                                <span>Choose Image</span>
-                            </label>
-                            <input type="file" name="attachment" id="eventImage" accept="image/*" class="hidden">
-                            <span id="imageFileName" class="text-sm text-gray-500">No file chosen</span>
-                        </div>
-                        <div id="imagePreviewContainer" class="mt-3 hidden">
-                            <img id="imagePreview" src="" alt="Preview" class="rounded-lg border border-gray-300 w-full image-preview">
-                            <button type="button" id="removeImage" class="mt-2 text-sm text-red-600 hover:text-red-800">
-                                <i class="fas fa-times mr-1"></i> Remove Image
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" id="eventDescription" rows="4" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Describe your event..."></textarea>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Event Date</label>
-                            <input type="date" name="date" id="eventDate" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Event Time</label>
-                            <input type="time" name="time" id="eventTime" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                        <input type="text" name="location" id="eventLocation" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Event location">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
-                            <select name="type" id="eventType" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="workshop">Workshop</option>
-                                <option value="seminar">Seminar</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="social">Social Event</option>
-                                <option value="other" selected>Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Participants (Optional)</label>
-                            <input type="number" name="max_participants" id="eventMaxParticipants" min="1"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Leave empty for unlimited">
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" id="cancelEventBtn"
-                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
-                            Cancel
-                        </button>
-                        <button type="submit" id="submitEventBtn"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                            Create Event
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+            <div class="w-full">
+                {% if user_role in "adviser,leader" %}
+                <div class="flex justify-end mb-6">
+                    <button id="openEventModal"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
+                        <i class="fas fa-calendar-plus"></i><span>Create Event</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Latest Updates</h2>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="space-y-6">
+                    {% if activities %}
+                    {% for event in activities %}
+                    {% include 'event/eventcard_upload.html' with event=event organization=organization
+                    user_role=user_role %}
+                    {% endfor %}
+                    {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-16">
+                        <div class="float-animation inline-block mb-4">
+                            <i class="fas fa-clipboard-list text-gray-300 text-6xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">No activities yet</h3>
+                        <p class="text-gray-500">Create one to get started!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
+            <p>&copy; {{ now|date:"Y" }} SOAR System. All rights reserved.</p>
+        </footer>
     </div>
-    
-    <script>
-        // Simple modal toggle functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            // Toggle event modal
-            const openEventModal = document.getElementById('openEventModal');
-            const closeEventModal = document.getElementById('closeEventModal');
-            const cancelEventBtn = document.getElementById('cancelEventBtn');
-            const eventModal = document.getElementById('eventModal');
+</div>
 
-            if (openEventModal) {
-                openEventModal.addEventListener('click', () => {
-                    eventModal.classList.remove('hidden');
-                    eventModal.classList.add('flex');
-                });
-            }
+<!-- EVENT MODAL -->
+<div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden justify-center items-center">
+    <div class="bg-white rounded-2xl shadow-lg max-w-3xl w-full mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
+        <button id="closeEventModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">
+            <i class="fas fa-times"></i>
+        </button>
 
-            const closeModal = () => {
-                eventModal.classList.add('hidden');
-                eventModal.classList.remove('flex');
-            };
+        <!-- Create/Edit Event Form -->
+        <div class="mt-2">
+            <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-6">Create New Event</h2>
+            <form id="createEventForm" action="{% url 'create_event' organization.id %}" method="post"
+                enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" id="eventId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+                    <input type="text" name="title" id="eventTitle" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter event title">
+                </div>
 
-            if (closeEventModal) closeEventModal.addEventListener('click', closeModal);
-            if (cancelEventBtn) cancelEventBtn.addEventListener('click', closeModal);
+                <!-- Image Upload Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Event Image (Optional)</label>
+                    <div class="flex items-center space-x-4">
+                        <label for="eventImage"
+                            class="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition inline-flex items-center">
+                            <i class="fas fa-image mr-2"></i>
+                            <span>Choose Image</span>
+                        </label>
+                        <input type="file" name="attachment" id="eventImage" accept="image/*" class="hidden">
+                        <span id="imageFileName" class="text-sm text-gray-500">No file chosen</span>
+                    </div>
+                </div>
 
-            // Close modal when clicking outside
-            eventModal?.addEventListener('click', (e) => {
-                if (e.target === eventModal) {
-                    closeModal();
-                }
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" id="eventDescription" rows="4" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Describe your event..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Date</label>
+                        <input type="date" name="date" id="eventDate" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Time</label>
+                        <input type="time" name="time" id="eventTime" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <input type="text" name="location" id="eventLocation" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Event location">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
+                        <select name="type" id="eventType" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="workshop">Workshop</option>
+                            <option value="seminar">Seminar</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="social">Social Event</option>
+                            <option value="other" selected>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Participants (Optional)</label>
+                        <input type="number" name="max_participants" id="eventMaxParticipants" min="1"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Leave empty for unlimited">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelEventBtn"
+                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitEventBtn"
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Create Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple modal toggle functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        // Toggle event modal
+        const openEventModal = document.getElementById('openEventModal');
+        const closeEventModal = document.getElementById('closeEventModal');
+        const cancelEventBtn = document.getElementById('cancelEventBtn');
+        const eventModal = document.getElementById('eventModal');
+
+        if (openEventModal) {
+            openEventModal.addEventListener('click', () => {
+                eventModal.classList.remove('hidden');
+                eventModal.classList.add('flex');
             });
+        }
 
-            // Mobile menu toggle
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+        const closeModal = () => {
+            eventModal.classList.add('hidden');
+            eventModal.classList.remove('flex');
+        };
 
-            if (mobileMenuToggle && sidebar && overlay) {
-                mobileMenuToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('mobile-open');
-                    overlay.classList.toggle('active');
-                });
-                
-                overlay.addEventListener('click', () => {
-                    sidebar.classList.remove('mobile-open');
-                    overlay.classList.remove('active');
-                });
-            }
+        if (closeEventModal) closeEventModal.addEventListener('click', closeModal);
+        if (cancelEventBtn) cancelEventBtn.addEventListener('click', closeModal);
 
-            // Image upload preview
-            const eventImage = document.getElementById('eventImage');
-            const imageFileName = document.getElementById('imageFileName');
-            const imagePreview = document.getElementById('imagePreview');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            const removeImage = document.getElementById('removeImage');
-
-            if (eventImage) {
-                eventImage.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        imageFileName.textContent = file.name;
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            imagePreview.src = e.target.result;
-                            imagePreviewContainer.classList.remove('hidden');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            if (removeImage) {
-                removeImage.addEventListener('click', function() {
-                    eventImage.value = '';
-                    imageFileName.textContent = 'No file chosen';
-                    imagePreviewContainer.classList.add('hidden');
-                });
+        // Close modal when clicking outside
+        eventModal?.addEventListener('click', (e) => {
+            if (e.target === eventModal) {
+                closeModal();
             }
         });
 
-        
-        // Leave Organization functionality
-        function leaveOrganization(orgId) {
-            if (confirm('Are you sure you want to leave this organization? This action cannot be undone.')) {
-                fetch(`/organization/orgpage/${orgId}/leave/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
+    });
+
+    // Leave Organization functionality
+    function leaveOrganization(orgId) {
+        if (confirm('Are you sure you want to leave this organization? This action cannot be undone.')) {
+            fetch(`/organization/orgpage/${orgId}/leave/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -466,8 +478,9 @@
                     console.error('Error:', error);
                     alert('Network error occurred. Please try again.');
                 });
-            }
         }
-    </script>
+    }
+</script>
 </body>
+
 </html>
