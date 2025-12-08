@@ -180,6 +180,9 @@ async function fetchSectionData(section) {
     }
 
     try {
+        // Show loading spinner
+        showTableLoader(true);
+        
         const response = await fetch(config.apiEndpoint);
         if (!response.ok) {
             throw new Error('Failed to fetch data');
@@ -189,6 +192,9 @@ async function fetchSectionData(section) {
     } catch (error) {
         console.error('Error fetching data:', error);
         showToast('Failed to load data', 'error');
+    } finally {
+        // Hide loading spinner
+        showTableLoader(false);
     }
 }
 
@@ -1014,6 +1020,92 @@ async function confirmDelete() {
     closeDeleteModal();
 }
 
+// Execute bulk action on selected items
+async function executeBulkAction() {
+    const action = document.getElementById('bulk-action-select').value;
+    const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.getAttribute('data-id'));
+
+    if (!action) {
+        showToast('Please select an action', 'error');
+        return;
+    }
+
+    if (selectedIds.length === 0) {
+        showToast('Please select at least one item', 'error');
+        return;
+    }
+
+    if (action === 'delete') {
+        // Show confirmation dialog
+        const confirmMsg = `Are you sure you want to delete ${selectedIds.length} item(s)? This action cannot be undone.`;
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        // Delete all selected items
+        const section = currentSection;
+        const config = sectionData[section];
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const id of selectedIds) {
+            if (config && config.apiEndpoint) {
+                const base = config.apiEndpoint;
+                const deleteUrl = base.endsWith('/') ? `${base}${id}/` : `${base}/${id}/`;
+
+                try {
+                    const token = (typeof csrftoken !== 'undefined') ? csrftoken : (window.csrftoken || '');
+                    const resp = await fetch(deleteUrl, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': token,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (resp.ok) {
+                        // Remove from local data
+                        const index = sectionData[section].data.findIndex(item => item.id === id);
+                        if (index > -1) {
+                            sectionData[section].data.splice(index, 1);
+                        }
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (err) {
+                    console.error('Bulk delete error for id:', id, err);
+                    failCount++;
+                }
+            } else {
+                // Fallback: local-only delete
+                const index = sectionData[section].data.findIndex(item => item.id === id);
+                if (index > -1) {
+                    sectionData[section].data.splice(index, 1);
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            }
+        }
+
+        // Update UI
+        renderTable();
+        
+        if (successCount > 0 && failCount === 0) {
+            showToast(`Deleted ${successCount} item(s) successfully!`, 'success');
+        } else if (successCount > 0) {
+            showToast(`Deleted ${successCount} item(s), but ${failCount} failed.`, 'error');
+        } else {
+            showToast(`Failed to delete items.`, 'error');
+        }
+
+        // Reset action dropdown
+        document.getElementById('bulk-action-select').value = '';
+    }
+}
+
 // Show toast
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -1033,6 +1125,30 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 3000);
+}
+
+// Show/Hide table loading spinner
+function showTableLoader(show) {
+    const loader = document.getElementById('table-loader');
+    if (loader) {
+        if (show) {
+            loader.classList.remove('hidden');
+        } else {
+            loader.classList.add('hidden');
+        }
+    }
+}
+
+// Show/Hide page loader spinner
+function showPageLoader(show) {
+    const loader = document.getElementById('page-loader');
+    if (loader) {
+        if (show) {
+            loader.classList.remove('hidden');
+        } else {
+            loader.classList.add('hidden');
+        }
+    }
 }
 
 // Search functionality

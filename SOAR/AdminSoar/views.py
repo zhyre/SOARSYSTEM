@@ -839,6 +839,7 @@ def get_rsvp_details(request, rsvp_id):
     return JsonResponse(details)
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def get_programs_data(request):
     """API endpoint to get all programs data, and add new programs via POST."""
     if not (request.user.is_superuser or request.user.is_staff):

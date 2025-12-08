@@ -14,6 +14,8 @@
 </head>
 
 <body class="bg-gray-50">
+    <!-- Loading Spinners -->
+    {% include 'base/spinners.html' %}
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         {% include 'base/sidebar_components.html' with sidebar_type='admin' %}
@@ -67,12 +69,12 @@
                         <!-- Filters -->
                         <div class="mt-4 flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
-                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                    <option>---------</option>
-                                    <option>Action 1</option>
-                                    <option>Action 2</option>
+                                <select id="bulk-action-select"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option value="">---------</option>
+                                    <option value="delete">Delete Selected</option>
                                 </select>
-                                <button
+                                <button onclick="executeBulkAction()"
                                     class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium">Go</button>
                             </div>
                             <span class="text-sm text-gray-500"><span id="selected-count">0</span> of <span
