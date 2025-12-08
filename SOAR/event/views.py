@@ -399,3 +399,87 @@ def rsvp_event(request, event_id):
         event = get_object_or_404(OrganizationEvent, id=event_id)
         return redirect(f"{reverse('orgpage', args=[event.organization.id])}#event-{event.id}")
 
+
+def edit_event(request, event_id):
+    """Edit an existing event - only admin, adviser, or leader can edit"""
+    event = get_object_or_404(OrganizationEvent, id=event_id)
+    organization = event.organization
+    
+    # Check permissions
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Check if user is admin, adviser, or leader of the organization
+    try:
+        org_member = OrganizationMember.objects.get(student=request.user, organization=organization)
+        if org_member.role not in ['admin', 'adviser', 'leader']:
+            return redirect('orgpage', org_id=organization.id)
+    except OrganizationMember.DoesNotExist:
+        return redirect('orgpage', org_id=organization.id)
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        location = request.POST.get('location')
+        activity_type = request.POST.get('type')
+        max_participants = request.POST.get('max_participants') or None
+        
+        try:
+            event_datetime = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+        except Exception as e:
+            return redirect('orgpage', org_id=organization.id)
+        
+        # Handle file upload if present
+        if 'attachment' in request.FILES:
+            file = request.FILES['attachment']
+            attachment_url = upload_to_supabase(file, organization.id, organization.name)
+            if attachment_url:
+                event.attachments_url = attachment_url
+        
+        # Update event fields
+        event.title = title
+        event.description = description
+        event.event_date = event_datetime
+        event.location = location
+        event.activity_type = activity_type
+        event.max_participants = max_participants
+        event.save()
+        
+        return redirect('orgpage', org_id=organization.id)
+    
+    context = {
+        'event': event,
+        'organization': organization,
+        'editing': True
+    }
+    return render(request, 'event/edit_event.html', context)
+
+
+def delete_event(request, event_id):
+    """Delete an event - only admin, adviser, or leader can delete"""
+    event = get_object_or_404(OrganizationEvent, id=event_id)
+    organization = event.organization
+    
+    # Check permissions
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Check if user is admin, adviser, or leader of the organization
+    try:
+        org_member = OrganizationMember.objects.get(student=request.user, organization=organization)
+        if org_member.role not in ['admin', 'adviser', 'leader']:
+            return redirect('orgpage', org_id=organization.id)
+    except OrganizationMember.DoesNotExist:
+        return redirect('orgpage', org_id=organization.id)
+    
+    if request.method == 'POST':
+        event.delete()
+        return redirect('orgpage', org_id=organization.id)
+    
+    context = {
+        'event': event,
+        'organization': organization
+    }
+    return render(request, 'event/delete_event.html', context)
