@@ -3,18 +3,18 @@ const sectionData = {
     users: {
         title: 'Select user to change',
         addButton: 'ADD USER',
-        // Columns: student id - first name - last name - school email - program
+        // Columns: student id - school email - program - year level - role - status
         // Keep 6th column present (empty) because the table layout expects 6 data columns.
-        columns: ['STUDENT ID', 'FIRST NAME', 'LAST NAME', 'SCHOOL EMAIL', 'PROGRAM', 'YEAR LEVEL'],
+        columns: ['STUDENT ID', 'SCHOOL EMAIL', 'PROGRAM', 'YEAR LEVEL', 'ROLE', 'STATUS'],
         // Field mapping: try multiple common keys per column to resolve values robustly
         // Exact backend keys from get_users_data in AdminSoar.views.py
         fields: [
             ['studentId'],
-            ['firstName'],
-            ['lastName'],
             ['email'],
             ['course'],
-            ['yearLevel']
+            ['yearLevel'],
+            ['role'],
+            ['status']
         ],
         apiEndpoint: '/admin-panel/api/users/',
         formFields: [
@@ -295,6 +295,12 @@ async function loadAdminSection(section) {
 
     if (sectionTitleEl) sectionTitleEl.textContent = data.title || '';
     if (addButtonTextEl) addButtonTextEl.textContent = data.addButton || '';
+    
+    // Clear search input when switching sections
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
     
     // Show/hide Create Organization button based on section
     const createOrgBtn = document.getElementById('create-org-btn');
@@ -885,11 +891,30 @@ function showToast(message, type = 'success') {
 document.getElementById('search-input').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
     const rows = document.querySelectorAll('#table-body tr');
+    let visibleCount = 0;
     
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
+        const isVisible = text.includes(searchTerm);
+        row.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
     });
+
+    // Update item count to show filtered results
+    const itemCountEl = document.getElementById('item-count');
+    if (itemCountEl) {
+        if (searchTerm) {
+            itemCountEl.textContent = `${visibleCount} (filtered from ${rows.length})`;
+        } else {
+            itemCountEl.textContent = rows.length;
+        }
+    }
+
+    // Clear "select all" checkbox if some rows are hidden
+    const selectAll = document.getElementById('select-all');
+    if (selectAll && searchTerm) {
+        selectAll.checked = false;
+    }
 });
 
 // Update selected count on checkbox change

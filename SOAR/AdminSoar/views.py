@@ -8,6 +8,7 @@ from SOAR.organization.forms import AdminOrganizationCreateForm
 from SOAR.organization.models import Organization, OrganizationMember, Program, ROLE_LEADER
 from SOAR.accounts.models import User
 from SOAR.event.models import OrganizationEvent, EventRSVP
+from SOAR.notification.models import Notification
 from django.db.models import Count
 import json
 from django.views.decorators.http import require_http_methods
@@ -48,6 +49,9 @@ def admin_create_organization(request):
             organization = form.save(commit=False)
             organization.save()
             
+            # Save many-to-many relationships (allowed_programs)
+            form.save_m2m()
+            
             # Assign admin as Head Officer (Leader)
             OrganizationMember.objects.create(
                 organization=organization,
@@ -56,11 +60,50 @@ def admin_create_organization(request):
                 is_approved=True
             )
             
+            # Send notifications based on organization visibility
+            notifications = []
+            org_link = f"/organization/{organization.id}/"
+            message = f"🎉 New organization '{organization.name}' has been created! Check it out and join if you're interested."
+            
+            if organization.is_public:
+                # Public organization: notify all users
+                all_users = User.objects.filter(is_active=True).exclude(id=request.user.id)
+                for user in all_users:
+                    notifications.append(Notification(
+                        user=user,
+                        message=message,
+                        notification_type=Notification.TYPE_ORGANIZATION,
+                        priority=Notification.PRIORITY_MEDIUM,
+                        link=org_link
+                    ))
+            else:
+                # Private organization: notify users from allowed programs
+                allowed_programs = organization.allowed_programs.all()
+                if allowed_programs.exists():
+                    eligible_users = User.objects.filter(
+                        course__in=allowed_programs,
+                        is_active=True
+                    ).exclude(id=request.user.id)
+                    
+                    for user in eligible_users:
+                        notifications.append(Notification(
+                            user=user,
+                            message=message,
+                            notification_type=Notification.TYPE_ORGANIZATION,
+                            priority=Notification.PRIORITY_MEDIUM,
+                            link=org_link
+                        ))
+            
+            # Bulk create notifications for efficiency
+            if notifications:
+                Notification.objects.bulk_create(notifications)
+                print(f"Created {len(notifications)} notifications for new organization: {organization.name}")
+            
             messages.success(
                 request,
                 f'Organization "{organization.name}" created successfully! You have been assigned as Head Officer.'
             )
-            return redirect('organization_profile', org_id=organization.id)
+            return redirect('admin_panel')
         else:
             # Form has errors, they will be displayed in template
             pass
@@ -225,15 +268,26 @@ def get_users_data(request):
             # Prefer the abbreviation (e.g., BSIT); fall back to name if needed
             course_display = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
 
+        # Determine user role
+        if user.is_superuser:
+            role = 'Admin'
+        elif user.is_staff:
+            role = 'Staff'
+        else:
+            role = 'Student'
+        
+        # Determine user status
+        status = 'Active' if user.is_active else 'Inactive'
+        
         users_data.append({
             'id': str(user.id),
             'studentId': user.student_id or 'N/A',
             #'username': user.username,
             'email': user.email,
-            'firstName': user.first_name,
-            'lastName': user.last_name,
             'course': course_display or 'N/A',
             'yearLevel': user.year_level if user.year_level is not None else 'N/A',
+            'role': role,
+            'status': status,
             'dateJoined': user.date_joined.strftime('%b. %d, %Y') if user.date_joined else 'N/A'
         })
 
@@ -267,6 +321,13 @@ def get_organizations_data(request):
         except Exception:
             programs_list = []
 
+        # Get adviser full name
+        adviser_name = 'N/A'
+        if org.adviser:
+            adviser_name = f"{org.adviser.first_name} {org.adviser.last_name}".strip()
+            if not adviser_name:
+                adviser_name = org.adviser.username
+
         orgs_data.append({
             'id': str(org.id),
             'orgName': org.name,
@@ -276,7 +337,7 @@ def get_organizations_data(request):
             'description': org.description,
             'isPublic': org.is_public,
             'programs': ', '.join(programs_list) if programs_list else '',
-            'adviser': org.adviser_id or 'N/A'
+            'adviser': adviser_name
         })
     
     return JsonResponse({'data': orgs_data})
@@ -407,6 +468,31 @@ def get_events_data(request):
             cancelled=cancelled,
             created_by=request.user
         )
+
+        # Create notifications for all approved organization members
+        approved_members = OrganizationMember.objects.filter(
+            organization=org,
+            is_approved=True
+        ).select_related('student')
+
+        event_date_str = event_date.strftime("%B %d, %Y at %I:%M %p")
+        message = f"📅 New event '{title}' has been created in {org.name}! Event date: {event_date_str}. Location: {location or 'TBA'}."
+        event_link = f"/event/{event.id}/"
+        
+        notifications = []
+        for member in approved_members:
+            notifications.append(Notification(
+                user=member.student,
+                message=message,
+                notification_type=Notification.TYPE_EVENT,
+                priority=Notification.PRIORITY_MEDIUM,
+                link=event_link
+            ))
+
+        # Bulk create notifications for efficiency
+        if notifications:
+            Notification.objects.bulk_create(notifications)
+            print(f"Created {len(notifications)} notifications for admin-created event: {event.title}")
 
         # Sync to Supabase
         try:

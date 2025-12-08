@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,12 +15,14 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-8">
-                <a href="{% url 'admin_panel' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+                <a href="{% url 'admin_panel' %}"
+                    class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Admin Panel
                 </a>
@@ -29,16 +32,18 @@
 
             <!-- Messages -->
             {% if messages %}
-                <div class="mb-6 space-y-2">
-                    {% for message in messages %}
-                        <div class="rounded-lg p-4 {% if message.tags == 'success' %}bg-green-100 border border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-100 border border-red-200 text-red-800{% else %}bg-blue-100 border border-blue-200 text-blue-800{% endif %}">
-                            <div class="flex items-center">
-                                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
-                                <span>{{ message }}</span>
-                            </div>
-                        </div>
-                    {% endfor %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div
+                    class="rounded-lg p-4 {% if message.tags == 'success' %}bg-green-100 border border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-100 border border-red-200 text-red-800{% else %}bg-blue-100 border border-blue-200 text-blue-800{% endif %}">
+                    <div class="flex items-center">
+                        <i
+                            class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        <span>{{ message }}</span>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
             {% endif %}
 
             <!-- Form -->
@@ -57,31 +62,32 @@
                         </label>
                         {{ form.name }}
                         {% if form.name.errors %}
-                            <div class="mt-2">
-                                {% for error in form.name.errors %}
-                                    <p class="text-sm text-red-600">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                    </p>
-                                {% endfor %}
-                            </div>
+                        <div class="mt-2">
+                            {% for error in form.name.errors %}
+                            <p class="text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                            </p>
+                            {% endfor %}
+                        </div>
                         {% endif %}
                         <p class="mt-1 text-xs text-gray-500">Must be unique across all organizations</p>
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="{{ form.description.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-2">
                             Description <span class="text-red-500">*</span>
                         </label>
                         {{ form.description }}
                         {% if form.description.errors %}
-                            <div class="mt-2">
-                                {% for error in form.description.errors %}
-                                    <p class="text-sm text-red-600">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                    </p>
-                                {% endfor %}
-                            </div>
+                        <div class="mt-2">
+                            {% for error in form.description.errors %}
+                            <p class="text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                            </p>
+                            {% endfor %}
+                        </div>
                         {% endif %}
                         <div class="mt-1 flex justify-between items-center">
                             <p class="text-xs text-gray-500">Provide a brief overview of the organization</p>
@@ -98,61 +104,88 @@
                         </label>
                         {{ form.tags }}
                         {% if form.tags.errors %}
-                            <div class="mt-2">
-                                {% for error in form.tags.errors %}
-                                    <p class="text-sm text-red-600">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                    </p>
-                                {% endfor %}
-                            </div>
+                        <div class="mt-2">
+                            {% for error in form.tags.errors %}
+                            <p class="text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                            </p>
+                            {% endfor %}
+                        </div>
                         {% endif %}
                         <p class="mt-1 text-xs text-gray-500">{{ form.tags.help_text }}</p>
-                        
+
                         <!-- Tag Suggestions -->
                         <div class="mt-2">
                             <p class="text-xs text-gray-600 mb-2">Common categories:</p>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" onclick="addTag('Academic')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs hover:bg-blue-100 border border-blue-200">
+                                <button type="button" onclick="addTag('Academic')"
+                                    class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs hover:bg-blue-100 border border-blue-200">
                                     Academic
                                 </button>
-                                <button type="button" onclick="addTag('Sports')" class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs hover:bg-green-100 border border-green-200">
+                                <button type="button" onclick="addTag('Sports')"
+                                    class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs hover:bg-green-100 border border-green-200">
                                     Sports
                                 </button>
-                                <button type="button" onclick="addTag('Cultural')" class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs hover:bg-purple-100 border border-purple-200">
+                                <button type="button" onclick="addTag('Cultural')"
+                                    class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs hover:bg-purple-100 border border-purple-200">
                                     Cultural
                                 </button>
-                                <button type="button" onclick="addTag('Technology')" class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs hover:bg-indigo-100 border border-indigo-200">
+                                <button type="button" onclick="addTag('Technology')"
+                                    class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs hover:bg-indigo-100 border border-indigo-200">
                                     Technology
                                 </button>
-                                <button type="button" onclick="addTag('Arts')" class="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs hover:bg-pink-100 border border-pink-200">
+                                <button type="button" onclick="addTag('Arts')"
+                                    class="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs hover:bg-pink-100 border border-pink-200">
                                     Arts
                                 </button>
-                                <button type="button" onclick="addTag('Community Service')" class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs hover:bg-yellow-100 border border-yellow-200">
+                                <button type="button" onclick="addTag('Community Service')"
+                                    class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs hover:bg-yellow-100 border border-yellow-200">
                                     Community Service
                                 </button>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Adviser -->
+                    <div>
+                        <label for="{{ form.adviser.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-2">
+                            Adviser
+                        </label>
+                        {{ form.adviser }}
+                        {% if form.adviser.errors %}
+                        <div class="mt-2">
+                            {% for error in form.adviser.errors %}
+                            <p class="text-sm text-red-600">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                            </p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.adviser.help_text }}</p>
+                    </div>
+
                     <!-- Profile Picture -->
                     <div>
-                        <label for="{{ form.profile_picture.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="{{ form.profile_picture.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-2">
                             Profile Picture
                         </label>
                         <div class="mt-1 flex items-center space-x-4">
                             <div id="image-preview" class="hidden">
-                                <img src="" alt="Preview" class="h-24 w-24 object-cover rounded-lg border-2 border-gray-300">
+                                <img src="" alt="Preview"
+                                    class="h-24 w-24 object-cover rounded-lg border-2 border-gray-300">
                             </div>
                             <div class="flex-1">
                                 {{ form.profile_picture }}
                                 {% if form.profile_picture.errors %}
-                                    <div class="mt-2">
-                                        {% for error in form.profile_picture.errors %}
-                                            <p class="text-sm text-red-600">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                            </p>
-                                        {% endfor %}
-                                    </div>
+                                <div class="mt-2">
+                                    {% for error in form.profile_picture.errors %}
+                                    <p class="text-sm text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                    </p>
+                                    {% endfor %}
+                                </div>
                                 {% endif %}
                                 <p class="mt-1 text-xs text-gray-500">Optional. JPG or PNG format only. Max 10MB.</p>
                             </div>
@@ -161,10 +194,12 @@
 
                     <!-- Form Actions -->
                     <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                        <a href="{% url 'admin_panel' %}" class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors">
+                        <a href="{% url 'admin_panel' %}"
+                            class="px-6 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors">
                             Cancel
                         </a>
-                        <button type="submit" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
+                        <button type="submit"
+                            class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all shadow-md hover:shadow-lg flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Create Organization</span>
                         </button>
@@ -189,7 +224,8 @@
                         <h3 class="text-sm font-medium text-blue-800">Important Information</h3>
                         <div class="mt-2 text-sm text-blue-700">
                             <ul class="list-disc list-inside space-y-1">
-                                <li>You will be automatically assigned as the Head Officer (Leader) of this organization</li>
+                                <li>You will be automatically assigned as the Head Officer (Leader) of this organization
+                                </li>
                                 <li>Organization names must be unique</li>
                                 <li>The description should be clear and informative (max 500 characters)</li>
                                 <li>At least one category/tag is required to help students find the organization</li>
@@ -205,9 +241,9 @@
         // Character counter for description
         const descriptionField = document.querySelector('textarea[name="description"]');
         const charCount = document.getElementById('char-count');
-        
+
         if (descriptionField && charCount) {
-            descriptionField.addEventListener('input', function() {
+            descriptionField.addEventListener('input', function () {
                 charCount.textContent = this.value.length;
                 if (this.value.length > 500) {
                     charCount.classList.add('text-red-600', 'font-semibold');
@@ -223,13 +259,13 @@
         const imageInput = document.querySelector('input[name="profile_picture"]');
         const imagePreview = document.getElementById('image-preview');
         const previewImg = imagePreview.querySelector('img');
-        
+
         if (imageInput) {
-            imageInput.addEventListener('change', function(e) {
+            imageInput.addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         previewImg.src = e.target.result;
                         imagePreview.classList.remove('hidden');
                     };
@@ -260,7 +296,7 @@
         }
 
         // Form validation
-        document.getElementById('create-org-form').addEventListener('submit', function(e) {
+        document.getElementById('create-org-form').addEventListener('submit', function (e) {
             let isValid = true;
             const name = document.querySelector('input[name="name"]').value.trim();
             const description = document.querySelector('textarea[name="description"]').value.trim();
@@ -270,7 +306,7 @@
                 alert('Organization name is required.');
                 isValid = false;
             }
-            
+
             if (!description) {
                 alert('Description is required.');
                 isValid = false;
@@ -290,4 +326,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -36,9 +36,7 @@
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
-                            <span class="text-sm text-gray-600">WELCOME, <strong>{{
-                                    request.user.get_full_name|default:request.user.username|default:"Admin"|upper
-                                    }}</strong></span>
+                            <span class="text-sm text-gray-600">WELCOME, <strong>{% if request.user.first_name and request.user.last_name %}{{ request.user.first_name|upper }} {{ request.user.last_name|upper }}{% else %}{% if request.user.first_name %}{{ request.user.first_name|upper }}{% else %}{{ request.user.username|upper }}{% endif %}{% endif %}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -108,28 +106,28 @@
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col3-header">FIRST NAME</span>
+                                            <span id="col3-header">PROGRAM</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col4-header">LAST NAME</span>
+                                            <span id="col4-header">YEAR LEVEL</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col5-header">PROGRAM</span>
+                                            <span id="col5-header">ROLE</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700">
                                         <div class="flex items-center space-x-1">
-                                            <span id="col6-header">YEAR LEVEL</span>
+                                            <span id="col6-header">STATUS</span>
                                             <i class="fas fa-sort text-gray-400"></i>
                                         </div>
                                     </th>

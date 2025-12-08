@@ -4,6 +4,16 @@ from SOAR.accounts.models import User
 
 class AdminOrganizationCreateForm(forms.ModelForm):
     """Form for admins to create organizations."""
+    adviser = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_staff=True),
+        required=False,
+        label="Adviser",
+        help_text="Select a staff member to be the organization adviser.",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
+        })
+    )
+    
     tags = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
@@ -15,7 +25,7 @@ class AdminOrganizationCreateForm(forms.ModelForm):
 
     class Meta:
         model = Organization
-        fields = ['name', 'description', 'tags', 'profile_picture']
+        fields = ['name', 'description', 'tags', 'adviser', 'profile_picture']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500',
