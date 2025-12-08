@@ -22,6 +22,7 @@ const sectionData = {
             { name: 'email', label: 'Email', type: 'email', required: true },
             { name: 'firstName', label: 'First Name', type: 'text', required: true },
             { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+            { name: 'role', label: 'Role', type: 'select', options: ['student', 'staff', 'admin'], required: true },
             { name: 'course', label: 'Program / Course', type: 'select', options: [], required: false },
             { name: 'yearLevel', label: 'Year Level', type: 'number', required: false },
             { name: 'password', label: 'Password', type: 'password', required: true }
@@ -214,7 +215,10 @@ async function fetchPrograms() {
             throw new Error('Failed to fetch programs');
         }
         const result = await response.json();
-        return result.data.map(prog => prog.code + ' - ' + prog.programName);
+        return result.data.map(prog => ({
+            value: prog.code,
+            label: prog.code + ' - ' + prog.programName
+        }));
     } catch (error) {
         console.error('Error fetching programs:', error);
         return [];
@@ -479,11 +483,20 @@ async function openAddModal() {
                 <textarea name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" ${requiredAttr} ${readonlyAttr}></textarea>
             `;
         } else if (field.type === 'select') {
+            // Handle both array of strings and array of objects with value/label
+            const optionsHTML = field.options.map(opt => {
+                if (typeof opt === 'object' && opt.value && opt.label) {
+                    return `<option value="${opt.value}">${opt.label}</option>`;
+                } else {
+                    return `<option value="${opt}">${opt}</option>`;
+                }
+            }).join('');
+            
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                 <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
                     <option value="">Select ${field.label}</option>
-                    ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    ${optionsHTML}
                 </select>
             `;
         } else if (field.type === 'checkbox') {

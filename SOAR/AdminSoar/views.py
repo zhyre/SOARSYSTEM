@@ -81,6 +81,7 @@ def get_users_data(request):
         first_name = (data.get('firstName') or '').strip()
         last_name = (data.get('lastName') or '').strip()
         password = data.get('password') or ''
+        role = (data.get('role') or '').strip().lower()
 
         if not email:
             errors['email'] = 'Email is required.'
@@ -90,6 +91,10 @@ def get_users_data(request):
             errors['lastName'] = 'Last name is required.'
         if not password:
             errors['password'] = 'Password is required for new users.'
+        if not role:
+            errors['role'] = 'Role is required.'
+        elif role not in ['student', 'staff', 'admin']:
+            errors['role'] = 'Invalid role. Must be student, staff, or admin.'
 
         # Check email uniqueness
         if not errors and User.objects.filter(email=email).exists():
@@ -143,6 +148,16 @@ def get_users_data(request):
         else:
             supa_user_id = str(user_attr)
 
+        # Handle course/program lookup
+        program = None
+        if data.get('course'):
+            try:
+                # Try to find program by code or name
+                program = Program.objects.filter(abbreviation=data.get('course')).first() or \
+                         Program.objects.filter(name=data.get('course')).first()
+            except Exception:
+                program = None
+
         # Create Django user
         try:
             user = User.objects.get(pk=supa_user_id)
@@ -151,11 +166,11 @@ def get_users_data(request):
             user.first_name = first_name
             user.last_name = last_name
             user.student_id = data.get('studentId') or None
-            user.course = data.get('course') or None
+            user.course = program
             if data.get('yearLevel'):
                 try:
                     user.year_level = int(data.get('yearLevel'))
-                except:
+                except ValueError:
                     pass
         except User.DoesNotExist:
             user = User(
@@ -165,13 +180,24 @@ def get_users_data(request):
                 first_name=first_name,
                 last_name=last_name,
                 student_id=data.get('studentId') or None,
-                course=data.get('course') or None,
+                course=program,
             )
             if data.get('yearLevel'):
                 try:
                     user.year_level = int(data.get('yearLevel'))
-                except:
+                except ValueError:
                     pass
+
+        # Set role based on the role field
+        if role == 'admin':
+            user.is_superuser = True
+            user.is_staff = True
+        elif role == 'staff':
+            user.is_superuser = False
+            user.is_staff = True
+        else:  # student
+            user.is_superuser = False
+            user.is_staff = False
 
         user.is_active = False
         user.set_unusable_password()
@@ -184,6 +210,11 @@ def get_users_data(request):
     users_data = []
 
     for user in users:
+        course_display = None
+        if user.course:
+            # Prefer the abbreviation (e.g., BSIT); fall back to name if needed
+            course_display = getattr(user.course, 'abbreviation', None) or getattr(user.course, 'name', None)
+
         users_data.append({
             'id': str(user.id),
             'studentId': user.student_id or 'N/A',
@@ -191,8 +222,8 @@ def get_users_data(request):
             'email': user.email,
             'firstName': user.first_name,
             'lastName': user.last_name,
-            'course': user.course or 'N/A',
-            'yearLevel': user.year_level or 'N/A',
+            'course': course_display or 'N/A',
+            'yearLevel': user.year_level if user.year_level is not None else 'N/A',
             'dateJoined': user.date_joined.strftime('%b. %d, %Y') if user.date_joined else 'N/A'
         })
 
@@ -475,14 +506,14 @@ def get_programs_data(request):
 
     programs_data = []
     for program in programs:
-        # Count students with this program in their course field
-        student_count = User.objects.filter(course__icontains=program.abbreviation).count()
+        # Count students enrolled in this program via FK (avoids invalid icontains lookups on FK)
+        student_count = User.objects.filter(course=program).count()
 
         programs_data.append({
             'id': str(program.id),
             'programName': program.name,
             'code': program.abbreviation,
-            'department': 'CCS',  # You may want to add a department field to Program model
+            'department': 'CCS',
             'students': str(student_count)
         })
 
