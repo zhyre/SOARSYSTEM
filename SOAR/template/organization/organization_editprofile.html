@@ -506,8 +506,7 @@
                                                 class="glass-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400">
                                                 <option value="true" {% if organization.is_public %}selected{% endif %}>
                                                     🌐 Public</option>
-                                                <option value="false" {% if not organization.is_public %}selected{%
-                                                    endif %}>🔒 Private</option>
+                                                <option value="false" {% if not organization.is_public %}selected{% endif %}>🔒 Private</option>
                                             </select>
                                             <p class="text-xs text-gray-500 mt-2 flex items-start">
                                                 <i class="fas fa-info-circle mr-2 mt-0.5 text-blue-500"></i>
@@ -528,7 +527,7 @@
                                             class="glass-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400">
                                             <option value="">Select Adviser</option>
                                             {% for user in users %}
-                                            <option value="{{ user.id }}" {% if organization.adviser and organization.adviser.id==user.id %}selected{% endif %}>{{ user.last_name|title }}, {{ user.first_name|title }}</option>
+                                            <option value="{{ user.id }}" {% if organization.adviser and organization.adviser.id == user.id %}selected{% endif %}>{{ user.last_name|title }}, {{ user.first_name|title }}</option>
                                             {% endfor %}
                                         </select>
                                         <p class="text-xs text-gray-500 mt-2 flex items-start">
