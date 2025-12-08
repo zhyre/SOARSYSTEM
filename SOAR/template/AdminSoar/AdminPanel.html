@@ -215,8 +215,8 @@
         // CSRF Token for AJAX requests
         const csrftoken = '{{ csrf_token }}';
     </script>
-    <script src="{% static 'js/AdminSoar/admin-panel.js' %}"></script>
-    <script src="{% static 'js/AdminSoar/adminAnalytics.js' %}"></script>
+    <script src="{% static 'js/AdminSoar/admin-panel.js' %}?v={% now 'Uu' %}"></script>
+    <script src="{% static 'js/AdminSoar/adminAnalytics.js' %}?v={% now 'Uu' %}"></script>
 </body>
 
 </html>
