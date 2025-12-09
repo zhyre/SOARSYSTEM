@@ -176,9 +176,9 @@ def register(request):
                 messages.error(request, "A user with this username already exists.")
                 return render(request, "accounts/register.html", {"form": form})
             
-            # Check if student ID already exists
+            # Check if School ID already exists
             if User.objects.filter(student_id=student_id).exists():
-                messages.error(request, "A user with this student ID already exists.")
+                messages.error(request, "A user with this School ID already exists.")
                 return render(request, "accounts/register.html", {"form": form})
 
             try:
@@ -243,7 +243,7 @@ def register(request):
                         messages.error(request, "A user with this email already exists.")
                         return render(request, "accounts/register.html", {"form": form})
                     if User.objects.filter(student_id=student_id).exclude(pk=user_obj.pk).exists():
-                        messages.error(request, "A user with this student ID already exists.")
+                        messages.error(request, "A user with this School ID already exists.")
                         return render(request, "accounts/register.html", {"form": form})
                     user_obj.username = cd.get("username") or user_obj.username
                     user_obj.email = email
@@ -259,6 +259,7 @@ def register(request):
                     user_obj.course = course_value or user_obj.course
 
                     user_obj.year_level = cd.get("year_level") or user_obj.year_level
+                    user_obj.is_staff = cd.get('user_type') == 'staff'
                 except User.DoesNotExist:
                     # Creating new user
                     if User.objects.filter(username=username).exists():
@@ -268,11 +269,12 @@ def register(request):
                         messages.error(request, "A user with this email already exists.")
                         return render(request, "accounts/register.html", {"form": form})
                     if User.objects.filter(student_id=student_id).exists():
-                        messages.error(request, "A user with this student ID already exists.")
+                        messages.error(request, "A user with this School ID already exists.")
                         return render(request, "accounts/register.html", {"form": form})
                     user_obj = form.save(commit=False)
                     user_obj.id = supa_user_id
                     user_obj.email = email
+                    user_obj.is_staff = cd.get('user_type') == 'staff'
 
                 user_obj.is_active = False
                 user_obj.set_unusable_password()
@@ -375,7 +377,7 @@ def login_view(request):
                                     return render(request, "accounts/login.html", {"form": form})
 
                         login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
-                        messages.success(request, f"Welcome back, {user_obj.username}!")
+                        #messages.success(request, f"Welcome back, {user_obj.username}!")
 
                         # Check if user is superuser from Supabase
                         response = supabase.table('accounts_user').select('is_superuser').eq('id', str(user_obj.id)).execute()

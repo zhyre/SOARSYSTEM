@@ -3,9 +3,9 @@ const sectionData = {
     users: {
         title: 'Select user to change',
         addButton: 'ADD USER',
-        // Columns: student id - school email - program - year level - role - status
+        // Columns: School id - school email - program - year level - role - status
         // Keep 6th column present (empty) because the table layout expects 6 data columns.
-        columns: ['STUDENT ID', 'SCHOOL EMAIL', 'PROGRAM', 'YEAR LEVEL', 'ROLE', 'STATUS'],
+        columns: ['SCHOOL ID', 'SCHOOL EMAIL', 'PROGRAM', 'YEAR LEVEL', 'ROLE', 'STATUS'],
         // Field mapping: try multiple common keys per column to resolve values robustly
         // Exact backend keys from get_users_data in AdminSoar.views.py
         fields: [
@@ -18,7 +18,7 @@ const sectionData = {
         ],
         apiEndpoint: '/admin-panel/api/users/',
         formFields: [
-            { name: 'studentId', label: 'Student ID', type: 'text', required: false },
+            { name: 'studentId', label: 'School ID', type: 'text', required: false },
             { name: 'email', label: 'Email', type: 'email', required: true },
             { name: 'firstName', label: 'First Name', type: 'text', required: true },
             { name: 'lastName', label: 'Last Name', type: 'text', required: true },
@@ -28,21 +28,6 @@ const sectionData = {
             { name: 'password', label: 'Password', type: 'password', required: true }
         ],
         data: []
-    },
-    groups: {
-        title: 'Select group to change',
-        addButton: 'ADD GROUP',
-        columns: ['GROUP NAME', 'PERMISSIONS', 'MEMBERS', 'CREATED'],
-        apiEndpoint: null, // No API endpoint yet
-        formFields: [
-            { name: 'groupName', label: 'Group Name', type: 'text', required: true },
-            { name: 'permissions', label: 'Permissions', type: 'textarea', required: false },
-            { name: 'description', label: 'Description', type: 'textarea', required: false }
-        ],
-        data: [
-            { id: 1, groupName: 'Administrators', permissions: 'All permissions', members: '3', created: 'Nov. 1, 2025' },
-            { id: 2, groupName: 'Moderators', permissions: 'Limited permissions', members: '5', created: 'Oct. 15, 2025' }
-        ]
     },
     'event-rsvps': {
         title: 'Select event RSVP to change',
@@ -87,7 +72,7 @@ const sectionData = {
             { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
             { name: 'date', label: 'Event Date', type: 'datetime-local', required: true },
             { name: 'location', label: 'Location', type: 'text', required: false },
-            { name: 'activityType', label: 'Activity Type', type: 'select', options: ['workshop','seminar','meeting','social','other'], required: false },
+            { name: 'activityType', label: 'Activity Type', type: 'select', options: ['workshop', 'seminar', 'meeting', 'social', 'other'], required: false },
             { name: 'description', label: 'Description', type: 'textarea', required: false },
             { name: 'cancelled', label: 'Cancelled', type: 'checkbox', required: false }
         ],
@@ -97,13 +82,13 @@ const sectionData = {
         title: 'Select organization member to change',
         addButton: 'ADD ORGANIZATION MEMBER',
         columns: ['ORGANIZATION', 'STUDENT', 'ROLE', 'DATE JOINED', 'STATUS'],
-          fields: [
-              ['organization'],
-              ['student'],
-              ['role'],
-              ['dateJoined'],
-              ['status']
-          ],
+        fields: [
+            ['organization'],
+            ['student'],
+            ['role'],
+            ['dateJoined'],
+            ['status']
+        ],
         apiEndpoint: '/admin-panel/api/organization-members/',
         formFields: [
             { name: 'organization', label: 'Organization', type: 'select', options: [], required: true },
@@ -182,7 +167,7 @@ async function fetchSectionData(section) {
     try {
         // Show loading spinner
         showTableLoader(true);
-        
+
         const response = await fetch(config.apiEndpoint);
         if (!response.ok) {
             throw new Error('Failed to fetch data');
@@ -254,7 +239,7 @@ async function fetchStaffUsers() {
 
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadAdminSection('users');
 });
 
@@ -278,7 +263,7 @@ async function loadAdminSection(section) {
             return;
         }
     }
-    
+
     // Update active nav link (guard against missing elements)
     document.querySelectorAll('.admin-nav-link').forEach(link => {
         link.classList.remove('active');
@@ -287,11 +272,10 @@ async function loadAdminSection(section) {
     if (navEl && navEl.classList) {
         navEl.classList.add('active');
     }
-    
+
     // Update page title and breadcrumb
     const sectionNames = {
         'users': 'Accounts › Users',
-        'groups': 'Authentication › Groups',
         'event-rsvps': 'Event › Event RSVPs',
         'organization-events': 'Event › Organization Events',
         'organization-members': 'Organization › Organization Members',
@@ -322,13 +306,13 @@ async function loadAdminSection(section) {
 
     if (sectionTitleEl) sectionTitleEl.textContent = data.title || '';
     if (addButtonTextEl) addButtonTextEl.textContent = data.addButton || '';
-    
+
     // Clear search input when switching sections
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.value = '';
     }
-    
+
     // Show/hide Create Organization button based on section
     const createOrgBtn = document.getElementById('create-org-btn');
     if (section === 'organizations') {
@@ -453,12 +437,12 @@ function renderTable() {
         `;
 
         row.innerHTML = html;
-        
+
         // Add click event listener for detail modals
         if (currentSection === 'users') {
             const userClickable = row.querySelector('.user-clickable');
             if (userClickable) {
-                userClickable.addEventListener('click', function() {
+                userClickable.addEventListener('click', function () {
                     const userId = this.getAttribute('data-user-id');
                     openUserDetailsModal(userId);
                 });
@@ -466,7 +450,7 @@ function renderTable() {
         } else if (currentSection === 'event-rsvps') {
             const rsvpClickable = row.querySelector('.rsvp-clickable');
             if (rsvpClickable) {
-                rsvpClickable.addEventListener('click', function() {
+                rsvpClickable.addEventListener('click', function () {
                     const rsvpId = this.getAttribute('data-rsvp-id');
                     openRsvpDetailsModal(rsvpId);
                 });
@@ -474,7 +458,7 @@ function renderTable() {
         } else if (currentSection === 'organization-events') {
             const eventClickable = row.querySelector('.event-clickable');
             if (eventClickable) {
-                eventClickable.addEventListener('click', function() {
+                eventClickable.addEventListener('click', function () {
                     const eventId = this.getAttribute('data-event-id');
                     openEventDetailsModal(eventId);
                 });
@@ -482,7 +466,7 @@ function renderTable() {
         } else if (currentSection === 'organization-members') {
             const memberClickable = row.querySelector('.org-member-clickable');
             if (memberClickable) {
-                memberClickable.addEventListener('click', function() {
+                memberClickable.addEventListener('click', function () {
                     const memberId = this.getAttribute('data-member-id');
                     openOrgMemberDetailsModal(memberId);
                 });
@@ -490,13 +474,13 @@ function renderTable() {
         } else if (currentSection === 'organizations') {
             const orgClickable = row.querySelector('.org-clickable');
             if (orgClickable) {
-                orgClickable.addEventListener('click', function() {
+                orgClickable.addEventListener('click', function () {
                     const orgId = this.getAttribute('data-org-id');
                     openOrgDetailsModal(orgId);
                 });
             }
         }
-        
+
         tbody.appendChild(row);
     });
 
@@ -592,7 +576,7 @@ async function openAddModal() {
                     return `<option value="${opt}">${opt}</option>`;
                 }
             }).join('');
-            
+
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                 <select name="${field.name}" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr} size="5">
@@ -609,7 +593,7 @@ async function openAddModal() {
                     return `<option value="${opt}">${opt}</option>`;
                 }
             }).join('');
-            
+
             fieldDiv.innerHTML = `
                 <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                 <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
@@ -633,7 +617,7 @@ async function openAddModal() {
 
         formFields.appendChild(fieldDiv);
     });
-    
+
     document.getElementById('add-modal').classList.remove('hidden');
     document.getElementById('add-modal').classList.add('flex');
 }
@@ -646,18 +630,18 @@ function closeAddModal() {
 }
 
 // Handle form submit
-    async function handleSubmit(event) {
+async function handleSubmit(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const itemData = {};
-    
+
     for (let [key, value] of formData.entries()) {
         itemData[key] = value;
     }
-    
+
     console.log('DEBUG: Form data before submit:', itemData);
-    
+
     // Ensure checkbox values are captured (FormData omits unchecked boxes)
     // Read checkbox fields from the form directly so we can send true/false
     const currentFormFields = sectionData[currentSection].formFields || [];
@@ -676,7 +660,7 @@ function closeAddModal() {
             }
         }
     }
-    
+
     // Check if editing existing item
     if (window.editingItemId) {
         // Update existing item: attempt server PATCH if endpoint exists
@@ -716,7 +700,7 @@ function closeAddModal() {
 
                     if (!resp.ok) {
                         let msg = 'Failed to update item.';
-                        try { const j = await resp.json(); msg = j.error || j.message || msg; } catch (e) {}
+                        try { const j = await resp.json(); msg = j.error || j.message || msg; } catch (e) { }
                         showToast(msg, 'error');
                     } else {
                         // Refetch data to get updated values (e.g., recalculated counts)
@@ -774,7 +758,7 @@ function closeAddModal() {
                         } else {
                             msg = j.error || j.message || msg;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                     showToast(msg, 'error');
                 } else {
                     // Refetch data to get updated list
@@ -792,10 +776,10 @@ function closeAddModal() {
             showToast('Item added locally', 'success');
         }
     }
-    
+
     // Re-render table
     renderTable();
-    
+
     // Close modal
     closeAddModal();
 }
@@ -884,7 +868,7 @@ function editItem(id) {
                     const isSelected = selectedValues.includes(String(optValue));
                     return `<option value="${optValue}" ${isSelected ? 'selected' : ''}>${optLabel}</option>`;
                 }).join('');
-                
+
                 fieldDiv.innerHTML = `
                     <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                     <select name="${field.name}" multiple class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr} size="5">
@@ -901,7 +885,7 @@ function editItem(id) {
                         return `<option value="${opt}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`;
                     }
                 }).join('');
-                
+
                 fieldDiv.innerHTML = `
                     <label class="block text-sm font-medium text-gray-700 mb-2">${field.label}${field.required ? ' *' : ''}</label>
                     <select name="${field.name}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${requiredAttr} ${readonlyAttr}>
@@ -992,7 +976,7 @@ async function confirmDelete() {
                 try {
                     const j = await resp.json();
                     msg = j.error || j.message || msg;
-                } catch (e) {}
+                } catch (e) { }
                 showToast(msg, 'error');
                 closeDeleteModal();
                 return;
@@ -1092,7 +1076,7 @@ async function executeBulkAction() {
 
         // Update UI
         renderTable();
-        
+
         if (successCount > 0 && failCount === 0) {
             showToast(`Deleted ${successCount} item(s) successfully!`, 'success');
         } else if (successCount > 0) {
@@ -1111,17 +1095,17 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     const toastDiv = toast.querySelector('div');
-    
+
     toastMessage.textContent = message;
-    
+
     if (type === 'success') {
         toastDiv.className = 'bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3';
     } else if (type === 'error') {
         toastDiv.className = 'bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3';
     }
-    
+
     toast.classList.remove('hidden');
-    
+
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 3000);
@@ -1152,11 +1136,11 @@ function showPageLoader(show) {
 }
 
 // Search functionality
-document.getElementById('search-input').addEventListener('input', function(e) {
+document.getElementById('search-input').addEventListener('input', function (e) {
     const searchTerm = e.target.value.toLowerCase();
     const rows = document.querySelectorAll('#table-body tr');
     let visibleCount = 0;
-    
+
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         const isVisible = text.includes(searchTerm);
@@ -1182,7 +1166,7 @@ document.getElementById('search-input').addEventListener('input', function(e) {
 });
 
 // Update selected count on checkbox change
-document.addEventListener('change', function(e) {
+document.addEventListener('change', function (e) {
     if (e.target.classList.contains('item-checkbox')) {
         updateCounts();
     }
@@ -1192,14 +1176,14 @@ document.addEventListener('change', function(e) {
 async function openUserDetailsModal(userId) {
     const modal = document.getElementById('user-details-modal');
     const content = document.getElementById('user-details-content');
-    
+
     if (!modal || !content) return;
-    
+
     // Show loading state
     content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i><p class="mt-4 text-gray-600">Loading user details...</p></div>';
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    
+
     try {
         const response = await fetch(`/admin-panel/api/users/${userId}/details/`, {
             method: 'GET',
@@ -1208,25 +1192,25 @@ async function openUserDetailsModal(userId) {
                 'X-CSRFToken': csrftoken
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch user details');
         }
-        
+
         const user = await response.json();
-        
+
         // Render user details using the template
         content.innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Profile Picture Section -->
                 <div class="md:col-span-1 flex flex-col items-center">
                     <div class="w-48 h-48 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300 shadow-lg">
-                        ${user.profilePicture 
-                            ? `<img src="${user.profilePicture}" alt="${user.firstName} ${user.lastName}" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
+                        ${user.profilePicture
+                ? `<img src="${user.profilePicture}" alt="${user.firstName} ${user.lastName}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full flex items-center justify-center text-gray-400 text-6xl">
                                 <i class="fas fa-user"></i>
                                </div>`
-                        }
+            }
                     </div>
                     <div class="mt-4 text-center">
                         <h4 class="text-xl font-bold text-gray-800">${user.firstName} ${user.lastName}</h4>
@@ -1245,7 +1229,7 @@ async function openUserDetailsModal(userId) {
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-medium text-gray-500 uppercase">Student ID</label>
+                                <label class="text-xs font-medium text-gray-500 uppercase">School ID</label>
                                 <p class="text-sm text-gray-800 font-medium mt-1">${user.studentId}</p>
                             </div>
                             <div>
@@ -1426,7 +1410,7 @@ async function openRsvpDetailsModal(rsvpId) {
                         </h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                <p class="text-xs text-gray-500">Student ID</p>
+                                <p class="text-xs text-gray-500">School ID</p>
                                 <p class="text-sm font-semibold text-gray-900 mt-1">${user.studentId || 'N/A'}</p>
                             </div>
                             <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -1645,7 +1629,7 @@ async function openOrgMemberDetailsModal(memberId) {
                         </h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                <p class="text-xs text-gray-500">Student ID</p>
+                                <p class="text-xs text-gray-500">School ID</p>
                                 <p class="text-sm font-semibold text-gray-900 mt-1">${user.studentId || 'N/A'}</p>
                             </div>
                             <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">

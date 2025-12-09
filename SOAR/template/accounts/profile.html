@@ -104,7 +104,7 @@
                                     <h3 class="text-2xl font-bold text-white">{{ user.first_name|title }} {{ user.last_name|title }}</h3>
                                     <p class="text-blue-100 mt-1">CIT-U Student</p>
                                     <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
-                                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">Student ID:
+                                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">School ID:
                                             {{ user.student_id|default:"Not Set" }}</span>
                                         <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm">Course: {{ user.course.name|default:"Not Set" }}</span>
                                     </div>
@@ -163,7 +163,7 @@
                                     <div class="form-fields-section">
                                         <div class="form-group">
                                             <label for="id_student_id"
-                                                class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+                                                class="block text-sm font-medium text-gray-700 mb-2">School ID</label>
                                             {{ form.student_id }}
                                         </div>
 
