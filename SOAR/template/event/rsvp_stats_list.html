@@ -1,0 +1,116 @@
+<script>
+    // Show RSVP Modal with attendees list
+    function showRSVPModal(status, attendees) {
+        const statusLabels = {
+            'going': 'Going',
+            'interested': 'Interested',
+            'not_going': 'Not Going'
+        };
+
+        const statusColors = {
+            'going': 'bg-green-50 text-green-700 border-green-200',
+            'interested': 'bg-amber-50 text-amber-700 border-amber-200',
+            'not_going': 'bg-red-50 text-red-700 border-red-200'
+        };
+
+        let html = `
+            <div id="rsvp-modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+                <div style="background: white; border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 600px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9;">
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">
+                            ${statusLabels[status]} (${attendees.length})
+                        </h3>
+                        <button onclick="document.getElementById('rsvp-modal').remove()" style="background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 1.25rem; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+        `;
+
+        // Add search bar if there are attendees
+        if (attendees.length > 0) {
+            html += `
+                    <div style="margin-bottom: 16px; position: relative;">
+                        <input type="text" id="attendee-search" placeholder="Search by name or email..." style="width: 100%; padding: 10px 12px 10px 36px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+                        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.875rem;"></i>
+                    </div>
+            `;
+        }
+
+        html += `
+                    <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1;">
+        `;
+
+        if (attendees.length === 0) {
+            html += '<p style="text-align: center; color: #94a3b8; padding: 32px 0;">Nothing yet</p>';
+        } else {
+            attendees.forEach((attendee, index) => {
+                const profilePic = attendee.profile_picture ? `<img src="${attendee.profile_picture}" alt="${attendee.username}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : `<span style="color: white; font-weight: 600; font-size: 0.875rem;">${attendee.username.substring(0, 2).toUpperCase()}</span>`;
+                const fullName = `${attendee.first_name} ${attendee.last_name}`.trim() || attendee.username;
+                
+                html += `
+                    <div class="attendee-item" data-username="${attendee.username.toLowerCase()}" data-email="${attendee.email.toLowerCase()}" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; ${statusColors[status]}">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                            ${profilePic}
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; color: #0f172a; margin: 0;">${fullName}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin: 2px 0 0 0;">${attendee.username}</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0 0 0;">${attendee.email}</div>
+                            ${attendee.student_id ? `<div style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0 0;">ID: ${attendee.student_id}</div>` : ''}
+                            ${attendee.course ? `<div style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0 0;">${attendee.course}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+
+        // Add search functionality
+        const searchInput = document.getElementById('attendee-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const attendeeItems = document.querySelectorAll('.attendee-item');
+                let visibleCount = 0;
+
+                attendeeItems.forEach(item => {
+                    const username = item.getAttribute('data-username');
+                    const email = item.getAttribute('data-email');
+                    const matches = username.includes(searchTerm) || email.includes(searchTerm);
+                    
+                    item.style.display = matches ? 'flex' : 'none';
+                    if (matches) visibleCount++;
+                });
+
+                // Show "No results" message if no matches
+                let noResultsMsg = document.getElementById('no-results-message');
+                if (visibleCount === 0) {
+                    if (!noResultsMsg) {
+                        const container = searchInput.parentElement.nextElementSibling;
+                        noResultsMsg = document.createElement('p');
+                        noResultsMsg.id = 'no-results-message';
+                        noResultsMsg.style.cssText = 'text-align: center; color: #94a3b8; padding: 32px 0; margin: 0;';
+                        noResultsMsg.textContent = 'No results found';
+                        container.appendChild(noResultsMsg);
+                    }
+                } else if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('rsvp-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.remove();
+            }
+        });
+    }
+</script>

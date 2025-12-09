@@ -1,0 +1,160 @@
+<div id="edit-event-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+        <!-- Modal Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #f1f5f9; sticky; top: 0; background: white;">
+            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #0f172a;">Edit Event</h2>
+            <button onclick="closeEditModal()" style="background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 1.25rem; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Modal Form -->
+        <form id="edit-event-form" method="post" enctype="multipart/form-data" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            {% csrf_token %}
+
+            <!-- Title -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Event Title</label>
+                <input type="text" name="title" id="edit-event-title" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+            </div>
+
+            <!-- Description -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Description</label>
+                <textarea name="description" id="edit-event-description" rows="4" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit; resize: vertical;"></textarea>
+            </div>
+
+            <!-- Date and Time -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Event Date</label>
+                    <input type="date" name="date" id="edit-event-date" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Event Time</label>
+                    <input type="time" name="time" id="edit-event-time" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Location</label>
+                <input type="text" name="location" id="edit-event-location" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+            </div>
+
+            <!-- Activity Type and Max Participants -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Activity Type</label>
+                    <select name="type" id="edit-event-type" required style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;">
+                        <option value="event">Event</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="seminar">Seminar</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="social">Social Event</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Max Participants</label>
+                    <input type="number" name="max_participants" id="edit-event-max-participants" min="1" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit;" placeholder="Leave empty for unlimited">
+                </div>
+            </div>
+
+            <!-- Event Image -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 0.875rem; font-weight: 600; color: #0f172a;">Event Image (Optional)</label>
+                <div id="current-image-container" style="display: none; margin-bottom: 12px;">
+                    <img id="current-event-image" src="" alt="Current event image" style="max-width: 200px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Current image</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <label for="edit-event-image" style="cursor: pointer; padding: 10px 12px; background-color: #f1f5f9; color: #475569; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; font-weight: 500;">
+                        <i class="fas fa-image"></i>
+                        <span>Choose Image</span>
+                    </label>
+                    <input type="file" name="attachment" id="edit-event-image" accept="image/*" style="display: none;">
+                    <span id="edit-image-filename" style="font-size: 0.875rem; color: #94a3b8;">No file chosen</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid #f1f5f9; margin-top: 8px;">
+                <button type="button" onclick="closeEditModal()" style="padding: 10px 20px; border: 1px solid #e2e8f0; background-color: white; color: #475569; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.875rem; font-family: inherit;">
+                    Cancel
+                </button>
+                <button type="submit" style="padding: 10px 20px; background-color: #3b82f6; color: white; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; font-size: 0.875rem; font-family: inherit; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-save"></i>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Modal functions
+    function openEditModal(eventId) {
+        fetch(`/event/${eventId}/get-edit-data/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Populate form fields
+                document.getElementById('edit-event-title').value = data.event.title;
+                document.getElementById('edit-event-description').value = data.event.description;
+                document.getElementById('edit-event-date').value = data.event.date;
+                document.getElementById('edit-event-time').value = data.event.time;
+                document.getElementById('edit-event-location').value = data.event.location;
+                document.getElementById('edit-event-type').value = data.event.activity_type;
+                document.getElementById('edit-event-max-participants').value = data.event.max_participants || '';
+                
+                // Show current image if exists
+                if (data.event.attachments_url) {
+                    document.getElementById('current-event-image').src = data.event.attachments_url;
+                    document.getElementById('current-image-container').style.display = 'block';
+                } else {
+                    document.getElementById('current-image-container').style.display = 'none';
+                }
+                
+                // Set form action
+                document.getElementById('edit-event-form').action = `/event/${eventId}/edit/`;
+                
+                // Show modal
+                document.getElementById('edit-event-modal').style.display = 'flex';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load event data');
+        });
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-event-modal').style.display = 'none';
+        document.getElementById('edit-event-form').reset();
+    }
+
+    // File input label update
+    document.getElementById('edit-event-image').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'No file chosen';
+        document.getElementById('edit-image-filename').textContent = fileName;
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('edit-event-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditModal();
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('edit-event-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        this.submit();
+    });
+</script>

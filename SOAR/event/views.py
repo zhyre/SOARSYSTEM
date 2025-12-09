@@ -406,6 +406,39 @@ def rsvp_event(request, event_id):
         return redirect(f"{reverse('orgpage', args=[event.organization.id])}#event-{event.id}")
 
 
+@login_required
+def rsvp_list(request, event_id, status):
+    """Get list of users with specific RSVP status for an event"""
+    event = get_object_or_404(OrganizationEvent, id=event_id)
+    
+    # Validate status
+    if status not in ['going', 'not_going', 'interested']:
+        return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
+    
+    # Get users with the specified RSVP status
+    rsvps = EventRSVP.objects.filter(event=event, status=status).select_related('user')
+    
+    # Serialize attendee data with profile information
+    attendees = [
+        {
+            'id': str(rsvp.user.id),
+            'username': rsvp.user.username,
+            'email': rsvp.user.email,
+            'first_name': rsvp.user.first_name,
+            'last_name': rsvp.user.last_name,
+            'profile_picture': rsvp.user.profile_picture.url if rsvp.user.profile_picture else None,
+            'student_id': rsvp.user.student_id or '',
+            'course': rsvp.user.course.name if rsvp.user.course else 'No Course'
+        }
+        for rsvp in rsvps
+    ]
+    
+    return JsonResponse({
+        'success': True,
+        'attendees': attendees
+    })
+
+
 def edit_event(request, event_id):
     """Edit an existing event - only admin, adviser, or leader can edit"""
     event = get_object_or_404(OrganizationEvent, id=event_id)
@@ -434,7 +467,7 @@ def edit_event(request, event_id):
         
         try:
             event_datetime = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
-        except Exception as e:
+        except Exception:
             return redirect('orgpage', org_id=organization.id)
         
         # Handle file upload if present
@@ -461,6 +494,38 @@ def edit_event(request, event_id):
         'editing': True
     }
     return render(request, 'event/edit_event.html', context)
+
+
+def get_event_edit_data(request, event_id):
+    """Get event data for edit modal - AJAX endpoint"""
+    event = get_object_or_404(OrganizationEvent, id=event_id)
+    organization = event.organization
+    
+    # Check permissions
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Not authenticated'}, status=401)
+    
+    try:
+        org_member = OrganizationMember.objects.get(student=request.user, organization=organization)
+        if org_member.role not in ['admin', 'adviser', 'leader']:
+            return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    except OrganizationMember.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+    
+    return JsonResponse({
+        'success': True,
+        'event': {
+            'id': str(event.id),
+            'title': event.title,
+            'description': event.description,
+            'date': event.event_date.strftime('%Y-%m-%d'),
+            'time': event.event_date.strftime('%H:%M'),
+            'location': event.location,
+            'activity_type': event.activity_type,
+            'max_participants': event.max_participants,
+            'attachments_url': event.attachments_url
+        }
+    })
 
 
 def delete_event(request, event_id):
