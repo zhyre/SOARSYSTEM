@@ -16,6 +16,12 @@ from django.utils.text import slugify
 from SOAR.notification.models import Notification
 
 def upload_to_supabase(file, org_id, org_name):
+    # Get Supabase client
+    supabase = get_supabase_client()
+    if not supabase:
+        print("Supabase client not available")  # Debug log
+        return None
+
     # Handle both file objects and raw bytes
     if hasattr(file, 'name'):
         # It's a file object
