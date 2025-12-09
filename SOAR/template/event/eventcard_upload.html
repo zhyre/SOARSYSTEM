@@ -237,9 +237,10 @@
             </div>
         </div>
 
+        {% if event.attachments_url %}
         <!-- Event Image with Enhanced Overlay -->
         <div class="relative h-64 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden rounded-xl">
-            <img src="{{ event.attachments_url|default:'https://source.unsplash.com/random/800x600/?event,conference,meeting' }}"
+            <img src="{{ event.attachments_url }}"
                 alt="{{ event.title|default:'Event Title' }}"
                 class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 loading="lazy">
@@ -248,7 +249,7 @@
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
             <!-- Status Badge -->
-            <div class="absolute top-4 left-4">
+            <div class="absolute top-4 right-4">
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg {% if event.status == 'Upcoming' %}bg-blue-100 text-blue-800{% elif event.status == 'Ongoing' %}bg-green-100 text-green-800{% elif event.status == 'Completed' %}bg-gray-100 text-gray-800{% elif event.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
                     {% if event.status == 'Upcoming' %}
@@ -309,6 +310,67 @@
                 </div>
             </div>
         </div>
+        {% else %}
+        <!-- Event Title when no image -->
+        <div class="mb-2">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-4 flex-1 min-w-0">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-900 line-clamp-2 flex-1">
+                        {{ event.title|default:"Event Title" }}
+                    </h3>
+                    <!-- Status Badge beside title -->
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 {% if event.status == 'Upcoming' %}bg-blue-100 text-blue-800{% elif event.status == 'Ongoing' %}bg-green-100 text-green-800{% elif event.status == 'Completed' %}bg-gray-100 text-gray-800{% elif event.status == 'Cancelled' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if event.status == 'Upcoming' %}
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {% elif event.status == 'Ongoing' %}
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H13m-3 3a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m-8 4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2m4-4a1 1 0 100-2 1 1 0 000 2" />
+                        </svg>
+                        {% elif event.status == 'Completed' %}
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {% elif event.status == 'Cancelled' %}
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {% endif %}
+                        {{ event.status }}
+                    </span>
+                </div>
+                <!-- Attendee Avatars -->
+                <div class="flex items-center -space-x-2 flex-shrink-0" id="attendee-avatars-{{ event.id }}">
+                    {% for rsvp in event.rsvp_users %}
+                    {% if rsvp.user.profile_picture %}
+                    <img src="{{ rsvp.user.profile_picture.url }}"
+                        alt="{{ rsvp.user.get_full_name|default:rsvp.user.username }}"
+                        class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover">
+                    {% else %}
+                    <div
+                        class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-blue-600 shadow-md flex items-center justify-center">
+                        <span class="text-xs font-bold text-white">
+                            {{ rsvp.user.first_name|slice:":1"|default:rsvp.user.username|slice:":1"|upper }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% if event.going_count > 5 %}
+                    <div
+                        class="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-gray-400 to-gray-600 shadow-md flex items-center justify-center">
+                        <span class="text-xs font-bold text-white">+{{ event.going_count|add:"-5" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Event Description -->
         <div class="relative mb-6">
