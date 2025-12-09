@@ -1,0 +1,83 @@
+<div id="delete-event-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); overflow: hidden;">
+        <!-- Modal Header -->
+        <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; background-color: #fef2f2;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #fee2e2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-exclamation" style="color: #dc2626; font-size: 1.25rem;"></i>
+                </div>
+                <div>
+                    <h2 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #7f1d1d;">Delete Event</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 0.875rem; color: #991b1b;">This action cannot be undone</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 24px;">
+            <p style="margin: 0 0 16px 0; color: #475569; font-size: 0.875rem; line-height: 1.5;">
+                Are you sure you want to delete <strong id="delete-event-title-display">this event</strong>? This will permanently remove the event and all associated data.
+            </p>
+            <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; display: flex; align-items: flex-start; gap: 8px;">
+                <i class="fas fa-info-circle" style="color: #dc2626; font-size: 0.875rem; margin-top: 2px; flex-shrink: 0;"></i>
+                <p style="margin: 0; font-size: 0.75rem; color: #991b1b;">Users will no longer see this event in their feeds or RSVPs.</p>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 12px; background-color: #f9fafb;">
+            <button type="button" onclick="closeDeleteModal()" style="padding: 10px 20px; border: 1px solid #e2e8f0; background-color: white; color: #475569; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.875rem; font-family: inherit;">
+                Cancel
+            </button>
+            <button type="button" onclick="confirmDeleteEvent()" style="padding: 10px 20px; background-color: #dc2626; color: white; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; font-size: 0.875rem; font-family: inherit; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-trash-alt"></i>
+                <span>Delete Event</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deleteEventId = null;
+
+    function openDeleteModal(eventId, eventTitle) {
+        deleteEventId = eventId;
+        document.getElementById('delete-event-title-display').textContent = eventTitle;
+        document.getElementById('delete-event-modal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-event-modal').style.display = 'none';
+        deleteEventId = null;
+    }
+
+    function confirmDeleteEvent() {
+        if (!deleteEventId) return;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/event/delete/${deleteEventId}/`;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                         document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+        
+        if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrfmiddlewaretoken';
+            input.value = csrfToken;
+            form.appendChild(input);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('delete-event-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>

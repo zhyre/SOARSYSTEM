@@ -426,18 +426,18 @@
                             </div>
                         </div>
 
-                        <!-- Available Organizations Card -->
+                        <!-- Today's Date Card -->
                         <div class="stat-card rounded-2xl p-7 cursor-pointer animate-fade-in animate-delay-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex-1">
                                     <p class="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wider">
-                                        Available Orgs</p>
-                                    <h3 class="text-5xl font-bold stat-number mb-2" data-count="{{ total_available_orgs }}">0</h3>
-                                    <p class="text-xs text-gray-500 font-medium">Total organizations</p>
+                                        Today's Date</p>
+                                    <h3 class="text-4xl font-bold mb-2" id="todayDate">Loading...</h3>
+                                    <p class="text-xs text-gray-500 font-medium" id="todayDayOfWeek">Monday</p>
                                 </div>
                                 <div
                                     class="stat-card-icon w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <i class="fas fa-building text-white text-2xl"></i>
+                                    <i class="fas fa-calendar-alt text-white text-2xl"></i>
                                 </div>
                             </div>
                         </div>
@@ -670,6 +670,20 @@
             counters.forEach(counter => {
                 setTimeout(() => animateCounter(counter), 500);
             });
+
+            // Update today's date
+            const today = new Date();
+            const dateString = today.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            const dayOfWeek = today.toLocaleDateString('en-US', {
+                weekday: 'long'
+            });
+            
+            document.getElementById('todayDate').textContent = dateString;
+            document.getElementById('todayDayOfWeek').textContent = dayOfWeek;
 
             // Add stagger animation to organization cards
             const orgCards = document.querySelectorAll('.org-card');

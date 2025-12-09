@@ -175,6 +175,35 @@
             font-weight: 500;
         }
 
+        /* Filter Button Styles */
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
         /* Enhanced Sidebar */
         .sidebar {
             transition: transform 0.3s ease, width 0.3s ease;
@@ -668,15 +697,33 @@
 
                 <div class="content-card">
                     <div class="mb-6">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
-                                <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-800 mb-2">Organization Members</h2>
+                                    <span class="member-count text-sm text-gray-500">{{ members|length }} member{{ members|length|pluralize }}</span>
+                                </div>
+                                <div class="relative w-full md:w-64">
+                                    <input type="text" id="member-search" placeholder="Search by name, email, or role..."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
                             </div>
-                            <div class="relative w-full md:w-64">
-                                <input type="text" id="member-search" placeholder="Search by name, email, or role..."
-                                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            
+                            <!-- Filter Buttons -->
+                            <div class="flex flex-wrap gap-2">
+                                <button class="filter-btn active" data-filter="all">
+                                    <i class="fas fa-users mr-2"></i>All Members
+                                </button>
+                                <button class="filter-btn" data-filter="pending">
+                                    <i class="fas fa-clock mr-2"></i>Pending
+                                </button>
+                                <button class="filter-btn" data-filter="approved">
+                                    <i class="fas fa-check-circle mr-2"></i>Approved
+                                </button>
+                                <button class="filter-btn" data-filter="management">
+                                    <i class="fas fa-shield-alt mr-2"></i>Management
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -696,7 +743,8 @@
                                 {% for member in members %}
                                 <tr class="member-row" data-member-id="{{ member.id }}"
                                     data-name="{{ member.student.username }}" data-email="{{ member.student.email }}"
-                                    data-role="{{ member.role }}">
+                                    data-role="{{ member.role }}" data-approved="{{ member.is_approved|lower }}"
+                                    data-is-management="{% if member.role in 'adviser,leader,officer' %}true{% else %}false{% endif %}">
                                     <td>
                                         <div class="member-info">
                                             <div class="member-avatar">{{ member.student.username|slice:":2"|upper }}
@@ -1563,41 +1611,73 @@
             const tableRows = document.querySelectorAll('.members-table tbody tr');
             const noMembers = document.getElementById('no-members');
             const noMembersInitial = document.getElementById('no-members-initial');
+            let currentFilter = 'all';
 
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    let visibleCount = 0;
+            // Handle filter button clicks
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    
+                    // Reset search and apply filter
+                    searchInput.value = '';
+                    applyFilters();
+                });
+            });
 
-                    tableRows.forEach(row => {
-                        const name = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
-                        const email = row.querySelector('td:nth-child(1)')?.innerHTML.toLowerCase() || '';
-                        const role = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
-                        
-                        const matchesSearch = name.includes(searchTerm) || 
-                                            email.includes(searchTerm) || 
-                                            role.includes(searchTerm);
-                        
-                        if (matchesSearch) {
-                            row.style.display = '';
-                            visibleCount++;
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
+            // Apply both filters and search
+            function applyFilters() {
+                const searchTerm = searchInput.value.toLowerCase();
+                let visibleCount = 0;
 
-                    // Show/hide no results message
-                    if (visibleCount === 0 && searchTerm) {
-                        if (noMembers) noMembers.style.display = 'flex';
-                        if (noMembersInitial) noMembersInitial.style.display = 'none';
-                    } else if (visibleCount === 0 && !searchTerm) {
-                        if (noMembers) noMembers.style.display = 'none';
-                        if (noMembersInitial) noMembersInitial.style.display = 'flex';
+                tableRows.forEach(row => {
+                    const isApproved = row.getAttribute('data-approved') === 'true';
+                    const isManagement = row.getAttribute('data-is-management') === 'true';
+                    
+                    let passesFilter = false;
+                    
+                    if (currentFilter === 'all') {
+                        passesFilter = true;
+                    } else if (currentFilter === 'pending') {
+                        passesFilter = !isApproved;
+                    } else if (currentFilter === 'approved') {
+                        passesFilter = isApproved;
+                    } else if (currentFilter === 'management') {
+                        passesFilter = isManagement;
+                    }
+
+                    const name = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+                    const email = row.querySelector('td:nth-child(1)')?.innerHTML.toLowerCase() || '';
+                    const role = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                    
+                    const matchesSearch = name.includes(searchTerm) || 
+                                        email.includes(searchTerm) || 
+                                        role.includes(searchTerm);
+                    
+                    if (passesFilter && matchesSearch) {
+                        row.style.display = '';
+                        visibleCount++;
                     } else {
-                        if (noMembers) noMembers.style.display = 'none';
-                        if (noMembersInitial) noMembersInitial.style.display = 'none';
+                        row.style.display = 'none';
                     }
                 });
+
+                // Show/hide no results message
+                if (visibleCount === 0) {
+                    if (noMembers) noMembers.style.display = 'flex';
+                    if (noMembersInitial) noMembersInitial.style.display = 'none';
+                } else {
+                    if (noMembers) noMembers.style.display = 'none';
+                    if (noMembersInitial) noMembersInitial.style.display = 'none';
+                }
+            }
+
+            // Handle search input
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
             }
         });
     </script>
