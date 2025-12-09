@@ -377,7 +377,7 @@ def login_view(request):
                                     return render(request, "accounts/login.html", {"form": form})
 
                         login(request, user_obj, backend='django.contrib.auth.backends.ModelBackend')
-                        messages.success(request, f"Welcome back, {user_obj.username}!")
+                        #messages.success(request, f"Welcome back, {user_obj.username}!")
 
                         # Check if user is superuser from Supabase
                         response = supabase.table('accounts_user').select('is_superuser').eq('id', str(user_obj.id)).execute()
