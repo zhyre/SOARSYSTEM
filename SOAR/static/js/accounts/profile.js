@@ -1,7 +1,7 @@
 // Student Profile JavaScript
 // Handles all interactive functionality for student profile management
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize the application
     initializeProfileApp();
 });
@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeProfileApp() {
     // Initialize sidebar functionality
     initializeSidebar();
-    
+
     // Initialize profile functionality
     initializeProfile();
-    
+
     // Load sample data
     loadSampleData();
 }
@@ -21,9 +21,9 @@ function initializeProfileApp() {
 function initializeSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.overlay');
-    
+
     if (overlay) {
-        overlay.addEventListener('click', function() {
+        overlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
             document.body.classList.remove('sidebar-active');
@@ -41,54 +41,54 @@ function initializeProfile() {
     const logoutBtn = document.getElementById('logout-btn');
     const aboutTextarea = document.getElementById('edit-about');
     const charCounter = document.getElementById('about-count');
-    
+
     // File upload functionality
     if (uploadBtn) {
-        uploadBtn.addEventListener('click', function() {
+        uploadBtn.addEventListener('click', function () {
             fileInput.click();
         });
     }
-    
+
     if (fileInput) {
-        fileInput.addEventListener('change', function() {
+        fileInput.addEventListener('change', function () {
             handleFileUpload(this);
         });
     }
-    
+
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', function() {
+        deleteBtn.addEventListener('click', function () {
             deleteProfileImage();
         });
     }
-    
+
     // Save profile changes
     if (saveBtn) {
-        saveBtn.addEventListener('click', function() {
+        saveBtn.addEventListener('click', function () {
             saveProfileChanges();
         });
     }
-    
+
     // Cancel button - redirect to dashboard
     if (cancelBtn) {
-        cancelBtn.addEventListener('click', function() {
+        cancelBtn.addEventListener('click', function () {
             window.location.href = '/accounts/index/';
         });
     }
-    
+
     // Logout functionality
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
+        logoutBtn.addEventListener('click', function () {
             confirmLogout();
         });
     }
-    
+
     // Character counter for about section
     if (aboutTextarea && charCounter) {
-        aboutTextarea.addEventListener('input', function() {
+        aboutTextarea.addEventListener('input', function () {
             charCounter.textContent = this.value.length;
         });
     }
-    
+
     // Form validation on input
     initializeFormValidation();
 }
@@ -118,13 +118,13 @@ function loadSampleData() {
     document.getElementById('edit-city').value = sampleProfileData.city;
     document.getElementById('edit-postcode').value = sampleProfileData.postcode;
     document.getElementById('edit-state').value = sampleProfileData.state;
-    
+
     // Update character counter
     const charCounter = document.getElementById('about-count');
     if (charCounter) {
         charCounter.textContent = sampleProfileData.about.length;
     }
-    
+
     // Update preview name
     const previewName = document.getElementById('preview-student-name');
     if (previewName) {
@@ -142,20 +142,20 @@ function handleFileUpload(input) {
             input.value = '';
             return;
         }
-        
+
         const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
             showError('image-error', 'File size must be less than 10MB.');
             input.value = '';
             return;
         }
-        
+
         // Clear any previous errors
         clearError('image-error');
-        
+
         // Preview the image
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             document.getElementById('preview-image').src = e.target.result;
         };
         reader.readAsDataURL(file);
@@ -174,30 +174,30 @@ function deleteProfileImage() {
 // Form validation
 function initializeFormValidation() {
     const requiredFields = [
-        { id: 'edit-student-id', errorId: 'student-id-error', message: 'Student ID is required.' },
+        { id: 'edit-student-id', errorId: 'student-id-error', message: 'School ID is required.' },
         { id: 'edit-full-name', errorId: 'full-name-error', message: 'Full Name is required.' },
         { id: 'edit-email', errorId: 'email-error', message: 'Email Address is required.' }
     ];
-    
+
     requiredFields.forEach(field => {
         const input = document.getElementById(field.id);
         const errorId = field.errorId;
-        
+
         if (input) {
-            input.addEventListener('blur', function() {
+            input.addEventListener('blur', function () {
                 validateField(this, errorId, field.message);
             });
-            
-            input.addEventListener('input', function() {
+
+            input.addEventListener('input', function () {
                 clearError(errorId);
             });
         }
     });
-    
+
     // Email validation
     const emailInput = document.getElementById('edit-email');
     if (emailInput) {
-        emailInput.addEventListener('blur', function() {
+        emailInput.addEventListener('blur', function () {
             if (this.value.trim()) {
                 if (!isValidEmail(this.value.trim())) {
                     showError('email-error', 'Please enter a valid email address.');
@@ -223,16 +223,16 @@ function validateField(field, errorId, message) {
 // Save profile changes
 function saveProfileChanges() {
     const requiredFields = [
-        { id: 'edit-student-id', errorId: 'student-id-error', message: 'Student ID is required.' },
+        { id: 'edit-student-id', errorId: 'student-id-error', message: 'School ID is required.' },
         { id: 'edit-full-name', errorId: 'full-name-error', message: 'Full Name is required.' },
         { id: 'edit-email', errorId: 'email-error', message: 'Email Address is required.' }
     ];
-    
+
     // Clear previous errors
     clearAllErrors();
-    
+
     let isValid = true;
-    
+
     // Validate required fields
     requiredFields.forEach(field => {
         const input = document.getElementById(field.id);
@@ -240,39 +240,39 @@ function saveProfileChanges() {
             isValid = false;
         }
     });
-    
+
     // Validate email format
     const emailInput = document.getElementById('edit-email');
     if (emailInput.value.trim() && !isValidEmail(emailInput.value.trim())) {
         showError('email-error', 'Please enter a valid email address.');
         isValid = false;
     }
-    
+
     // Validate about section
     const aboutInput = document.getElementById('edit-about');
     if (aboutInput.value.trim() && aboutInput.value.length > 500) {
         showError('about-error', 'About section must not exceed 500 characters.');
         isValid = false;
     }
-    
+
     if (isValid) {
         // Show loading state
         const saveBtn = document.getElementById('save-profile-btn');
         saveBtn.classList.add('loading');
         saveBtn.disabled = true;
-        
+
         // Simulate API call
         setTimeout(() => {
             // Update profile data
             updateProfileData();
-            
+
             // Show success message
             showSuccessMessage('Profile updated successfully!');
-            
+
             // Reset button state
             saveBtn.classList.remove('loading');
             saveBtn.disabled = false;
-            
+
             // Redirect to dashboard after a delay
             setTimeout(() => {
                 window.location.href = '/accounts/index/';
@@ -285,19 +285,19 @@ function saveProfileChanges() {
 function updateProfileData() {
     const fullName = document.getElementById('edit-full-name').value.trim();
     const email = document.getElementById('edit-email').value.trim();
-    
+
     // Update preview name
     const previewName = document.getElementById('preview-student-name');
     if (previewName) {
         previewName.textContent = fullName;
     }
-    
+
     // Update avatar if name changed
     if (fullName !== sampleProfileData.fullName) {
         const newAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff&size=150`;
         document.getElementById('preview-image').src = newAvatar;
     }
-    
+
     // Update sample data
     sampleProfileData.fullName = fullName;
     sampleProfileData.email = email;
@@ -310,7 +310,7 @@ function confirmLogout() {
         const logoutBtn = document.getElementById('logout-btn');
         logoutBtn.classList.add('loading');
         logoutBtn.disabled = true;
-        
+
         // Simulate logout process
         setTimeout(() => {
             window.location.href = '/accounts/logout/';
@@ -348,7 +348,7 @@ function clearAllErrors() {
         'image-error',
         'about-error'
     ];
-    
+
     errorIds.forEach(errorId => {
         clearError(errorId);
     });
@@ -357,11 +357,11 @@ function clearAllErrors() {
 function showSuccessMessage(message) {
     const successMessage = document.getElementById('success-message');
     const successText = document.getElementById('success-text');
-    
+
     if (successMessage && successText) {
         successText.textContent = message;
         successMessage.classList.add('show');
-        
+
         // Hide after 3 seconds
         setTimeout(() => {
             successMessage.classList.remove('show');
@@ -373,16 +373,16 @@ function showSuccessMessage(message) {
 function initializeAutoSave() {
     const form = document.getElementById('edit-profile-form');
     const inputs = form.querySelectorAll('input, textarea, select');
-    
+
     inputs.forEach(input => {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             // Save to localStorage
             const formData = new FormData(form);
             const data = Object.fromEntries(formData);
             localStorage.setItem('profileDraft', JSON.stringify(data));
         });
     });
-    
+
     // Load draft on page load
     const draft = localStorage.getItem('profileDraft');
     if (draft) {
@@ -394,9 +394,9 @@ function initializeAutoSave() {
             }
         });
     }
-    
+
     // Clear draft on successful save
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         const saveBtn = document.getElementById('save-profile-btn');
         if (!saveBtn.disabled) {
             localStorage.removeItem('profileDraft');
@@ -406,13 +406,13 @@ function initializeAutoSave() {
 
 // Keyboard shortcuts
 function initializeKeyboardShortcuts() {
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         // Ctrl/Cmd + S to save
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
             document.getElementById('save-profile-btn').click();
         }
-        
+
         // Escape to cancel
         if (e.key === 'Escape') {
             document.getElementById('cancel-profile-btn').click();
@@ -421,10 +421,10 @@ function initializeKeyboardShortcuts() {
 }
 
 // Initialize additional features
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize auto-save (optional)
     // initializeAutoSave();
-    
+
     // Initialize keyboard shortcuts
     initializeKeyboardShortcuts();
 });
@@ -436,12 +436,12 @@ function initializeAccessibility() {
     formGroups.forEach(group => {
         const label = group.querySelector('label');
         const input = group.querySelector('input, textarea, select');
-        
+
         if (label && input) {
             input.setAttribute('aria-labelledby', label.id || label.textContent);
         }
     });
-    
+
     // Add role attributes
     const form = document.getElementById('edit-profile-form');
     if (form) {
@@ -451,6 +451,6 @@ function initializeAccessibility() {
 }
 
 // Initialize accessibility features
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeAccessibility();
 });

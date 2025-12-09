@@ -37,6 +37,7 @@ class StudentRegistrationForm(UserCreationForm):
     )
     student_id = forms.CharField(
         required=True,
+        label='School ID',
         help_text='Format: XX-XXXX-XXX (e.g., 12-3456-789)',
         widget=forms.TextInput(attrs={
             'placeholder': ' ',
@@ -61,6 +62,17 @@ class StudentRegistrationForm(UserCreationForm):
         min_value=1,
         widget=forms.NumberInput(attrs={'placeholder': ' '})
     )
+    user_type = forms.ChoiceField(
+        choices=[('', 'Select user type'), ('student', 'Student'), ('staff', 'Staff')],
+        required=True,
+        label='',
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'required': 'required',
+            'onchange': "this.setCustomValidity('')",
+            'oninvalid': "this.setCustomValidity('Please select a user type')",
+        })
+    )
 
     first_name = forms.CharField(
         required=True,
@@ -73,7 +85,7 @@ class StudentRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'student_id', 'course', 'year_level', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'student_id', 'course', 'year_level', 'user_type', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -86,7 +98,7 @@ class StudentRegistrationForm(UserCreationForm):
             "Password must follow these rules:<br>"
             "• At least 8 characters<br>"
             "• Cannot be entirely numeric<br>"
-            "• Cannot be too similar to username, email, or student ID<br>"
+            "• Cannot be too similar to username, email, or School ID<br>"
             "• Cannot be a common password"
         )
 
@@ -99,7 +111,7 @@ class StudentRegistrationForm(UserCreationForm):
     def clean_student_id(self):
         student_id = self.cleaned_data.get('student_id')
         if not re.match(r'^\d{2}-\d{4}-\d{3}$', student_id):
-            raise ValidationError('Student ID must be in the format XX-XXXX-XXX (e.g., 12-3456-789)')
+            raise ValidationError('School ID must be in the format XX-XXXX-XXX (e.g., 12-3456-789)')
         return student_id
 
     def clean_password1(self):
@@ -112,19 +124,19 @@ class StudentRegistrationForm(UserCreationForm):
             raise ValidationError('Your password must contain at least 8 characters.')
 
         if password.isdigit():
-            raise ValidationError('Your password can’t be entirely numeric.')
+            raise ValidationError("Your password can't be entirely numeric.")
 
         if username and username.lower() in password.lower():
-            raise ValidationError('Your password can’t be too similar to your username.')
+            raise ValidationError("Your password can't be too similar to your username.")
         
         if email and email.split('@')[0].lower() in password.lower():
-            raise ValidationError('Your password can’t be too similar to your email.')
+            raise ValidationError("Your password can't be too similar to your email.")
 
         if student_id and student_id in password:
-            raise ValidationError('Your password can’t be too similar to your student ID.')
+            raise ValidationError("Your password can't be too similar to your School ID.")
 
         if password.lower() in COMMON_PASSWORDS:
-            raise ValidationError('Your password can’t be a commonly used password.')
+            raise ValidationError("Your password can't be a commonly used password.")
 
         return password
     

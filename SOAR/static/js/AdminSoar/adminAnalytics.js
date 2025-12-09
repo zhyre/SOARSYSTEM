@@ -70,14 +70,16 @@ function showLoadingStates() {
 
     // Show activity loading
     const activityContainer = document.getElementById('recent-activity');
-    activityContainer.innerHTML = `
-        <div class="activity-loading flex items-center justify-center py-8">
-            <div class="text-center">
-                <div class="w-8 h-8 border-4 border-yellow-200 border-t-yellow-600 rounded-full animate-spin mx-auto mb-2"></div>
-                <p class="text-sm text-gray-600">Loading activity...</p>
+    if (activityContainer) {
+        activityContainer.innerHTML = `
+            <div class="activity-loading flex items-center justify-center py-8">
+                <div class="text-center">
+                    <div class="w-8 h-8 border-4 border-yellow-200 border-t-yellow-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p class="text-sm text-gray-600">Loading activity...</p>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    }
 }
 
 function hideLoadingStates() {
@@ -94,6 +96,8 @@ function hideLoadingStates() {
 
 function animateCounter(elementId, targetValue) {
     const element = document.getElementById(elementId);
+    if (!element) return; // Exit if element doesn't exist
+
     const startValue = parseInt(element.textContent) || 0;
     const duration = 1000;
     const startTime = performance.now();
@@ -366,11 +370,11 @@ function loadRecentActivity(events) {
 }
 
 // Event listeners for filters and buttons
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Refresh button
     const refreshBtn = document.getElementById('refresh-analytics');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
+        refreshBtn.addEventListener('click', function () {
             loadAnalytics();
         });
     }
@@ -391,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chart type filter
     const chartTypeSelect = document.getElementById('chart-type');
     if (chartTypeSelect) {
-        chartTypeSelect.addEventListener('change', function() {
+        chartTypeSelect.addEventListener('change', function () {
             loadAnalytics(); // Reload to update all charts
         });
     }
@@ -399,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Date range filter
     const dateRangeSelect = document.getElementById('date-range');
     if (dateRangeSelect) {
-        dateRangeSelect.addEventListener('change', function() {
+        dateRangeSelect.addEventListener('change', function () {
             const customRange = document.getElementById('custom-date-range');
             if (this.value === 'custom') {
                 customRange.classList.remove('hidden');
@@ -413,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Custom date range apply button
     const applyCustomRangeBtn = document.getElementById('apply-custom-range');
     if (applyCustomRangeBtn) {
-        applyCustomRangeBtn.addEventListener('click', function() {
+        applyCustomRangeBtn.addEventListener('click', function () {
             const startDate = document.getElementById('start-date').value;
             const endDate = document.getElementById('end-date').value;
 
@@ -440,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tableToggles.forEach(toggleId => {
         const toggleBtn = document.getElementById(toggleId);
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
+            toggleBtn.addEventListener('click', function () {
                 const tableId = toggleId.replace('toggle-', '') + '-data-table';
                 const table = document.getElementById(tableId);
                 const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
@@ -498,6 +502,8 @@ function updateTrends(currentUsers, currentOrgs, currentEvents, currentRsvps) {
 
 function updateTrendDisplay(elementId, changePercent) {
     const element = document.getElementById(elementId);
+    if (!element) return; // Exit if element doesn't exist
+
     const isPositive = parseFloat(changePercent) >= 0;
     const absChange = Math.abs(changePercent);
 
@@ -573,8 +579,8 @@ function filterActivities() {
 
         const matchesSearch = eventName.includes(searchTerm) || orgName.includes(searchTerm);
         const matchesFilter = filterType === 'all' ||
-                            (filterType === 'event' && type.includes('event')) ||
-                            (filterType === 'organization' && type.includes('org'));
+            (filterType === 'event' && type.includes('event')) ||
+            (filterType === 'organization' && type.includes('org'));
 
         if (matchesSearch && matchesFilter) {
             activity.style.display = 'flex';
